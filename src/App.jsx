@@ -29,17 +29,21 @@ export default function App() {
     if (!isSupabaseConfigured || !supabase) return;
 
     async function fetchGlobalStats() {
-      const { data, error } = await supabase
-        .from('campaign_stats')
-        .select('*')
-        .eq('id', 'global')
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('campaign_stats')
+          .select('*')
+          .eq('id', 'global')
+          .single();
 
-      if (data && !error) {
-        setStats({
-          emails: data.emails || 0,
-          tweets: data.tweets || 0
-        });
+        if (data && !error) {
+          setStats({
+            emails: data.emails || 0,
+            tweets: data.tweets || 0
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats from Supabase:', err);
       }
     }
 
@@ -72,22 +76,37 @@ export default function App() {
     localStorage.setItem('pnd_wbjee_stats_v3', JSON.stringify(stats));
   }, [stats]);
 
-  // Increment action handler
+  // Increment action handler with automatic fallback
   const handleActionCompleted = async (type) => {
-    // Optimistic local increment
-    setStats(prev => ({
-      ...prev,
-      [type]: (prev[type] || 0) + 1
-    }));
+    // 1. Optimistic local increment
+    setStats(prev => {
+      const updated = {
+        ...prev,
+        [type]: (prev[type] || 0) + 1
+      };
 
-    // If Supabase is connected, call increment RPC
-    if (isSupabaseConfigured && supabase) {
-      try {
-        await supabase.rpc('increment_campaign_stat', { stat_column: type });
-      } catch (err) {
-        console.error('Failed to sync stat to Supabase:', err);
+      // 2. Sync to Supabase
+      if (isSupabaseConfigured && supabase) {
+        supabase.rpc('increment_campaign_stat', { stat_column: type }).then(({ error }) => {
+          if (error) {
+            // Fallback: direct update
+            supabase
+              .from('campaign_stats')
+              .update({ [type]: updated[type], updated_at: new Date().toISOString() })
+              .eq('id', 'global')
+              .catch(console.error);
+          }
+        }).catch(() => {
+          supabase
+            .from('campaign_stats')
+            .update({ [type]: updated[type], updated_at: new Date().toISOString() })
+            .eq('id', 'global')
+            .catch(console.error);
+        });
       }
-    }
+
+      return updated;
+    });
   };
 
   const scrollToSection = (id) => {
