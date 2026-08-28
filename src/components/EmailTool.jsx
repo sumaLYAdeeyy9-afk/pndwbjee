@@ -195,14 +195,14 @@ export default function EmailTool({ onActionCompleted }) {
                 </div>
 
                 <div>
-                  <div className="font-bold text-amber-400 text-[11px] mb-0.5">DTE, GOVT, HIGHER ED & CMO (CC):</div>
+                  <div className="font-bold text-amber-400 text-[11px] mb-0.5">DTE, GOVT, HIGHER ED & OPPOSITION (CC):</div>
                   <div className="font-mono text-slate-300 bg-slate-950 p-2 rounded-lg border border-slate-800 space-y-0.5">
                     <div>• dtewbgovt@gmail.com (Directorate of Technical Ed)</div>
                     <div>• techedndirectoratewb@gmail.com (Tech Ed Directorate)</div>
                     <div>• highereducationwb@gmail.com (Higher Ed General)</div>
                     <div>• dpihedn@gmail.com (Director of Public Instruction)</div>
                     <div>• jdpidd1@gmail.com (Joint DPI)</div>
-                    <div>• asap@wb.gov.in (CMO Grievance Cell)</div>
+                    <div>• adhikarisuvenduwb1@gmail.com (Shri Suvendu Adhikari)</div>
                   </div>
                 </div>
               </div>

@@ -10,7 +10,7 @@ export const CC_RECIPIENTS = [
   'highereducationwb@gmail.com',
   'dpihedn@gmail.com',
   'jdpidd1@gmail.com',
-  'asap@wb.gov.in'
+  'adhikarisuvenduwb1@gmail.com'
 ];
 
 export const OFFICIAL_RECIPIENTS = [
@@ -57,10 +57,10 @@ export const OFFICIAL_RECIPIENTS = [
     category: 'CC'
   },
   {
-    id: 'cmo_grievance',
-    name: "Chief Minister's Office Grievance Cell (CMO ASAP)",
-    email: 'asap@wb.gov.in',
-    designation: 'Govt of WB Public Grievance Portal Desk, Nabanna',
+    id: 'suvendu_adhikari',
+    name: 'Shri Suvendu Adhikari (Leader of Opposition)',
+    email: 'adhikarisuvenduwb1@gmail.com',
+    designation: 'Office of the Leader of Opposition, West Bengal',
     category: 'CC'
   }
 ];
@@ -80,7 +80,7 @@ Kolkata, West Bengal.
 Copy forwarded for urgent perusal and intervention to:
 1. Directorate of Technical Education (DTE), Bikash Bhavan (dtewbgovt@gmail.com)
 2. Department of Higher Education, Govt. of West Bengal (highereducationwb@gmail.com)
-3. Chief Minister's Office Grievance Cell (asap@wb.gov.in)
+3. Shri Suvendu Adhikari, Leader of Opposition (adhikarisuvenduwb1@gmail.com)
 
 Subject: URGENT: Representation regarding severe distress and academic loss caused by WBJEEB Decentralized Counseling Notification dated 27.08.2026.
 

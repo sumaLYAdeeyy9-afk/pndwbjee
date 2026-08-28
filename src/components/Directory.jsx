@@ -28,12 +28,12 @@ export default function Directory() {
       link: 'https://wbhed.gov.in'
     },
     {
-      title: "Chief Minister's Grievance Cell (CMO ASAP)",
-      authority: "Govt. of West Bengal, Nabanna",
-      location: 'Nabanna, 325 Sarat Chatterjee Road, Howrah 711102',
-      phones: ['Toll Free: 1800 345 0117'],
-      emails: ['asap@wb.gov.in'],
-      link: 'https://wb.gov.in'
+      title: "Leader of Opposition Desk",
+      authority: "Shri Suvendu Adhikari (MLA & LoP West Bengal)",
+      location: 'Kolkata / Nandigram, West Bengal',
+      phones: ['9733064595'],
+      emails: ['adhikarisuvenduwb1@gmail.com'],
+      link: 'https://bjpbengal.org'
     }
   ];
 
