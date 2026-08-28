@@ -70,6 +70,9 @@ WBJEE Roll Number: ${roll}
 Current Allotted Institute: ${institute}`;
 }
 
+/**
+ * Generates RFC 6068 compliant mailto link for Android/iOS Native Mail & Gmail Apps
+ */
 export function buildMailtoUrl(toEmails, ccEmails, subject, body) {
   const to = Array.isArray(toEmails) ? toEmails.join(',') : toEmails;
   const cc = Array.isArray(ccEmails) ? ccEmails.join(',') : ccEmails;
@@ -79,9 +82,13 @@ export function buildMailtoUrl(toEmails, ccEmails, subject, body) {
   if (subject) params.push(`subject=${encodeURIComponent(subject)}`);
   if (body) params.push(`body=${encodeURIComponent(body)}`);
 
-  return `mailto:${encodeURIComponent(to)}?${params.join('&')}`;
+  const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+  return `mailto:${to}${queryString}`;
 }
 
+/**
+ * Web browser fallback for desktop Gmail
+ */
 export function buildGmailComposeUrl(toEmails, ccEmails, subject, body) {
   const to = Array.isArray(toEmails) ? toEmails.join(',') : toEmails;
   const cc = Array.isArray(ccEmails) ? ccEmails.join(',') : ccEmails;

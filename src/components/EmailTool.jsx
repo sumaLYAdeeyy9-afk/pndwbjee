@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
-  User, Hash, School, HelpCircle, CheckCircle2 
+  User, Hash, School, Smartphone, CheckCircle2, Globe 
 } from 'lucide-react';
 import { 
   PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, EMAIL_SUBJECT, 
@@ -24,6 +24,10 @@ export default function EmailTool({ onActionCompleted }) {
   const generatedSubject = EMAIL_SUBJECT;
   const generatedBody = generateMegaDraft(formData);
 
+  // Real-time mailto and web urls
+  const mailtoUrl = buildMailtoUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, generatedSubject, generatedBody);
+  const webGmailUrl = buildGmailComposeUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, generatedSubject, generatedBody);
+
   // Form input handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -43,20 +47,6 @@ export default function EmailTool({ onActionCompleted }) {
     }
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 5000);
-  };
-
-  // Handle Gmail click
-  const handleOpenGmail = () => {
-    const url = buildGmailComposeUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, generatedSubject, generatedBody);
-    window.open(url, '_blank', 'noopener,noreferrer');
-    triggerCelebration();
-  };
-
-  // Handle Default Mail / Mailto click
-  const handleOpenMailto = () => {
-    const url = buildMailtoUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, generatedSubject, generatedBody);
-    window.location.href = url;
-    triggerCelebration();
   };
 
   // Handle Copy
@@ -91,7 +81,7 @@ export default function EmailTool({ onActionCompleted }) {
             Send Unified Mega-Draft to WB Authorities
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm">
-            Hits the WBJEE Board (<span className="text-white font-mono">TO</span>) and Higher Education Department (<span className="text-white font-mono">CC</span>) simultaneously in one click.
+            Direct 1-click dispatch to the WBJEE Board (<span className="text-white font-mono">TO</span>) and Higher Education Department (<span className="text-white font-mono">CC</span>).
           </p>
         </div>
 
@@ -237,47 +227,55 @@ export default function EmailTool({ onActionCompleted }) {
               </div>
 
               {/* Action Buttons */}
-              <div className="p-4 bg-slate-950 border-t border-slate-800 space-y-2">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <button
-                    onClick={handleOpenGmail}
-                    className="py-3 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-rose-900/40"
+              <div className="p-4 bg-slate-950 border-t border-slate-800 space-y-2.5">
+                
+                {/* 1. Primary Action: Native Mailto Link (Triggers Gmail App / Mobile Mail App) */}
+                <a
+                  href={mailtoUrl}
+                  onClick={triggerCelebration}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white font-black text-sm flex items-center justify-center space-x-2 shadow-xl shadow-rose-950 transition-all text-center"
+                >
+                  <Smartphone className="w-4 h-4 text-white" />
+                  <span>Open in Mail / Gmail Mobile App</span>
+                  <Send className="w-4 h-4 ml-1" />
+                </a>
+
+                {/* 2. Secondary Action: Web Browser Fallback for Desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <a
+                    href={webGmailUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={triggerCelebration}
+                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all"
                   >
-                    <Mail className="w-4 h-4" />
-                    <span>Send via Gmail</span>
-                    <ExternalLink className="w-3.5 h-3.5 opacity-75" />
-                  </button>
+                    <Globe className="w-3.5 h-3.5 text-rose-400" />
+                    <span>Open in Web Gmail (Browser)</span>
+                    <ExternalLink className="w-3 h-3 opacity-60" />
+                  </a>
 
                   <button
-                    onClick={handleOpenMailto}
-                    className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 flex items-center justify-center space-x-2"
+                    onClick={() => handleCopy('all')}
+                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all"
                   >
-                    <Send className="w-4 h-4 text-rose-400" />
-                    <span>Open in Default Mail App</span>
+                    {copiedType === 'all' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-emerald-400">Copied Full Email!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Copy Email & Recipients</span>
+                      </>
+                    )}
                   </button>
                 </div>
-
-                <button
-                  onClick={() => handleCopy('all')}
-                  className="w-full py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold border border-slate-800 flex items-center justify-center space-x-1.5"
-                >
-                  {copiedType === 'all' ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400">Copied Email with Recipients!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Copy Full Email (TO + CC + Subject + Body)</span>
-                    </>
-                  )}
-                </button>
 
                 {showSuccessToast && (
                   <div className="p-2.5 bg-emerald-950/90 border border-emerald-500/50 rounded-lg text-emerald-300 text-xs font-semibold flex items-center space-x-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Email launched! Thank you. Now fire off your tweet below!</span>
+                    <span>Email launched! Now fire off your tweet below!</span>
                   </div>
                 )}
               </div>
