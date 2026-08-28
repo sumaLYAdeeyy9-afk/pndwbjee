@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
-  User, Hash, School, Smartphone, CheckCircle2, Globe 
+  User, Hash, School, Smartphone, CheckCircle2, Globe,
+  RotateCcw, Edit3
 } from 'lucide-react';
 import { 
   PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, EMAIL_SUBJECT, 
@@ -17,21 +18,47 @@ export default function EmailTool({ onActionCompleted }) {
     currentInstitute: ''
   });
 
+  // Editable Subject & Body State
+  const [subject, setSubject] = useState(EMAIL_SUBJECT);
+  const [body, setBody] = useState(() => generateMegaDraft({}));
+  const [isManuallyEdited, setIsManuallyEdited] = useState(false);
+
   const [copiedType, setCopiedType] = useState(null); // 'all' | 'subject' | 'body'
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // Dynamic Subject and Body
-  const generatedSubject = EMAIL_SUBJECT;
-  const generatedBody = generateMegaDraft(formData);
+  // Auto-fill template unless user has manually customized the body text
+  useEffect(() => {
+    if (!isManuallyEdited) {
+      setBody(generateMegaDraft(formData));
+    }
+  }, [formData, isManuallyEdited]);
 
-  // Real-time mailto and web urls
-  const mailtoUrl = buildMailtoUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, generatedSubject, generatedBody);
-  const webGmailUrl = buildGmailComposeUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, generatedSubject, generatedBody);
+  // Real-time mailto and web urls using current editable subject and body
+  const mailtoUrl = buildMailtoUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, subject, body);
+  const webGmailUrl = buildGmailComposeUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, subject, body);
 
   // Form input handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Body text change handler
+  const handleBodyChange = (e) => {
+    setBody(e.target.value);
+    setIsManuallyEdited(true);
+  };
+
+  // Subject text change handler
+  const handleSubjectChange = (e) => {
+    setSubject(e.target.value);
+  };
+
+  // Reset to default template
+  const handleResetDraft = () => {
+    setIsManuallyEdited(false);
+    setSubject(EMAIL_SUBJECT);
+    setBody(generateMegaDraft(formData));
   };
 
   // Trigger celebration & counter increment
@@ -53,11 +80,11 @@ export default function EmailTool({ onActionCompleted }) {
   const handleCopy = (type = 'all') => {
     let textToCopy = '';
     if (type === 'all') {
-      textToCopy = `To: ${PRIMARY_TO_RECIPIENTS.join(', ')}\nCc: ${CC_RECIPIENTS.join(', ')}\nSubject: ${generatedSubject}\n\n${generatedBody}`;
+      textToCopy = `To: ${PRIMARY_TO_RECIPIENTS.join(', ')}\nCc: ${CC_RECIPIENTS.join(', ')}\nSubject: ${subject}\n\n${body}`;
     } else if (type === 'subject') {
-      textToCopy = generatedSubject;
+      textToCopy = subject;
     } else {
-      textToCopy = generatedBody;
+      textToCopy = body;
     }
 
     navigator.clipboard.writeText(textToCopy).then(() => {
@@ -81,7 +108,7 @@ export default function EmailTool({ onActionCompleted }) {
             Send Unified Mega-Draft to WB Authorities
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm">
-            Direct 1-click dispatch to the WBJEE Board (<span className="text-white font-mono">TO</span>) and Higher Education Department (<span className="text-white font-mono">CC</span>).
+            Direct 1-click dispatch to WBJEEB (<span className="text-white font-mono">TO</span>), DTE & Higher Education Dept (<span className="text-white font-mono">CC</span>). You can freely edit both subject and body.
           </p>
         </div>
 
@@ -103,14 +130,14 @@ export default function EmailTool({ onActionCompleted }) {
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center space-x-1">
                     <User className="w-3.5 h-3.5 text-rose-400" />
-                    <span>Your Name *</span>
+                    <span>Your Full Name *</span>
                   </label>
                   <input
                     type="text"
                     name="studentName"
                     value={formData.studentName}
                     onChange={handleInputChange}
-                    placeholder="e.g. Rahul Sharma"
+                    placeholder="e.g. Rahul Sen"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
@@ -119,7 +146,7 @@ export default function EmailTool({ onActionCompleted }) {
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center space-x-1">
                     <Hash className="w-3.5 h-3.5 text-rose-400" />
-                    <span>WBJEE Roll Number *</span>
+                    <span>WBJEE Roll / Rank Number *</span>
                   </label>
                   <input
                     type="text"
@@ -183,106 +210,134 @@ export default function EmailTool({ onActionCompleted }) {
 
           </div>
 
-          {/* Right Column: Live Draft Preview & Actions (7 cols) */}
-          <div className="lg:col-span-7 space-y-4 lg:sticky lg:top-20">
+          {/* Right Column: Editable Preview & Dispatch (7 cols) */}
+          <div className="lg:col-span-7 space-y-4">
             
-            <div className="bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden">
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl p-5 sm:p-6">
               
-              {/* Card Titlebar */}
-              <div className="bg-slate-950 px-5 py-3 border-b border-slate-800 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-300 font-mono">
-                  Draft Representation
-                </span>
+              <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                  <h3 className="font-bold text-white text-sm sm:text-base flex items-center space-x-1.5">
+                    <Edit3 className="w-4 h-4 text-rose-400" />
+                    <span>Editable Representation Draft</span>
+                  </h3>
+                </div>
 
                 <button
-                  onClick={() => handleCopy('subject')}
-                  className="text-xs text-slate-400 hover:text-white flex items-center space-x-1 px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700"
+                  onClick={handleResetDraft}
+                  className="flex items-center space-x-1 text-[11px] font-semibold text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors"
+                  title="Reset to default template"
                 >
-                  {copiedType === 'subject' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                  <span>Copy Subject</span>
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset Draft</span>
                 </button>
               </div>
 
-              {/* Headers */}
-              <div className="p-4 bg-slate-950/60 border-b border-slate-800 space-y-1.5 text-xs">
-                <div className="flex gap-2">
-                  <span className="font-bold text-slate-400 w-12 shrink-0">TO:</span>
-                  <span className="text-rose-300 font-mono break-all">
-                    {PRIMARY_TO_RECIPIENTS.join(', ')}
-                  </span>
+              {/* Editable Subject */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
+                    <span>Subject Line (Editable):</span>
+                  </label>
+                  <button
+                    onClick={() => handleCopy('subject')}
+                    className="text-[11px] text-rose-400 hover:text-rose-300 flex items-center space-x-1 font-semibold"
+                  >
+                    {copiedType === 'subject' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedType === 'subject' ? 'Copied' : 'Copy Subject'}</span>
+                  </button>
                 </div>
-                <div className="flex gap-2">
-                  <span className="font-bold text-slate-400 w-12 shrink-0">CC:</span>
-                  <span className="text-amber-300 font-mono break-all">
-                    {CC_RECIPIENTS.join(', ')}
-                  </span>
-                </div>
-                <div className="flex gap-2 pt-1 border-t border-slate-800">
-                  <span className="font-bold text-white w-12 shrink-0">SUBJ:</span>
-                  <span className="text-white font-bold">{generatedSubject}</span>
-                </div>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={handleSubjectChange}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-medium focus:outline-none focus:border-rose-500 transition-all"
+                />
               </div>
 
-              {/* Body */}
-              <div className="p-5 max-h-[340px] overflow-y-auto text-slate-200 text-xs sm:text-sm font-sans leading-relaxed whitespace-pre-wrap select-text">
-                {generatedBody}
+              {/* Editable Email Body */}
+              <div className="mb-5">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Email Body (Editable - Type or refine text below):
+                  </label>
+                  <button
+                    onClick={() => handleCopy('body')}
+                    className="text-[11px] text-rose-400 hover:text-rose-300 flex items-center space-x-1 font-semibold"
+                  >
+                    {copiedType === 'body' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedType === 'body' ? 'Copied' : 'Copy Body'}</span>
+                  </button>
+                </div>
+
+                <textarea
+                  value={body}
+                  onChange={handleBodyChange}
+                  rows={13}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 leading-relaxed font-mono focus:outline-none focus:border-rose-500 transition-all resize-y"
+                  placeholder="Draft content..."
+                />
               </div>
 
               {/* Action Buttons */}
-              <div className="p-4 bg-slate-950 border-t border-slate-800 space-y-2.5">
+              <div className="space-y-2.5">
                 
-                {/* 1. Primary Action: Native Mailto Link (Triggers Gmail App / Mobile Mail App) */}
+                {/* 1. Native Mobile Email App Button */}
                 <a
                   href={mailtoUrl}
                   onClick={triggerCelebration}
-                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white font-black text-sm flex items-center justify-center space-x-2 shadow-xl shadow-rose-950 transition-all text-center"
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-black text-sm flex items-center justify-center space-x-2 shadow-lg shadow-rose-900/40 transition-all cursor-pointer text-center"
                 >
-                  <Smartphone className="w-4 h-4 text-white" />
-                  <span>Open in Mail / Gmail Mobile App</span>
-                  <Send className="w-4 h-4 ml-1" />
+                  <Smartphone className="w-4 h-4" />
+                  <span>Send via Email App (Android / iPhone / Mail)</span>
                 </a>
 
-                {/* 2. Secondary Action: Web Browser Fallback for Desktop */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {/* 2. Web Browser & Manual Copy Secondary Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <a
                     href={webGmailUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={triggerCelebration}
-                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all"
+                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center space-x-2 border border-slate-700 transition-all text-center"
                   >
-                    <Globe className="w-3.5 h-3.5 text-rose-400" />
-                    <span>Open in Web Gmail (Browser)</span>
+                    <Globe className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Open in Web Gmail</span>
                     <ExternalLink className="w-3 h-3 opacity-60" />
                   </a>
 
                   <button
                     onClick={() => handleCopy('all')}
-                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold text-xs border border-slate-700 flex items-center justify-center space-x-1.5 transition-all"
+                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center space-x-2 border border-slate-700 transition-all"
                   >
                     {copiedType === 'all' ? (
                       <>
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">Copied Full Email!</span>
+                        <span className="text-emerald-400">All Text Copied!</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Copy Email & Recipients</span>
+                        <span>Copy Complete Email</span>
                       </>
                     )}
                   </button>
                 </div>
 
-                {showSuccessToast && (
-                  <div className="p-2.5 bg-emerald-950/90 border border-emerald-500/50 rounded-lg text-emerald-300 text-xs font-semibold flex items-center space-x-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Email launched! Now fire off your tweet below!</span>
-                  </div>
-                )}
               </div>
 
             </div>
+
+            {/* Success Toast */}
+            {showSuccessToast && (
+              <div className="p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs flex items-center space-x-2 shadow-xl animate-fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>
+                  <strong>Representation Triggered!</strong> Thank you for taking a stand for WBJEE students.
+                </span>
+              </div>
+            )}
 
           </div>
 
