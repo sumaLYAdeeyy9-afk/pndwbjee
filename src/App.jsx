@@ -8,12 +8,12 @@ import GrievanceWall from './components/GrievanceWall';
 import ShareCampaign from './components/ShareCampaign';
 import Directory from './components/Directory';
 import Footer from './components/Footer';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
-  // Active section for Navbar
   const [activeSection, setActiveSection] = useState('hero');
 
-  // Real Community Stats (Starting from 0, incremented dynamically with genuine user actions)
+  // Real Community Stats (Fallback to localStorage if Supabase is not connected yet)
   const [stats, setStats] = useState(() => {
     try {
       const saved = localStorage.getItem('pnd_wbjee_stats_v2');
@@ -26,28 +26,80 @@ export default function App() {
     };
   });
 
-  // Sync stats to localStorage
+  // Load and subscribe to real-time stats from Supabase
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    // 1. Fetch current global stats
+    async function fetchGlobalStats() {
+      const { data, error } = await supabase
+        .from('campaign_stats')
+        .select('*')
+        .eq('id', 'global')
+        .single();
+
+      if (data && !error) {
+        setStats({
+          emails: data.emails || 0,
+          tweets: data.tweets || 0,
+          stories: data.stories || 0
+        });
+      }
+    }
+
+    fetchGlobalStats();
+
+    // 2. Subscribe to live changes
+    const channel = supabase
+      .channel('campaign_stats_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'campaign_stats', filter: 'id=eq.global' },
+        (payload) => {
+          if (payload.new) {
+            setStats({
+              emails: payload.new.emails || 0,
+              tweets: payload.new.tweets || 0,
+              stories: payload.new.stories || 0
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Save to local storage as fallback
   useEffect(() => {
     localStorage.setItem('pnd_wbjee_stats_v2', JSON.stringify(stats));
   }, [stats]);
 
-  // Handler for action increments (e.g. email sent, tweet fired)
-  const handleActionCompleted = (type) => {
+  // Increment action handler
+  const handleActionCompleted = async (type) => {
+    // Optimistic local increment
     setStats(prev => ({
       ...prev,
       [type]: (prev[type] || 0) + 1
     }));
+
+    // If Supabase is connected, call increment RPC or update
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.rpc('increment_campaign_stat', { stat_column: type });
+      } catch (err) {
+        console.error('Failed to sync stat to Supabase:', err);
+      }
+    }
   };
 
-  // Handler for story submissions
+  // Story submitted handler
   const handleStorySubmitted = () => {
-    setStats(prev => ({
-      ...prev,
-      stories: (prev.stories || 0) + 1
-    }));
+    handleActionCompleted('stories');
   };
 
-  // Smooth scroll handler
   const scrollToSection = (id) => {
     setActiveSection(id);
     const element = document.getElementById(id);
@@ -58,49 +110,39 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-rose-500 selection:text-white">
-      {/* Sticky Header Navbar */}
       <Navbar 
         activeSection={activeSection} 
         scrollToSection={scrollToSection} 
       />
 
-      {/* Main Container */}
       <main className="flex-1">
-        {/* 1. Hero & Protest Hub */}
         <Hero 
           scrollToSection={scrollToSection} 
         />
 
-        {/* 2. Live Impact Counter */}
         <LiveCounter 
           stats={stats} 
         />
 
-        {/* 3. Action 1: Mass Email Tool */}
         <EmailTool 
           onActionCompleted={handleActionCompleted} 
         />
 
-        {/* 4. Action 2: Coordinated X (Twitter) Storm */}
         <TwitterStorm 
           onActionCompleted={handleActionCompleted} 
         />
 
-        {/* 5. Action 3: Documented Incident Wall */}
         <GrievanceWall 
           onStorySubmitted={handleStorySubmitted} 
         />
 
-        {/* 6. Action 4: Mobilize / Share Campaign */}
         <ShareCampaign 
           stats={stats} 
         />
 
-        {/* 7. Authority Directory & Legal FAQs */}
         <Directory />
       </main>
 
-      {/* Footer */}
       <Footer 
         scrollToSection={scrollToSection} 
       />

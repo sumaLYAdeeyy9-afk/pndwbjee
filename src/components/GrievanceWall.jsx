@@ -5,17 +5,13 @@ import {
   Send, User, Hash, School, X, Sparkles, AlertCircle 
 } from 'lucide-react';
 import { INITIAL_STORIES, CATEGORIES } from '../data/mockStories';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function GrievanceWall({ onStorySubmitted }) {
   const [stories, setStories] = useState(() => {
     try {
-      const saved = localStorage.getItem('pnd_wbjee_stories');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Filter out any legacy dummy mock stories
-        const realOnly = parsed.filter(s => !s.id.startsWith('story-1') && !s.id.startsWith('story-2') && !s.id.startsWith('story-3') && !s.id.startsWith('story-4'));
-        return realOnly;
-      }
+      const saved = localStorage.getItem('pnd_wbjee_stories_v2');
+      if (saved) return JSON.parse(saved);
       return INITIAL_STORIES;
     } catch {
       return INITIAL_STORIES;
@@ -34,6 +30,7 @@ export default function GrievanceWall({ onStorySubmitted }) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // New Story Form State
   const [newStory, setNewStory] = useState({
@@ -44,9 +41,54 @@ export default function GrievanceWall({ onStorySubmitted }) {
     story: ''
   });
 
-  // Save stories to localStorage
+  // Fetch stories & subscribe to realtime from Supabase if connected
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stories', JSON.stringify(stories));
+    if (!isSupabaseConfigured || !supabase) return;
+
+    async function fetchStories() {
+      const { data, error } = await supabase
+        .from('incidents')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (data && !error) {
+        setStories(data);
+      }
+    }
+
+    fetchStories();
+
+    // Subscribe to new incidents in realtime
+    const channel = supabase
+      .channel('incidents_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'incidents' },
+        (payload) => {
+          if (payload.new) {
+            setStories(prev => [payload.new, ...prev.filter(s => s.id !== payload.new.id)]);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'incidents' },
+        (payload) => {
+          if (payload.new) {
+            setStories(prev => prev.map(s => s.id === payload.new.id ? payload.new : s));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Save stories to localStorage as fallback
+  useEffect(() => {
+    localStorage.setItem('pnd_wbjee_stories_v2', JSON.stringify(stories));
   }, [stories]);
 
   // Save upvoted ids to localStorage
@@ -55,20 +97,40 @@ export default function GrievanceWall({ onStorySubmitted }) {
   }, [upvotedIds]);
 
   // Handle Upvote
-  const handleToggleUpvote = (storyId) => {
-    if (upvotedIds.includes(storyId)) {
+  const handleToggleUpvote = async (storyId) => {
+    const isCurrentlyUpvoted = upvotedIds.includes(storyId);
+    
+    if (isCurrentlyUpvoted) {
       setUpvotedIds(prev => prev.filter(id => id !== storyId));
-      setStories(prev => prev.map(s => s.id === storyId ? { ...s, upvotes: Math.max(0, s.upvotes - 1) } : s));
+      setStories(prev => prev.map(s => s.id === storyId ? { ...s, upvotes: Math.max(0, (s.upvotes || 1) - 1) } : s));
+      
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.rpc('decrement_incident_upvote', { incident_id: storyId });
+        } catch (err) {
+          console.error(err);
+        }
+      }
     } else {
       setUpvotedIds(prev => [...prev, storyId]);
       setStories(prev => prev.map(s => s.id === storyId ? { ...s, upvotes: (s.upvotes || 0) + 1 } : s));
+
+      if (isSupabaseConfigured && supabase) {
+        try {
+          await supabase.rpc('increment_incident_upvote', { incident_id: storyId });
+        } catch (err) {
+          console.error(err);
+        }
+      }
     }
   };
 
   // Handle New Story Submission
-  const handleSubmitStory = (e) => {
+  const handleSubmitStory = async (e) => {
     e.preventDefault();
     if (!newStory.story.trim()) return;
+
+    setIsSubmitting(true);
 
     const entry = {
       id: `incident-${Date.now()}`,
@@ -81,6 +143,7 @@ export default function GrievanceWall({ onStorySubmitted }) {
       upvotes: 1
     };
 
+    // Optimistic UI update
     setStories(prev => [entry, ...prev]);
     setIsModalOpen(false);
     setNewStory({
@@ -101,21 +164,32 @@ export default function GrievanceWall({ onStorySubmitted }) {
     if (onStorySubmitted) {
       onStorySubmitted();
     }
+
+    // Insert into Supabase if configured
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('incidents').insert([entry]);
+      } catch (err) {
+        console.error('Failed to post incident to Supabase:', err);
+      }
+    }
+
+    setIsSubmitting(false);
   };
 
   // Filter stories
   const filteredStories = stories.filter(story => {
     const matchesCategory = selectedCategory === 'All' || story.category === selectedCategory;
     const matchesSearch = 
-      story.story.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      story.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      story.gmr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      story.allottedCollege.toLowerCase().includes(searchQuery.toLowerCase());
+      (story.story || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (story.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (story.gmr || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (story.allottedCollege || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   return (
-    <section id="grievance-wall" className="py-16 bg-slate-950 border-t border-slate-800/80 scroll-mt-20">
+    <section id="grievance-wall" className="py-14 bg-slate-950 border-t border-slate-800/80 scroll-mt-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -128,7 +202,7 @@ export default function GrievanceWall({ onStorySubmitted }) {
             <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
               Student Grievances & Incidents
             </h2>
-            <p className="text-slate-400 text-sm mt-1 max-w-xl">
+            <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-xl">
               Documented personal accounts of counseling irregularities, seat-blocking, and fee traps.
             </p>
           </div>
@@ -230,7 +304,7 @@ export default function GrievanceWall({ onStorySubmitted }) {
             })}
           </div>
         ) : (
-          /* Clean Empty State (No Dummy Data) */
+          /* Clean Empty State */
           <div className="text-center py-12 px-6 bg-slate-900/40 rounded-2xl border border-slate-800 max-w-xl mx-auto">
             <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-3">
               <MessageSquare className="w-6 h-6" />
@@ -351,10 +425,11 @@ export default function GrievanceWall({ onStorySubmitted }) {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-md flex items-center space-x-1"
+                  disabled={isSubmitting}
+                  className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-md flex items-center space-x-1 disabled:opacity-50"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>Publish</span>
+                  <span>{isSubmitting ? 'Publishing...' : 'Publish'}</span>
                 </button>
               </div>
             </form>
