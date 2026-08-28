@@ -5,16 +5,31 @@ import { Share2, MessageCircle, Send, Copy, Check, Users } from 'lucide-react';
 export default function ShareCampaign() {
   const [copied, setCopied] = useState(false);
 
-  const shareText = `🚨 URGENT FOR ALL WBJEE 2026 CANDIDATES & PARENTS!
+  // Dynamic portal url
+  const portalUrl = typeof window !== 'undefined' && !window.location.origin.includes('localhost')
+    ? window.location.origin
+    : 'https://wbjee.playnodice.com';
 
-Don't let them play dice with our future! Demand the immediate revocation of the Aug 27 WBJEEB notification debarring admitted students from Decentralized Counseling (DC).
+  const shareText = `🚨 PLEASE DON'T PLAY WITH STUDENTS' FUTURE!
+URGENT FOR ALL WBJEE 2026 CANDIDATES & PARENTS!
 
-1️⃣ Send 1-Click Mass Email to WBJEEB & Higher Education Dept
+We are urgently protesting against the sudden WBJEEB notification released on August 27, 2026, which abruptly debars already admitted students from participating in Decentralized Counseling (DC).
+
+⚠️ 1. Violation of Historical Precedent:
+Historically, Decentralized Counseling (DC) has ALWAYS been open to all students, allowing admitted candidates to upgrade branches at premier state universities (JU, CU, KGEC, JGEC) without losing their academic year.
+
+⚠️ 2. Flawed Centralized Counseling:
+By allowing fresh registration across all 3 rounds, cutoffs shrank instead of getting relaxed—an unprecedented anomaly in WBJEE history that caused rampant seat blocking and massive seat vacancies statewide.
+
+We demand the immediate withdrawal of the Aug 27 notice and full DC access for all students!
+
+Take Action Now (Takes 10 seconds):
+1️⃣ 1-Click Mass Email to WBJEEB & Higher Education Dept
 2️⃣ Fire Pre-Crafted Tweet Storm on X tagging CM @SuvenduWB & @CMO_WB
 
-👉 Open the Campaign Portal now: ${typeof window !== 'undefined' ? window.location.origin : 'https://playnodice.com'}
+👉 Open the Action Portal: ${portalUrl}
 
-#WBJEEBDecentralized #JusticeForWBJEEStudents #DontPlayDiceWithStudents`;
+#WBJEEBDecentralized #JusticeForWBJEEStudents #DontPlayWithStudentsFuture`;
 
   const handleWhatsAppShare = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
@@ -23,8 +38,7 @@ Don't let them play dice with our future! Demand the immediate revocation of the
   };
 
   const handleTelegramShare = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://playnodice.com';
-    const url = `https://t.me/share/url?url=${encodeURIComponent(origin)}&text=${encodeURIComponent(shareText)}`;
+    const url = `https://t.me/share/url?url=${encodeURIComponent(portalUrl)}&text=${encodeURIComponent(shareText)}`;
     window.open(url, '_blank');
     triggerConfetti();
   };
@@ -50,7 +64,7 @@ Don't let them play dice with our future! Demand the immediate revocation of the
     <section id="share-campaign" className="py-14 bg-slate-900/40 border-t border-slate-800/80 scroll-mt-16">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="rounded-3xl p-6 sm:p-8 border border-emerald-500/30 bg-slate-950 shadow-2xl relative overflow-hidden text-center max-w-2xl mx-auto">
+        <div className="rounded-3xl p-6 sm:p-8 border border-emerald-500/30 bg-slate-950 shadow-2xl relative overflow-hidden text-center max-w-3xl mx-auto">
           
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
             <Users className="w-3.5 h-3.5" />
@@ -61,7 +75,7 @@ Don't let them play dice with our future! Demand the immediate revocation of the
             Mobilize WBJEE Batches & Groups
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm mb-6">
-            Share this 1-click advocacy tool to batch WhatsApp groups and Telegram channels to scale mass representation.
+            Share this campaign across batch WhatsApp groups and Telegram channels to scale mass representation.
           </p>
 
           {/* Quick Buttons */}
@@ -101,7 +115,7 @@ Don't let them play dice with our future! Demand the immediate revocation of the
           </div>
 
           {/* Preview of Broadcast Message */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 text-left text-xs font-mono text-slate-300 whitespace-pre-wrap select-text">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-left text-xs font-mono text-slate-300 whitespace-pre-wrap select-text leading-relaxed">
             {shareText}
           </div>
 

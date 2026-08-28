@@ -12,12 +12,12 @@ export default function Hero({ scrollToSection }) {
           <Flame className="w-4 h-4 text-rose-500" />
           <span>WBJEE 2026 Emergency Protest Movement</span>
           <span className="w-1 h-1 rounded-full bg-slate-500"></span>
-          <span className="text-amber-400 font-semibold lowercase">#PlayNoDice</span>
+          <span className="text-amber-400 font-semibold lowercase">#JusticeForWBJEE</span>
         </div>
 
         {/* Protest Headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white uppercase leading-tight mb-6">
-          PLEASE DON'T PLAY DICE WITH <br />
+          PLEASE DON'T PLAY WITH <br />
           <span className="text-rose-500">
             STUDENTS' FUTURE
           </span>

@@ -29,7 +29,7 @@ export default function Footer() {
           {/* Slogan */}
           <div className="text-center md:text-right">
             <p className="font-bold text-slate-200 text-sm">
-              "Please Don't Play Dice With Students' Future"
+              "Please Don't Play With Students' Future"
             </p>
             <p className="text-[11px] text-slate-500">
               Standing with WBJEE 2026 Engineering Aspirants across West Bengal
