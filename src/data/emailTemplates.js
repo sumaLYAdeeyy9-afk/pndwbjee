@@ -1,8 +1,7 @@
 // WBJEE Grievance Email Targets & Unified Mega-Draft
 
 export const PRIMARY_TO_RECIPIENTS = [
-  'info@wbjeeb.in',
-  'helpdesk@wbjeeb.in'
+  'info@wbjeeb.in'
 ];
 
 export const CC_RECIPIENTS = [
@@ -20,13 +19,6 @@ export const OFFICIAL_RECIPIENTS = [
     name: 'WBJEEB Official Desk',
     email: 'info@wbjeeb.in',
     designation: 'West Bengal Joint Entrance Examinations Board',
-    category: 'TO'
-  },
-  {
-    id: 'wbjeeb_support',
-    name: 'WBJEEB Support / Helpdesk',
-    email: 'helpdesk@wbjeeb.in',
-    designation: 'WBJEEB Candidate Support',
     category: 'TO'
   },
   {

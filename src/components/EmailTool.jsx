@@ -182,7 +182,7 @@ export default function EmailTool({ onActionCompleted }) {
                 <span>Direct Target Desk List</span>
                 <span className="text-emerald-400 font-bold flex items-center space-x-1">
                   <ShieldCheck className="w-3 h-3" />
-                  <span>8 Key Desks</span>
+                  <span>7 Key Desks</span>
                 </span>
               </h4>
 
@@ -190,8 +190,7 @@ export default function EmailTool({ onActionCompleted }) {
                 <div>
                   <div className="font-bold text-rose-400 text-[11px] mb-0.5">PRIMARY (TO):</div>
                   <div className="font-mono text-slate-300 bg-slate-950 p-2 rounded-lg border border-slate-800 space-y-0.5">
-                    <div>• info@wbjeeb.in (WBJEEB Official)</div>
-                    <div>• helpdesk@wbjeeb.in (WBJEEB Support)</div>
+                    <div>• info@wbjeeb.in (WBJEEB Official Desk)</div>
                   </div>
                 </div>
 

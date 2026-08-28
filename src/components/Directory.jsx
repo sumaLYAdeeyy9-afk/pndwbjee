@@ -8,7 +8,7 @@ export default function Directory() {
       authority: 'West Bengal Joint Entrance Examinations Board',
       location: 'RUPANNA, DB-118, Sector-I, Salt Lake City, Kolkata 700064',
       phones: ['1800-1234-782 (Toll Free)', '033-71564345'],
-      emails: ['info@wbjeeb.in', 'helpdesk@wbjeeb.in'],
+      emails: ['info@wbjeeb.in'],
       link: 'https://wbjeeb.in'
     },
     {
