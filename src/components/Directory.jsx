@@ -28,12 +28,12 @@ export default function Directory() {
       link: 'https://wbhed.gov.in'
     },
     {
-      title: "Leader of Opposition Desk",
-      authority: "Shri Suvendu Adhikari (MLA & LoP West Bengal)",
-      location: 'Kolkata / Nandigram, West Bengal',
+      title: "Chief Minister's Secretariat Desk",
+      authority: "Hon'ble Chief Minister Shri Suvendu Adhikari",
+      location: 'Nabanna, 325 Sarat Chatterjee Road, Howrah 711102',
       phones: ['9733064595'],
       emails: ['adhikarisuvenduwb1@gmail.com'],
-      link: 'https://bjpbengal.org'
+      link: 'https://wb.gov.in'
     }
   ];
 

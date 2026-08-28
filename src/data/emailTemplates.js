@@ -58,9 +58,9 @@ export const OFFICIAL_RECIPIENTS = [
   },
   {
     id: 'suvendu_adhikari',
-    name: 'Shri Suvendu Adhikari (Leader of Opposition)',
+    name: 'Hon’ble Chief Minister Shri Suvendu Adhikari',
     email: 'adhikarisuvenduwb1@gmail.com',
-    designation: 'Office of the Leader of Opposition, West Bengal',
+    designation: "Chief Minister's Secretariat / Office, Govt of West Bengal",
     category: 'CC'
   }
 ];
@@ -80,7 +80,7 @@ Kolkata, West Bengal.
 Copy forwarded for urgent perusal and intervention to:
 1. Directorate of Technical Education (DTE), Bikash Bhavan (dtewbgovt@gmail.com)
 2. Department of Higher Education, Govt. of West Bengal (highereducationwb@gmail.com)
-3. Shri Suvendu Adhikari, Leader of Opposition (adhikarisuvenduwb1@gmail.com)
+3. Hon'ble Chief Minister Shri Suvendu Adhikari (adhikarisuvenduwb1@gmail.com)
 
 Subject: URGENT: Representation regarding severe distress and academic loss caused by WBJEEB Decentralized Counseling Notification dated 27.08.2026.
 

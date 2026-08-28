@@ -71,7 +71,7 @@ export default function TwitterStorm({ onActionCompleted }) {
             Amplify Public Pressure on X
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm">
-            Targeting <span className="text-sky-400 font-bold">@SuvenduWB</span>, <span className="text-sky-400 font-bold">@abpanandatv</span>, and <span className="text-sky-400 font-bold">@Zee24Ghanta</span>. Select any draft below and edit freely before posting.
+            Targeting Hon'ble CM <span className="text-sky-400 font-bold">@SuvenduWB</span>, <span className="text-sky-400 font-bold">@abpanandatv</span>, and <span className="text-sky-400 font-bold">@Zee24Ghanta</span>. Select any draft below and edit freely before posting.
           </p>
         </div>
 
