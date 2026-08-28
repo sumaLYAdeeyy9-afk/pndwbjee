@@ -6,6 +6,8 @@ export const PRIMARY_TO_RECIPIENTS = [
 ];
 
 export const CC_RECIPIENTS = [
+  'dtewbgovt@gmail.com',
+  'techedndirectoratewb@gmail.com',
   'highereducationwb@gmail.com',
   'dpihedn@gmail.com',
   'jdpidd1@gmail.com'
@@ -25,6 +27,20 @@ export const OFFICIAL_RECIPIENTS = [
     email: 'helpdesk@wbjeeb.in',
     designation: 'WBJEEB Candidate Support',
     category: 'TO'
+  },
+  {
+    id: 'dte_wb_govt',
+    name: 'Directorate of Technical Education (DTE)',
+    email: 'dtewbgovt@gmail.com',
+    designation: 'Directorate of Technical Education, Bikash Bhavan 10th Floor',
+    category: 'CC'
+  },
+  {
+    id: 'tech_edn_dir',
+    name: 'Technical Education Directorate WB',
+    email: 'techedndirectoratewb@gmail.com',
+    designation: 'Technical Education Wing, Govt of WB',
+    category: 'CC'
   },
   {
     id: 'higher_edu_gen',
@@ -56,13 +72,15 @@ export function generateMegaDraft(data) {
   const roll = data.rollNumber?.trim() || '[Roll Number]';
   const institute = data.currentInstitute?.trim() || '[Allotted Institute]';
 
-  return `To the Hon'ble Chairman of WBJEEB and Officials of the Higher Education Department,
+  return `To the Hon'ble Chairman of WBJEEB, Director of Technical Education (DTE), and Officials of the Higher Education Department,
 
 I am writing to urgently register my protest against the WBJEEB notification issued on August 27, 2026, which abruptly bars already admitted students from participating in the Decentralized Counseling (DC) rounds.
 
-Thousands of students, myself included, secured and locked our admissions based on the clear historical precedent that DC allows admitted students to upgrade their branches at esteemed state universities. Altering this fundamental rule after the primary admission phases have concluded is unjust and severely penalizes merit-holding students who trusted the process.
+Thousands of students, myself included, secured and locked our admissions based on the clear historical precedent that DC allows admitted students to upgrade their branches at esteemed state universities (JU, CU, KGEC, JGEC). Altering this fundamental rule after the primary admission phases have concluded is unjust and severely penalizes merit-holding students who trusted the process.
 
-By restricting upgrades, the Board is trapping students in colleges or branches they would not have otherwise finalized. We urgently appeal to the Board and the Higher Education Department to intervene, suspend this notification, and restore our right to participate in Decentralized Counseling.
+Furthermore, due to the allowance of fresh registrations in every round of centralized counseling, cutoffs shrank instead of getting relaxed, triggering artificial seat-blocking and resulting in massive vacancies statewide. Barring admitted students from DC prevents genuine merit-based seat optimization and traps meritorious students in locked seats.
+
+We urgently appeal to the Board, the Directorate of Technical Education (DTE), and the Higher Education Department to intervene immediately, suspend this notification, and restore full DC participation for all candidates.
 
 Sincerely,
 ${name}
