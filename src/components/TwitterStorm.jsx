@@ -1,13 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Copy, Check, Sparkles, ExternalLink, RefreshCw, Shuffle, Edit3, RotateCcw, Smartphone, Globe } from 'lucide-react';
+import { Copy, Check, Sparkles, ExternalLink, Shuffle, Edit3, RotateCcw, Smartphone, Globe, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { TwitterIcon } from './Icons';
 import { TWEET_TEMPLATES, buildTweetIntentUrl, buildTwitterAppUrl, getRandomTweet } from '../data/tweetTemplates';
+
+// Helper to reliably detect mobile devices (Android / iOS)
+function isMobileDevice() {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
+}
 
 export default function TwitterStorm({ onActionCompleted }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [editedTweetText, setEditedTweetText] = useState(() => TWEET_TEMPLATES[0]?.text || '');
   const [copied, setCopied] = useState(false);
+  const [mobileOnlyNotice, setMobileOnlyNotice] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Sync edited text when user switches tweet angles
   useEffect(() => {
@@ -15,8 +24,6 @@ export default function TwitterStorm({ onActionCompleted }) {
       setEditedTweetText(TWEET_TEMPLATES[selectedIdx].text);
     }
   }, [selectedIdx]);
-
-  const activeTemplate = TWEET_TEMPLATES[selectedIdx] || TWEET_TEMPLATES[0];
 
   const triggerCelebration = () => {
     confetti({
@@ -30,11 +37,38 @@ export default function TwitterStorm({ onActionCompleted }) {
     }
   };
 
+  // Handler for Native App button with PC protection
+  const handleAppDispatch = (e) => {
+    if (!isMobileDevice()) {
+      e.preventDefault();
+      setShowSuccessToast(false);
+      setMobileOnlyNotice(true);
+      setTimeout(() => setMobileOnlyNotice(false), 6000);
+      return;
+    }
+    setMobileOnlyNotice(false);
+    triggerCelebration();
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 5000);
+  };
+
+  // Handler for Web Browser link
+  const handleWebDispatch = () => {
+    setMobileOnlyNotice(false);
+    triggerCelebration();
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 5000);
+  };
+
+  // Handler for Copy Tweet
   const handleCopyTweet = () => {
     navigator.clipboard.writeText(editedTweetText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
+      setMobileOnlyNotice(false);
       triggerCelebration();
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 5000);
     });
   };
 
@@ -224,7 +258,7 @@ export default function TwitterStorm({ onActionCompleted }) {
                 {/* 1. Primary Direct Native Android / iOS App Dispatch */}
                 <a
                   href={twitterAppUrl}
-                  onClick={triggerCelebration}
+                  onClick={handleAppDispatch}
                   className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-sky-950 transition-all cursor-pointer text-center"
                 >
                   <Smartphone className="w-4 h-4" />
@@ -237,7 +271,7 @@ export default function TwitterStorm({ onActionCompleted }) {
                     href={twitterWebUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={triggerCelebration}
+                    onClick={handleWebDispatch}
                     className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center space-x-2 border border-slate-700 transition-all text-center"
                   >
                     <Globe className="w-3.5 h-3.5 text-sky-400" />
@@ -266,6 +300,34 @@ export default function TwitterStorm({ onActionCompleted }) {
               </div>
 
             </div>
+
+            {/* PC Mobile-Only Notice Banner */}
+            {mobileOnlyNotice && (
+              <div className="p-4 rounded-2xl bg-amber-950/90 border border-amber-500/60 text-amber-100 text-xs flex items-start space-x-3 shadow-2xl animate-fade-in">
+                <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <strong className="text-amber-300 font-bold text-xs block">
+                    Mobile Device Only Action
+                  </strong>
+                  <p className="text-slate-200 text-[11px] leading-relaxed">
+                    This direct app dispatch works only when opened on a mobile device (Android / iPhone) with the X app installed.
+                  </p>
+                  <p className="text-amber-200 text-[11px] font-semibold">
+                    👉 On PC / Desktop, please click <strong>"Open in Web X.com"</strong> or <strong>"Copy Tweet Text"</strong> above.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Success Toast */}
+            {showSuccessToast && (
+              <div className="p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs flex items-center space-x-2 shadow-xl animate-fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>
+                  <strong>X Post Dispatched!</strong> Thank you for amplifying the voice of WBJEE students.
+                </span>
+              </div>
+            )}
 
           </div>
 
