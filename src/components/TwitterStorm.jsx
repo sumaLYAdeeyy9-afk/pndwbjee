@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Copy, Check, Sparkles, ExternalLink, RefreshCw, Shuffle, Edit3, RotateCcw } from 'lucide-react';
+import { Copy, Check, Sparkles, ExternalLink, RefreshCw, Shuffle, Edit3, RotateCcw, Smartphone, Globe } from 'lucide-react';
 import { TwitterIcon } from './Icons';
-import { TWEET_TEMPLATES, buildTweetIntentUrl, getRandomTweet } from '../data/tweetTemplates';
+import { TWEET_TEMPLATES, buildTweetIntentUrl, buildTwitterAppUrl, getRandomTweet } from '../data/tweetTemplates';
 
 export default function TwitterStorm({ onActionCompleted }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -30,12 +30,6 @@ export default function TwitterStorm({ onActionCompleted }) {
     }
   };
 
-  const handlePostTweet = () => {
-    const url = buildTweetIntentUrl(editedTweetText);
-    window.open(url, '_blank', 'noopener,noreferrer');
-    triggerCelebration();
-  };
-
   const handleCopyTweet = () => {
     navigator.clipboard.writeText(editedTweetText).then(() => {
       setCopied(true);
@@ -58,6 +52,10 @@ export default function TwitterStorm({ onActionCompleted }) {
 
   const charCount = editedTweetText.length;
   const isOverLimit = charCount > 280;
+
+  // URLs for direct app and web browser
+  const twitterAppUrl = buildTwitterAppUrl(editedTweetText);
+  const twitterWebUrl = buildTweetIntentUrl(editedTweetText);
 
   return (
     <section id="twitter-storm" className="py-14 bg-slate-900/60 border-t border-b border-slate-800/80 scroll-mt-16">
@@ -224,32 +222,50 @@ export default function TwitterStorm({ onActionCompleted }) {
               )}
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-                <button
-                  onClick={handlePostTweet}
-                  className="py-3 px-4 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-sky-500/30 transition-all"
+              <div className="space-y-2.5 pt-2">
+                
+                {/* 1. Primary Direct Native Android / iOS App Dispatch */}
+                <a
+                  href={twitterAppUrl}
+                  onClick={triggerCelebration}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-sky-950 transition-all cursor-pointer text-center"
                 >
-                  <TwitterIcon className="w-4 h-4 fill-current" />
-                  <span>Post on X (Twitter)</span>
-                  <ExternalLink className="w-3.5 h-3.5 opacity-75" />
-                </button>
+                  <Smartphone className="w-4 h-4" />
+                  <span>Send Post Directly from X App (Android / iPhone)</span>
+                </a>
 
-                <button
-                  onClick={handleCopyTweet}
-                  className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 flex items-center justify-center space-x-2 transition-all"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400">Copied Tweet!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Copy Tweet Text</span>
-                    </>
-                  )}
-                </button>
+                {/* 2. Secondary Row: Web Browser & Copy Button */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <a
+                    href={twitterWebUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={triggerCelebration}
+                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center space-x-2 border border-slate-700 transition-all text-center"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Open in Web X.com</span>
+                    <ExternalLink className="w-3 h-3 opacity-60" />
+                  </a>
+
+                  <button
+                    onClick={handleCopyTweet}
+                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 flex items-center justify-center space-x-2 transition-all"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-emerald-400">Copied Tweet!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Copy Tweet Text</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
               </div>
 
             </div>

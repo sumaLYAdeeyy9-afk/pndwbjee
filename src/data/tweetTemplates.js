@@ -69,6 +69,16 @@ export function getRandomTweet() {
   return { tweet: TWEET_TEMPLATES[index], index };
 }
 
+/**
+ * Deep links directly into the installed X (Twitter) App on Android / iOS
+ */
+export function buildTwitterAppUrl(text) {
+  return `twitter://post?message=${encodeURIComponent(text)}`;
+}
+
+/**
+ * Web browser fallback intent for desktop / browser
+ */
 export function buildTweetIntentUrl(text) {
   const params = new URLSearchParams({
     text: text
