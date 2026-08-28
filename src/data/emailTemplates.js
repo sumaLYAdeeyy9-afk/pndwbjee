@@ -10,7 +10,8 @@ export const CC_RECIPIENTS = [
   'techedndirectoratewb@gmail.com',
   'highereducationwb@gmail.com',
   'dpihedn@gmail.com',
-  'jdpidd1@gmail.com'
+  'jdpidd1@gmail.com',
+  'asap@wb.gov.in'
 ];
 
 export const OFFICIAL_RECIPIENTS = [
@@ -62,66 +63,106 @@ export const OFFICIAL_RECIPIENTS = [
     email: 'jdpidd1@gmail.com',
     designation: 'Joint DPI, Higher Education Dept',
     category: 'CC'
+  },
+  {
+    id: 'cmo_grievance',
+    name: "Chief Minister's Office Grievance Cell (CMO ASAP)",
+    email: 'asap@wb.gov.in',
+    designation: 'Govt of WB Public Grievance Portal Desk, Nabanna',
+    category: 'CC'
   }
 ];
 
-export const EMAIL_SUBJECT = 'URGENT: Revoke Aug 27 Notification Restricting Admitted Students from WBJEE 2026 Decentralized Counseling';
+export const EMAIL_SUBJECT = 'URGENT: Representation against WBJEEB Decentralized Counseling Notification dated 27.08.2026';
 
-export function generateMegaDraft(data) {
-  const name = data.studentName?.trim() || '[Student Name]';
-  const roll = data.rollNumber?.trim() || '[Roll Number]';
-  const institute = data.currentInstitute?.trim() || '[Allotted Institute]';
+export function generateMegaDraft({ studentName = '', rollNumber = '', currentInstitute = '' }) {
+  const namePlaceholder = studentName.trim() || '[Your Full Name]';
+  const rollPlaceholder = rollNumber.trim() || '[Your WBJEE Roll / Rank Number]';
+  const institutePlaceholder = currentInstitute.trim() || '[Your Currently Allotted Institute & Branch / None]';
 
-  return `To the Hon'ble Chairman of WBJEEB, Director of Technical Education (DTE), and Officials of the Higher Education Department,
+  return `To,
+The Chairman / Competent Authority,
+West Bengal Joint Entrance Examinations Board (WBJEEB),
+Kolkata, West Bengal.
 
-I am writing to urgently register my protest against the WBJEEB notification issued on August 27, 2026, which abruptly bars already admitted students from participating in the Decentralized Counseling (DC) rounds.
+Copy forwarded for urgent perusal and intervention to:
+1. Directorate of Technical Education (DTE), Bikash Bhavan (dtewbgovt@gmail.com)
+2. Department of Higher Education, Govt. of West Bengal (highereducationwb@gmail.com)
+3. Chief Minister's Office Grievance Cell (asap@wb.gov.in)
 
-Thousands of students, myself included, secured and locked our admissions based on the clear historical precedent that DC allows admitted students to upgrade their branches at esteemed state universities (JU, CU, KGEC, JGEC). Altering this fundamental rule after the primary admission phases have concluded is unjust and severely penalizes merit-holding students who trusted the process.
+Subject: URGENT: Representation regarding severe distress and academic loss caused by WBJEEB Decentralized Counseling Notification dated 27.08.2026.
 
-Furthermore, due to the allowance of fresh registrations in every round of centralized counseling, cutoffs shrank instead of getting relaxed, triggering artificial seat-blocking and resulting in massive vacancies statewide. Barring admitted students from DC prevents genuine merit-based seat optimization and traps meritorious students in locked seats.
+Respected Authorities,
 
-We urgently appeal to the Board, the Directorate of Technical Education (DTE), and the Higher Education Department to intervene immediately, suspend this notification, and restore full DC participation for all candidates.
+I am writing this representation as a bonafide candidate of WBJEE 2026 to register my deep anguish, distress, and formal grievance against the sudden notification issued on 27.08.2026 regarding Decentralized Counseling (DC).
 
-Sincerely,
-${name}
-WBJEE Roll Number: ${roll}
-Current Allotted Institute: ${institute}`;
+Candidate Credentials:
+- Name: ${namePlaceholder}
+- WBJEE Roll / Rank: ${rollPlaceholder}
+- Currently Allotted Institute/Branch: ${institutePlaceholder}
+
+Grounds for Grievance & Appeal:
+
+1. Violation of Established Precedent & Legitimate Expectation:
+Historically and consistently across previous academic years, Decentralized Counseling in West Bengal has ALWAYS permitted already admitted students to participate and upgrade to their preferred branches/institutions (including Jadavpur University, Calcutta University, KGEC, JGEC, etc.) without forfeiting their existing seats. Millions of students planned their counseling choices relying in good faith on this established convention.
+
+2. Flawed Centralized Counseling Framework & Artificial Cutoff Compression:
+During the WBJEE 2026 centralized rounds, permitting fresh registrations across all 3 rounds caused an artificial compression of cutoffs rather than expected relaxation. This resulted in unprecedented anomalies, widespread seat blocking, and arbitrary allocations that forced merit-holding students to freeze seats in sub-optimal branches just to secure an academic year.
+
+3. Unjust Trapping of Meritorious Candidates & Creation of Artificial Vacancies:
+The sudden notification dated 27.08.2026 barring admitted candidates effectively locks high-rankers into colleges while allowing lower-ranked or unregistered candidates to claim vacant seats in premier government institutes. This directly penalizes merit and violates equitable access to higher education in our state.
+
+Prayer / Demands:
+In the greater interest of justice and the future of thousands of West Bengal engineering aspirants, I humbly request:
+a) Immediate withdrawal or reconsideration of the restrictive clause in the 27.08.2026 notification.
+b) Unconditional permission for ALL admitted WBJEE 2026 candidates to participate in Decentralized Counseling across all state universities and government/private colleges.
+c) Directives ensuring uniform, transparent, and merit-based spot/decentralized counseling across all institutions.
+
+I earnestly appeal to the competent authorities to intervene at the earliest to prevent irreparable career and academic damage.
+
+Yours faithfully,
+${namePlaceholder}
+WBJEE 2026 Aspirant
+Roll/Rank: ${rollPlaceholder}
+Contact: Through Registered Email`;
 }
 
 /**
- * Generates RFC 6068 compliant mailto link for Android/iOS Native Mail & Gmail Apps
+ * Builds standard mailto URL (RFC 6068 compliant) with unencoded @ symbols in recipients
  */
 export function buildMailtoUrl(toEmails, ccEmails, subject, body) {
-  const to = Array.isArray(toEmails) ? toEmails.join(',') : toEmails;
-  const cc = Array.isArray(ccEmails) ? ccEmails.join(',') : ccEmails;
-  
-  const params = [];
-  if (cc) params.push(`cc=${encodeURIComponent(cc)}`);
-  if (subject) params.push(`subject=${encodeURIComponent(subject)}`);
-  if (body) params.push(`body=${encodeURIComponent(body)}`);
+  const toStr = Array.isArray(toEmails) ? toEmails.join(',') : toEmails;
+  const ccStr = Array.isArray(ccEmails) ? ccEmails.join(',') : ccEmails;
 
-  const queryString = params.length > 0 ? `?${params.join('&')}` : '';
-  return `mailto:${to}${queryString}`;
+  const params = [];
+  if (ccStr) {
+    params.push(`cc=${ccStr}`);
+  }
+  if (subject) {
+    params.push(`subject=${encodeURIComponent(subject)}`);
+  }
+  if (body) {
+    params.push(`body=${encodeURIComponent(body)}`);
+  }
+
+  return `mailto:${toStr}?${params.join('&')}`;
 }
 
 /**
- * Web browser fallback for desktop Gmail
+ * Builds direct Web Gmail compose URL
  */
 export function buildGmailComposeUrl(toEmails, ccEmails, subject, body) {
-  const to = Array.isArray(toEmails) ? toEmails.join(',') : toEmails;
-  const cc = Array.isArray(ccEmails) ? ccEmails.join(',') : ccEmails;
+  const toStr = Array.isArray(toEmails) ? toEmails.join(',') : toEmails;
+  const ccStr = Array.isArray(ccEmails) ? ccEmails.join(',') : ccEmails;
 
   const params = new URLSearchParams({
     view: 'cm',
     fs: '1',
-    to: to,
+    to: toStr,
+    cc: ccStr,
     su: subject,
     body: body
   });
-
-  if (cc) {
-    params.append('cc', cc);
-  }
 
   return `https://mail.google.com/mail/?${params.toString()}`;
 }
