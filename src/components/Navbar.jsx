@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, Mail, MessageSquare, Share2, PhoneCall, ShieldAlert, Menu, X } from 'lucide-react';
+import { Flame, Mail, Share2, PhoneCall, ShieldAlert, Menu, X } from 'lucide-react';
 import { TwitterIcon } from './Icons';
 
 export default function Navbar({ activeSection, scrollToSection }) {
@@ -8,7 +8,6 @@ export default function Navbar({ activeSection, scrollToSection }) {
   const navItems = [
     { id: 'email-tool', label: 'Email Authorities', icon: Mail, highlight: true },
     { id: 'twitter-storm', label: 'X (Twitter) Storm', icon: TwitterIcon },
-    { id: 'grievance-wall', label: 'Incident Wall', icon: MessageSquare },
     { id: 'share-campaign', label: 'Mobilize', icon: Share2 },
     { id: 'directory', label: 'Contacts & FAQ', icon: PhoneCall },
   ];
@@ -60,38 +59,31 @@ export default function Navbar({ activeSection, scrollToSection }) {
             })}
           </nav>
 
-          {/* Live Action Badge & Mobile Menu Button */}
-          <div className="flex items-center space-x-3">
-            <div className="hidden sm:flex items-center space-x-1.5 bg-slate-900/90 border border-slate-700/60 px-2.5 py-1 rounded-full text-xs text-slate-300">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 -ml-2.5"></span>
-              <span className="font-semibold text-[11px] text-emerald-400">Campaign Live</span>
-            </div>
-
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-slate-900 text-slate-300 hover:text-white border border-slate-800"
-              aria-label="Toggle menu"
+              className="p-2 rounded-lg bg-slate-900 text-slate-300 hover:text-white border border-slate-800"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Nav Drawer */}
+      {/* Mobile Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-slate-900/95 border-b border-slate-800 px-4 pt-2 pb-4 space-y-2 backdrop-blur-xl">
+        <div className="md:hidden bg-slate-950 border-b border-slate-800 px-4 pt-2 pb-4 space-y-2 animate-in fade-in slide-in-from-top duration-200">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
-                  item.highlight
-                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-900/50'
-                    : 'text-slate-200 hover:bg-slate-800'
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-left transition-all ${
+                  item.highlight 
+                    ? 'bg-rose-600 text-white font-bold' 
+                    : 'bg-slate-900 text-slate-200 hover:bg-slate-800'
                 }`}
               >
                 <Icon className="w-4 h-4" />

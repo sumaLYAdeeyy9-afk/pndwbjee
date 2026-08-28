@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
-import { Share2, MessageCircle, Send, Copy, Check, Users, Sparkles } from 'lucide-react';
+import { Share2, MessageCircle, Send, Copy, Check, Users } from 'lucide-react';
 
 export default function ShareCampaign() {
   const [copied, setCopied] = useState(false);
 
-  const shareText = `🚨 URGENT FOR ALL WBJEE ASPIRANTS & PARENTS!
+  const shareText = `🚨 URGENT FOR ALL WBJEE 2026 CANDIDATES & PARENTS!
 
-Don't let them play dice with our future! Join the centralized digital protest to demand a single-window Centralized Mop-Up Round & stop seat-blocking.
+Don't let them play dice with our future! Demand the immediate revocation of the Aug 27 WBJEEB notification debarring admitted students from Decentralized Counseling (DC).
 
-1️⃣ Send 1-Click Email to WBJEEB Chairman & Education Minister
-2️⃣ Fire Pre-Crafted Tweet Storm on X
-3️⃣ Log Your Incident & Stand Together
+1️⃣ Send 1-Click Mass Email to WBJEEB & Higher Education Dept
+2️⃣ Fire Pre-Crafted Tweet Storm on X tagging CM @SuvenduWB & @CMO_WB
 
-👉 Open the Campaign Portal now: ${window.location.origin || 'https://playnodice.com'}
+👉 Open the Campaign Portal now: ${typeof window !== 'undefined' ? window.location.origin : 'https://playnodice.com'}
 
-#WBJEEBDecentralized #SaveWBJEEAspirants #DontPlayDiceWithStudents`;
+#WBJEEBDecentralized #JusticeForWBJEEStudents #DontPlayDiceWithStudents`;
 
   const handleWhatsAppShare = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
@@ -24,7 +23,8 @@ Don't let them play dice with our future! Join the centralized digital protest t
   };
 
   const handleTelegramShare = () => {
-    const url = `https://t.me/share/url?url=${encodeURIComponent(window.location.origin || 'https://playnodice.com')}&text=${encodeURIComponent(shareText)}`;
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://playnodice.com';
+    const url = `https://t.me/share/url?url=${encodeURIComponent(origin)}&text=${encodeURIComponent(shareText)}`;
     window.open(url, '_blank');
     triggerConfetti();
   };
@@ -47,69 +47,64 @@ Don't let them play dice with our future! Join the centralized digital protest t
   };
 
   return (
-    <section id="share-campaign" className="py-16 bg-slate-900/40 border-t border-slate-800/80 scroll-mt-20">
+    <section id="share-campaign" className="py-14 bg-slate-900/40 border-t border-slate-800/80 scroll-mt-16">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="glass-card rounded-3xl p-8 sm:p-10 border-2 border-emerald-500/30 bg-slate-950/90 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4">
-              <Users className="w-4 h-4" />
-              <span>Action 4: Student Mobilizer</span>
-            </div>
-
-            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight mb-4">
-              Broadcast to Your Coaching & College Groups
-            </h2>
-
-            <p className="text-slate-300 text-sm sm:text-base mb-8">
-              Every single batch of 50 students sending emails increases our collective leverage tenfold. Share this tool across WhatsApp & Telegram groups immediately.
-            </p>
-
-            {/* Share Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              <button
-                onClick={handleWhatsAppShare}
-                className="py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tracking-wide shadow-lg shadow-emerald-900/40 flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5"
-              >
-                <MessageCircle className="w-5 h-5 fill-current" />
-                <span>Share to WhatsApp</span>
-              </button>
-
-              <button
-                onClick={handleTelegramShare}
-                className="py-3.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm tracking-wide shadow-lg shadow-sky-900/40 flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5"
-              >
-                <Send className="w-5 h-5" />
-                <span>Share to Telegram</span>
-              </button>
-
-              <button
-                onClick={handleCopyLink}
-                className="py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm tracking-wide border border-slate-700 flex items-center justify-center space-x-2 transition-all"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-5 h-5 text-emerald-400" />
-                    <span className="text-emerald-400">Message Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-5 h-5 text-slate-400" />
-                    <span>Copy Broadcast Text</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Quick Preview Quote */}
-            <div className="mt-8 p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-left text-xs text-slate-400 font-mono">
-              <span className="text-slate-500 block text-[10px] uppercase font-bold mb-1">Pre-Formatted Broadcast Message Preview:</span>
-              <p className="line-clamp-3 text-slate-300 font-sans">{shareText}</p>
-            </div>
-
+        <div className="rounded-3xl p-6 sm:p-8 border border-emerald-500/30 bg-slate-950 shadow-2xl relative overflow-hidden text-center max-w-2xl mx-auto">
+          
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
+            <Users className="w-3.5 h-3.5" />
+            <span>Action 3: Student Mobilizer</span>
           </div>
+
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">
+            Mobilize WBJEE Batches & Groups
+          </h2>
+          <p className="text-slate-300 text-xs sm:text-sm mb-6">
+            Share this 1-click advocacy tool to batch WhatsApp groups and Telegram channels to scale mass representation.
+          </p>
+
+          {/* Quick Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+            <button
+              onClick={handleWhatsAppShare}
+              className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950 transition-all"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Share to WhatsApp</span>
+            </button>
+
+            <button
+              onClick={handleTelegramShare}
+              className="py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-sky-950 transition-all"
+            >
+              <Send className="w-4 h-4" />
+              <span>Share on Telegram</span>
+            </button>
+
+            <button
+              onClick={handleCopyLink}
+              className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 flex items-center justify-center space-x-2 transition-all"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-400">Copied Message!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 text-slate-400" />
+                  <span>Copy Share Text</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Preview of Broadcast Message */}
+          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 text-left text-xs font-mono text-slate-300 whitespace-pre-wrap select-text">
+            {shareText}
+          </div>
+
         </div>
 
       </div>

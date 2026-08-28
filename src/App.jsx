@@ -4,7 +4,6 @@ import Hero from './components/Hero';
 import LiveCounter from './components/LiveCounter';
 import EmailTool from './components/EmailTool';
 import TwitterStorm from './components/TwitterStorm';
-import GrievanceWall from './components/GrievanceWall';
 import ShareCampaign from './components/ShareCampaign';
 import Directory from './components/Directory';
 import Footer from './components/Footer';
@@ -16,13 +15,12 @@ export default function App() {
   // Real Community Stats (Fallback to localStorage if Supabase is not connected yet)
   const [stats, setStats] = useState(() => {
     try {
-      const saved = localStorage.getItem('pnd_wbjee_stats_v2');
+      const saved = localStorage.getItem('pnd_wbjee_stats_v3');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
       emails: 0,
-      tweets: 0,
-      stories: 0
+      tweets: 0
     };
   });
 
@@ -30,7 +28,6 @@ export default function App() {
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) return;
 
-    // 1. Fetch current global stats
     async function fetchGlobalStats() {
       const { data, error } = await supabase
         .from('campaign_stats')
@@ -41,15 +38,14 @@ export default function App() {
       if (data && !error) {
         setStats({
           emails: data.emails || 0,
-          tweets: data.tweets || 0,
-          stories: data.stories || 0
+          tweets: data.tweets || 0
         });
       }
     }
 
     fetchGlobalStats();
 
-    // 2. Subscribe to live changes
+    // Subscribe to live changes
     const channel = supabase
       .channel('campaign_stats_realtime')
       .on(
@@ -59,8 +55,7 @@ export default function App() {
           if (payload.new) {
             setStats({
               emails: payload.new.emails || 0,
-              tweets: payload.new.tweets || 0,
-              stories: payload.new.stories || 0
+              tweets: payload.new.tweets || 0
             });
           }
         }
@@ -74,7 +69,7 @@ export default function App() {
 
   // Save to local storage as fallback
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stats_v2', JSON.stringify(stats));
+    localStorage.setItem('pnd_wbjee_stats_v3', JSON.stringify(stats));
   }, [stats]);
 
   // Increment action handler
@@ -85,7 +80,7 @@ export default function App() {
       [type]: (prev[type] || 0) + 1
     }));
 
-    // If Supabase is connected, call increment RPC or update
+    // If Supabase is connected, call increment RPC
     if (isSupabaseConfigured && supabase) {
       try {
         await supabase.rpc('increment_campaign_stat', { stat_column: type });
@@ -93,11 +88,6 @@ export default function App() {
         console.error('Failed to sync stat to Supabase:', err);
       }
     }
-  };
-
-  // Story submitted handler
-  const handleStorySubmitted = () => {
-    handleActionCompleted('stories');
   };
 
   const scrollToSection = (id) => {
@@ -130,10 +120,6 @@ export default function App() {
 
         <TwitterStorm 
           onActionCompleted={handleActionCompleted} 
-        />
-
-        <GrievanceWall 
-          onStorySubmitted={handleStorySubmitted} 
         />
 
         <ShareCampaign 
