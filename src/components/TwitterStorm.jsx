@@ -71,7 +71,7 @@ export default function TwitterStorm({ onActionCompleted }) {
             Amplify Public Pressure on X
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm">
-            Targeting <span className="text-sky-400 font-bold">@SuvenduWB</span>, Education Minister <span className="text-sky-400 font-bold">@basu_bratya</span>, <span className="text-sky-400 font-bold">@abpanandatv</span>, and <span className="text-sky-400 font-bold">@Zee24Ghanta</span>. Select any draft below and edit freely before posting.
+            Targeting <span className="text-sky-400 font-bold">@SuvenduWB</span>, <span className="text-sky-400 font-bold">@abpanandatv</span>, and <span className="text-sky-400 font-bold">@Zee24Ghanta</span>. Select any draft below and edit freely before posting.
           </p>
         </div>
 
@@ -133,9 +133,6 @@ export default function TwitterStorm({ onActionCompleted }) {
               <div className="flex flex-wrap gap-1.5">
                 <span className="px-2 py-0.5 rounded-lg bg-slate-950 text-sky-400 border border-slate-800 font-mono text-[11px]">
                   @SuvenduWB
-                </span>
-                <span className="px-2 py-0.5 rounded-lg bg-slate-950 text-sky-400 border border-slate-800 font-mono text-[11px]">
-                  @basu_bratya
                 </span>
                 <span className="px-2 py-0.5 rounded-lg bg-slate-950 text-sky-400 border border-slate-800 font-mono text-[11px]">
                   @abpanandatv

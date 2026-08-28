@@ -93,7 +93,7 @@ export default function Hero({ scrollToSection }) {
                 Post on X (Twitter)
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                10 randomized spam-proof tweet drafts tagging @SuvenduWB, @basu_bratya & news.
+                10 randomized spam-proof tweet drafts tagging @SuvenduWB & media.
               </p>
             </button>
 
