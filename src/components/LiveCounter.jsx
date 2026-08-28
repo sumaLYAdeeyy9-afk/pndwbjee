@@ -22,7 +22,7 @@ export default function LiveCounter({ stats }) {
       color: 'text-sky-400',
       bgColor: 'bg-sky-500/10',
       borderColor: 'border-sky-500/30',
-      desc: 'Tagging CM @SuvenduWB, @CMO_WB & Media'
+      desc: 'Tagging @SuvenduWB, @basu_bratya & Media'
     }
   ];
 

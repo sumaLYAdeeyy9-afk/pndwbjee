@@ -25,7 +25,7 @@ We demand the immediate withdrawal of the Aug 27 notice and full DC access for a
 
 Take Action Now (Takes 10 seconds):
 1️⃣ 1-Click Mass Email to WBJEEB & Higher Education Dept
-2️⃣ Fire Pre-Crafted Tweet Storm on X tagging CM @SuvenduWB & @CMO_WB
+2️⃣ Fire Pre-Crafted Tweet Storm on X tagging @SuvenduWB & @basu_bratya
 
 👉 Open the Action Portal: ${portalUrl}
 

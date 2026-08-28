@@ -73,7 +73,7 @@ export default function TwitterStorm({ onActionCompleted }) {
             Amplify Public Pressure on X
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm">
-            Targeting Hon'ble CM <span className="text-sky-400 font-bold">@SuvenduWB</span>, <span className="text-sky-400 font-bold">@CMO_WB</span>, <span className="text-sky-400 font-bold">@abpanandatv</span>, and <span className="text-sky-400 font-bold">@Zee24Ghanta</span>. Select any draft below and edit freely before posting.
+            Targeting <span className="text-sky-400 font-bold">@SuvenduWB</span>, Education Minister <span className="text-sky-400 font-bold">@basu_bratya</span>, <span className="text-sky-400 font-bold">@abpanandatv</span>, and <span className="text-sky-400 font-bold">@Zee24Ghanta</span>. Select any draft below and edit freely before posting.
           </p>
         </div>
 
@@ -137,13 +137,16 @@ export default function TwitterStorm({ onActionCompleted }) {
                   @SuvenduWB
                 </span>
                 <span className="px-2 py-0.5 rounded-lg bg-slate-950 text-sky-400 border border-slate-800 font-mono text-[11px]">
-                  @CMO_WB
+                  @basu_bratya
                 </span>
                 <span className="px-2 py-0.5 rounded-lg bg-slate-950 text-sky-400 border border-slate-800 font-mono text-[11px]">
                   @abpanandatv
                 </span>
                 <span className="px-2 py-0.5 rounded-lg bg-slate-950 text-sky-400 border border-slate-800 font-mono text-[11px]">
                   @Zee24Ghanta
+                </span>
+                <span className="px-2 py-0.5 rounded-lg bg-slate-950 text-rose-400 border border-slate-800 font-mono text-[11px]">
+                  #WBJEE2026
                 </span>
                 <span className="px-2 py-0.5 rounded-lg bg-slate-950 text-rose-400 border border-slate-800 font-mono text-[11px]">
                   #WBJEEBDecentralized
