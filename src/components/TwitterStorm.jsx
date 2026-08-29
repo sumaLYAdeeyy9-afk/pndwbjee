@@ -60,15 +60,12 @@ export default function TwitterStorm({ onActionCompleted }) {
     setTimeout(() => setShowSuccessToast(false), 5000);
   };
 
-  // Handler for Copy Tweet
+  // Handler for Copy Tweet (Copies text without incrementing the sent counter)
   const handleCopyTweet = () => {
     navigator.clipboard.writeText(editedTweetText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
       setMobileOnlyNotice(false);
-      triggerCelebration();
-      setShowSuccessToast(true);
-      setTimeout(() => setShowSuccessToast(false), 5000);
     });
   };
 

@@ -76,7 +76,7 @@ export default function EmailTool({ onActionCompleted }) {
     setTimeout(() => setShowSuccessToast(false), 5000);
   };
 
-  // Handle Copy
+  // Handle Copy (Copies text without incrementing the sent counter)
   const handleCopy = (type = 'all') => {
     let textToCopy = '';
     if (type === 'all') {
@@ -90,7 +90,6 @@ export default function EmailTool({ onActionCompleted }) {
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopiedType(type);
       setTimeout(() => setCopiedType(null), 2500);
-      triggerCelebration();
     });
   };
 
