@@ -76,9 +76,36 @@ export function generateMegaDraft({
 }) {
   const namePlaceholder = studentName.trim() || '[Your Full Name]';
   const rollPlaceholder = rollNumber.trim() || '[Your WBJEE Roll Number]';
-  const rankPlaceholder = rankGmr.trim() || '[Your WBJEE GMR / Rank]';
-  const institutePlaceholder = currentInstitute.trim() || '[Your Currently Allotted Institute & Branch / None]';
-  const contactPlaceholder = contactInfo.trim() || '[Your Registered Email / Mobile]';
+  
+  // Format credentials cleanly with optional items
+  const credentialsList = [
+    `- Full Name: ${namePlaceholder}`,
+    `- WBJEE Roll Number: ${rollPlaceholder}`
+  ];
+
+  if (rankGmr.trim()) {
+    credentialsList.push(`- WBJEE GMR / Rank: ${rankGmr.trim()}`);
+  }
+  if (currentInstitute.trim()) {
+    credentialsList.push(`- Currently Allotted Institute/Branch: ${currentInstitute.trim()}`);
+  }
+  if (contactInfo.trim()) {
+    credentialsList.push(`- Contact Details: ${contactInfo.trim()}`);
+  }
+
+  const signoffDetails = [
+    `Yours faithfully,`,
+    `${namePlaceholder}`,
+    `WBJEE 2026 Aspirant`,
+    `Roll Number: ${rollPlaceholder}`
+  ];
+
+  if (rankGmr.trim()) {
+    signoffDetails.push(`GMR: ${rankGmr.trim()}`);
+  }
+  if (contactInfo.trim()) {
+    signoffDetails.push(`Contact: ${contactInfo.trim()}`);
+  }
 
   return `To,
 The Chairman / Competent Authority,
@@ -97,11 +124,7 @@ Respected Authorities,
 I am writing this representation as a bonafide candidate of WBJEE 2026 to register my strong protest, anguish, and collective demand regarding the proposed Decentralized Counseling (DC) modality for the 2026 academic session.
 
 Candidate Credentials:
-- Full Name: ${namePlaceholder}
-- WBJEE Roll Number: ${rollPlaceholder}
-- WBJEE GMR / Rank: ${rankPlaceholder}
-- Currently Allotted Institute/Branch: ${institutePlaceholder}
-- Contact Details: ${contactPlaceholder}
+${credentialsList.join('\n')}
 
 Grounds for Grievance & Core Demands:
 
@@ -127,12 +150,7 @@ In the interest of justice, merit, and thousands of engineering aspirants of Wes
 
 We earnestly appeal to your immediate administrative intervention to protect our academic year and restore the established convention.
 
-Yours faithfully,
-${namePlaceholder}
-WBJEE 2026 Aspirant
-Roll Number: ${rollPlaceholder}
-GMR: ${rankPlaceholder}
-Contact: ${contactPlaceholder}`;
+${signoffDetails.join('\n')}`;
 }
 
 /**

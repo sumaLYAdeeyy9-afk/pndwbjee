@@ -12,7 +12,7 @@ import {
 import { saveStudentSubmission } from '../lib/submissionStore';
 
 export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
-  // Form State with all candidate fields
+  // Form State with candidate fields
   const [formData, setFormData] = useState({
     studentName: '',
     rollNumber: '',
@@ -61,13 +61,10 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
     setIsManuallyEdited(false);
   };
 
-  // Check if all required fields are completely filled
+  // Points 1 & 2 are REQUIRED, Points 3, 4, 5 are OPTIONAL
   const isFormComplete = Boolean(
     formData.studentName.trim().length >= 2 &&
-    formData.rollNumber.trim().length >= 3 &&
-    formData.rankGmr.trim().length >= 1 &&
-    formData.currentInstitute.trim().length >= 2 &&
-    formData.contactInfo.trim().length >= 3
+    formData.rollNumber.trim().length >= 3
   );
 
   // Copy handler without incrementing counters
@@ -99,7 +96,7 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
     }
   };
 
-  // Primary Dispatch Validator: Only complete data allows dispatch & metric increment
+  // Primary Dispatch Validator: Only complete required data allows dispatch & metric increment
   const handleDispatch = async (e, mode = 'app') => {
     setAttemptedSubmit(true);
 
@@ -165,22 +162,22 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
                 {isFormComplete ? (
                   <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded-full flex items-center space-x-1">
                     <Check className="w-3 h-3" />
-                    <span>Verified Complete</span>
+                    <span>Ready to Send</span>
                   </span>
                 ) : (
                   <span className="text-[10px] text-amber-400 font-semibold">
-                    * All fields required
+                    * Name & Roll required
                   </span>
                 )}
               </div>
 
               <div className="space-y-3">
-                {/* 1. Student Name */}
+                {/* 1. Student Name (REQUIRED) */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
                     <span className="flex items-center space-x-1">
                       <User className="w-3.5 h-3.5 text-rose-400" />
-                      <span>1. Full Name *</span>
+                      <span>1. Full Name <span className="text-rose-400">*</span></span>
                     </span>
                     {formData.studentName.trim().length >= 2 && (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -200,12 +197,12 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
                   />
                 </div>
 
-                {/* 2. WBJEE Roll Number */}
+                {/* 2. WBJEE Roll Number (REQUIRED) */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
                     <span className="flex items-center space-x-1">
                       <Hash className="w-3.5 h-3.5 text-rose-400" />
-                      <span>2. WBJEE Roll Number *</span>
+                      <span>2. WBJEE Roll Number <span className="text-rose-400">*</span></span>
                     </span>
                     {formData.rollNumber.trim().length >= 3 && (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -225,12 +222,12 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
                   />
                 </div>
 
-                {/* 3. WBJEE GMR / Rank */}
+                {/* 3. WBJEE GMR / Rank (OPTIONAL) */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
                     <span className="flex items-center space-x-1">
                       <Award className="w-3.5 h-3.5 text-amber-400" />
-                      <span>3. WBJEE GMR / Rank *</span>
+                      <span>3. WBJEE GMR / Rank <span className="text-slate-400 font-normal text-[11px]">(Optional)</span></span>
                     </span>
                     {formData.rankGmr.trim().length >= 1 && (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -241,23 +238,19 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
                     name="rankGmr"
                     value={formData.rankGmr}
                     onChange={handleInputChange}
-                    placeholder="e.g. GMR 3420"
-                    className={`w-full bg-slate-950 border rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none transition-all ${
-                      attemptedSubmit && formData.rankGmr.trim().length < 1
-                        ? 'border-rose-500 focus:border-rose-400 ring-1 ring-rose-500/30'
-                        : 'border-slate-700 focus:border-rose-500'
-                    }`}
+                    placeholder="e.g. GMR 3420 (optional)"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
-                {/* 4. Current Allotted Institute & Branch */}
+                {/* 4. Current Allotted Institute & Branch (OPTIONAL) */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
                     <span className="flex items-center space-x-1">
                       <School className="w-3.5 h-3.5 text-rose-400" />
-                      <span>4. Currently Allotted College & Branch *</span>
+                      <span>4. Currently Allotted College & Branch <span className="text-slate-400 font-normal text-[11px]">(Optional)</span></span>
                     </span>
-                    {formData.currentInstitute.trim().length >= 2 && (
+                    {formData.currentInstitute.trim().length >= 1 && (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
                     )}
                   </label>
@@ -266,23 +259,19 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
                     name="currentInstitute"
                     value={formData.currentInstitute}
                     onChange={handleInputChange}
-                    placeholder="e.g. KGEC IT (or type 'None / Unallotted')"
-                    className={`w-full bg-slate-950 border rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none transition-all ${
-                      attemptedSubmit && formData.currentInstitute.trim().length < 2
-                        ? 'border-rose-500 focus:border-rose-400 ring-1 ring-rose-500/30'
-                        : 'border-slate-700 focus:border-rose-500'
-                    }`}
+                    placeholder="e.g. KGEC IT / None (optional)"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
 
-                {/* 5. Contact Info (Email / Mobile) */}
+                {/* 5. Contact Info (Email / Mobile) (OPTIONAL) */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
                     <span className="flex items-center space-x-1">
                       <Phone className="w-3.5 h-3.5 text-sky-400" />
-                      <span>5. Registered Email / Mobile Number *</span>
+                      <span>5. Registered Email / Mobile <span className="text-slate-400 font-normal text-[11px]">(Optional)</span></span>
                     </span>
-                    {formData.contactInfo.trim().length >= 3 && (
+                    {formData.contactInfo.trim().length >= 1 && (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
                     )}
                   </label>
@@ -291,12 +280,8 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
                     name="contactInfo"
                     value={formData.contactInfo}
                     onChange={handleInputChange}
-                    placeholder="e.g. rahul.sen@gmail.com / 9876543210"
-                    className={`w-full bg-slate-950 border rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none transition-all ${
-                      attemptedSubmit && formData.contactInfo.trim().length < 3
-                        ? 'border-rose-500 focus:border-rose-400 ring-1 ring-rose-500/30'
-                        : 'border-slate-700 focus:border-rose-500'
-                    }`}
+                    placeholder="e.g. rahul.sen@gmail.com / 9876543210 (optional)"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-all"
                   />
                 </div>
               </div>
@@ -307,10 +292,10 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
                   <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                   <div className="space-y-0.5">
                     <strong className="font-bold text-rose-300 block">
-                      All 5 Fields Required
+                      Name & Roll Number Required
                     </strong>
                     <p className="text-[11px] leading-relaxed">
-                      Please complete all 5 fields above (Full Name, Roll No, GMR, College, Contact) so your representation can be verified and counted.
+                      Please enter your Full Name and WBJEE Roll Number so your representation can be verified and counted in community metrics.
                     </p>
                   </div>
                 </div>
@@ -441,7 +426,7 @@ export default function EmailTool({ onActionCompleted, onOpenAdmin }) {
                   <span>
                     {isFormComplete
                       ? 'Send via Email App (Android / iPhone / Mail)'
-                      : 'Fill All 5 Details Above to Send Email'}
+                      : 'Enter Name & Roll Number Above to Send Email'}
                   </span>
                 </a>
 

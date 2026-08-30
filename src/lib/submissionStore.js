@@ -5,14 +5,14 @@ const LOCAL_STORAGE_KEY = 'pnd_wbjee_submissions_archive_v1';
 /**
  * Saves a verified student submission both locally and to Supabase
  */
-export async function saveStudentSubmission(submission) {
+export async function saveStudentSubmission(submission = {}) {
   const record = {
     id: 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-    studentName: submission.studentName.trim(),
-    rollNumber: submission.rollNumber.trim(),
-    rankGmr: submission.rankGmr.trim(),
-    currentInstitute: submission.currentInstitute.trim(),
-    contactInfo: submission.contactInfo.trim(),
+    studentName: (submission.studentName || '').trim(),
+    rollNumber: (submission.rollNumber || '').trim(),
+    rankGmr: (submission.rankGmr || '').trim(),
+    currentInstitute: (submission.currentInstitute || '').trim(),
+    contactInfo: (submission.contactInfo || '').trim(),
     timestamp: new Date().toISOString()
   };
 
@@ -32,9 +32,9 @@ export async function saveStudentSubmission(submission) {
         {
           student_name: record.studentName,
           roll_number: record.rollNumber,
-          rank_gmr: record.rankGmr,
-          current_institute: record.currentInstitute,
-          contact_info: record.contactInfo,
+          rank_gmr: record.rankGmr || null,
+          current_institute: record.currentInstitute || null,
+          contact_info: record.contactInfo || null,
           submitted_at: record.timestamp
         }
       ]);
@@ -77,9 +77,9 @@ export async function fetchAllSubmissions() {
           id: item.id || 'sb_' + item.submitted_at,
           studentName: item.student_name,
           rollNumber: item.roll_number,
-          rankGmr: item.rank_gmr,
-          currentInstitute: item.current_institute,
-          contactInfo: item.contact_info,
+          rankGmr: item.rank_gmr || '',
+          currentInstitute: item.current_institute || '',
+          contactInfo: item.contact_info || '',
           timestamp: item.submitted_at
         }));
         return mapped;

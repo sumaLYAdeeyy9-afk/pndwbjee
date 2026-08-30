@@ -45,9 +45,9 @@ CREATE TABLE IF NOT EXISTS public.grievance_submissions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   student_name TEXT NOT NULL,
   roll_number TEXT NOT NULL,
-  rank_gmr TEXT NOT NULL,
-  current_institute TEXT NOT NULL,
-  contact_info TEXT NOT NULL,
+  rank_gmr TEXT,
+  current_institute TEXT,
+  contact_info TEXT,
   submitted_at TIMESTAMPTZ DEFAULT NOW()
 );
 
