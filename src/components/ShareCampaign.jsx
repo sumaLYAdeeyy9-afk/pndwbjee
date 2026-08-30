@@ -10,7 +10,7 @@ export default function ShareCampaign() {
     ? window.location.origin
     : 'https://wbjee.playnodice.com';
 
-  const shareText = `🚨 DEMAND FOR OFFLINE DECENTRALIZED COUNSELING!
+  const shareText = `🚨 MASS MAILING CAMPAIGN: DEMAND FOR OFFLINE DECENTRALIZED COUNSELING!
 URGENT FOR ALL WBJEE 2026 CANDIDATES & PARENTS!
 
 We are urgently protesting against the proposed Online Decentralized Counseling portal. WBJEE 2026 students REFUSE to be the experimental batch of WBJEEB!
