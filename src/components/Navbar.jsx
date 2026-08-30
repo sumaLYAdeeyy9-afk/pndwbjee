@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { Flame, Mail, Share2, PhoneCall, ShieldAlert, Menu, X } from 'lucide-react';
-import { TwitterIcon } from './Icons';
+import { Mail, Share2, PhoneCall, Database, Menu, X } from 'lucide-react';
 
-export default function Navbar({ activeSection, scrollToSection }) {
+export default function Navbar({ activeSection, scrollToSection, onOpenAdmin }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { id: 'email-tool', label: 'Email Authorities', icon: Mail, highlight: true },
-    { id: 'twitter-storm', label: 'X (Twitter) Storm', icon: TwitterIcon },
-    { id: 'share-campaign', label: 'Mobilize', icon: Share2 },
+    { id: 'share-campaign', label: 'Mobilize Batches', icon: Share2 },
     { id: 'directory', label: 'Contacts & FAQ', icon: PhoneCall },
   ];
 
@@ -36,31 +34,54 @@ export default function Navbar({ activeSection, scrollToSection }) {
           </div>
 
           {/* Desktop Nav Items */}
-          <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeSection === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                    item.highlight 
-                      ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-900/40' 
-                      : isActive 
-                        ? 'bg-slate-800 text-rose-400 border border-rose-500/30' 
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+          <div className="hidden md:flex items-center space-x-2">
+            <nav className="flex items-center space-x-1 lg:space-x-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeSection === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleNavClick(item.id)}
+                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                      item.highlight 
+                        ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-900/40' 
+                        : isActive 
+                          ? 'bg-slate-800 text-rose-400 border border-rose-500/30' 
+                          : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Admin Submissions Log Button */}
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-rose-400 border border-slate-700/80 transition-all cursor-pointer"
+                title="View All Inputted Candidate Submissions & Export CSV"
+              >
+                <Database className="w-3.5 h-3.5 text-rose-400" />
+                <span>Submissions Log</span>
+              </button>
+            )}
+          </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                className="p-2 rounded-lg bg-slate-900 text-rose-400 border border-slate-800 text-xs font-bold"
+                title="View Submissions Log"
+              >
+                <Database className="w-4 h-4" />
+              </button>
+            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg bg-slate-900 text-slate-300 hover:text-white border border-slate-800"
@@ -91,6 +112,18 @@ export default function Navbar({ activeSection, scrollToSection }) {
               </button>
             );
           })}
+          {onOpenAdmin && (
+            <button
+              onClick={() => {
+                onOpenAdmin();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-left bg-slate-900 text-rose-400 border border-slate-800"
+            >
+              <Database className="w-4 h-4" />
+              <span>View Candidate Submissions Log & CSV</span>
+            </button>
+          )}
         </div>
       )}
     </header>

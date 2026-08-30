@@ -25,7 +25,7 @@ Conduct Decentralized Counseling OFFLINE directly at respective university & col
 
 Take Action Now (Takes 10 seconds):
 1️⃣ 1-Click Mass Email to WBJEEB, DTE & Hon'ble CM
-2️⃣ Fire Pre-Crafted Tweet Storm on X tagging @SuvenduWB & Media
+2️⃣ Mobilize your coaching batches and engineering aspirant groups
 
 👉 Open the Action Portal: ${portalUrl}
 
@@ -69,7 +69,7 @@ Take Action Now (Takes 10 seconds):
           
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4">
             <Users className="w-3.5 h-3.5" />
-            <span>Action 3: Mobilize Student Batches</span>
+            <span>Action 2: Mobilize Student Batches</span>
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight mb-3">
@@ -121,7 +121,7 @@ Take Action Now (Takes 10 seconds):
 
           </div>
 
-          <p className="text-[11px] text-slate-300">
+          <p className="text-[11px] text-slate-400">
             Includes direct portal links and the grievance summary formatted for instant messaging.
           </p>
 

@@ -3,26 +3,46 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import LiveCounter from './components/LiveCounter';
 import EmailTool from './components/EmailTool';
-import TwitterStorm from './components/TwitterStorm';
 import ShareCampaign from './components/ShareCampaign';
 import Directory from './components/Directory';
 import Footer from './components/Footer';
+import AdminSubmissionsModal from './components/AdminSubmissionsModal';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('hero');
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Real Community Stats (Fallback to initial stats if Supabase is connecting)
   const [stats, setStats] = useState(() => {
     try {
-      const saved = localStorage.getItem('pnd_wbjee_stats_v5');
+      const saved = localStorage.getItem('pnd_wbjee_stats_v6');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
-      emails: 0,
-      tweets: 0
+      emails: 0
     };
   });
+
+  // Check URL query param `?admin=true` or hash `#admin` or key combination Ctrl+Shift+A
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('admin') === 'true' || window.location.hash === '#admin') {
+        setIsAdminOpen(true);
+      }
+
+      const handleKeyDown = (e) => {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+          e.preventDefault();
+          setIsAdminOpen(prev => !prev);
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, []);
 
   // Load and subscribe to real-time stats from Supabase
   useEffect(() => {
@@ -38,8 +58,7 @@ export default function App() {
 
         if (data && !error) {
           setStats({
-            emails: data.emails || 0,
-            tweets: data.tweets || 0
+            emails: data.emails || 0
           });
         }
       } catch (err) {
@@ -58,8 +77,7 @@ export default function App() {
         (payload) => {
           if (payload.new) {
             setStats({
-              emails: payload.new.emails || 0,
-              tweets: payload.new.tweets || 0
+              emails: payload.new.emails || 0
             });
           }
         }
@@ -73,11 +91,11 @@ export default function App() {
 
   // Save to local storage as fallback
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stats_v5', JSON.stringify(stats));
+    localStorage.setItem('pnd_wbjee_stats_v6', JSON.stringify(stats));
   }, [stats]);
 
   // Increment action handler with automatic fallback
-  const handleActionCompleted = async (type) => {
+  const handleActionCompleted = async (type = 'emails') => {
     // 1. Optimistic local increment
     setStats(prev => {
       const updated = {
@@ -89,7 +107,6 @@ export default function App() {
       if (isSupabaseConfigured && supabase) {
         supabase.rpc('increment_campaign_stat', { stat_column: type }).then(({ error }) => {
           if (error) {
-            // Fallback: direct update
             supabase
               .from('campaign_stats')
               .update({ [type]: updated[type], updated_at: new Date().toISOString() })
@@ -122,6 +139,7 @@ export default function App() {
       <Navbar 
         activeSection={activeSection} 
         scrollToSection={scrollToSection} 
+        onOpenAdmin={() => setIsAdminOpen(true)}
       />
 
       <main className="flex-1">
@@ -135,21 +153,20 @@ export default function App() {
 
         <EmailTool 
           onActionCompleted={handleActionCompleted} 
+          onOpenAdmin={() => setIsAdminOpen(true)}
         />
 
-        <TwitterStorm 
-          onActionCompleted={handleActionCompleted} 
-        />
-
-        <ShareCampaign 
-          stats={stats} 
-        />
+        <ShareCampaign />
 
         <Directory />
       </main>
 
-      <Footer 
-        scrollToSection={scrollToSection} 
+      <Footer onOpenAdmin={() => setIsAdminOpen(true)} />
+
+      {/* Admin Submissions Log & CSV Exporter Modal */}
+      <AdminSubmissionsModal
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
       />
     </div>
   );

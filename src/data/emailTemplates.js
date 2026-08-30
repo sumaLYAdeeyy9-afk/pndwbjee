@@ -67,10 +67,18 @@ export const OFFICIAL_RECIPIENTS = [
 
 export const EMAIL_SUBJECT = 'DEMAND FOR OFFLINE DECENTRALIZED COUNSELING: Representation against Online DC & WBJEEB Experimental Framework for WBJEE 2026';
 
-export function generateMegaDraft({ studentName = '', rollNumber = '', currentInstitute = '' }) {
+export function generateMegaDraft({ 
+  studentName = '', 
+  rollNumber = '', 
+  rankGmr = '', 
+  currentInstitute = '', 
+  contactInfo = '' 
+}) {
   const namePlaceholder = studentName.trim() || '[Your Full Name]';
-  const rollPlaceholder = rollNumber.trim() || '[Your WBJEE Roll / Rank Number]';
+  const rollPlaceholder = rollNumber.trim() || '[Your WBJEE Roll Number]';
+  const rankPlaceholder = rankGmr.trim() || '[Your WBJEE GMR / Rank]';
   const institutePlaceholder = currentInstitute.trim() || '[Your Currently Allotted Institute & Branch / None]';
+  const contactPlaceholder = contactInfo.trim() || '[Your Registered Email / Mobile]';
 
   return `To,
 The Chairman / Competent Authority,
@@ -89,9 +97,11 @@ Respected Authorities,
 I am writing this representation as a bonafide candidate of WBJEE 2026 to register my strong protest, anguish, and collective demand regarding the proposed Decentralized Counseling (DC) modality for the 2026 academic session.
 
 Candidate Credentials:
-- Name: ${namePlaceholder}
-- WBJEE Roll / Rank: ${rollPlaceholder}
+- Full Name: ${namePlaceholder}
+- WBJEE Roll Number: ${rollPlaceholder}
+- WBJEE GMR / Rank: ${rankPlaceholder}
 - Currently Allotted Institute/Branch: ${institutePlaceholder}
+- Contact Details: ${contactPlaceholder}
 
 Grounds for Grievance & Core Demands:
 
@@ -120,8 +130,9 @@ We earnestly appeal to your immediate administrative intervention to protect our
 Yours faithfully,
 ${namePlaceholder}
 WBJEE 2026 Aspirant
-Roll/Rank: ${rollPlaceholder}
-Contact: Through Registered Email`;
+Roll Number: ${rollPlaceholder}
+GMR: ${rankPlaceholder}
+Contact: ${contactPlaceholder}`;
 }
 
 /**

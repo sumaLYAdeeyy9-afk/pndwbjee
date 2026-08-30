@@ -1,6 +1,5 @@
 import React from 'react';
-import { Mail, Share2, Sparkles, Flame, CheckCircle2, AlertTriangle, Ban, Building2, Layers } from 'lucide-react';
-import { TwitterIcon } from './Icons';
+import { Mail, Share2, Sparkles, Flame, CheckCircle2, AlertTriangle, Ban, Building2, Layers, PhoneCall } from 'lucide-react';
 
 export default function Hero({ scrollToSection }) {
   return (
@@ -95,69 +94,53 @@ export default function Hero({ scrollToSection }) {
             {/* 1. Email to Authorities */}
             <button
               onClick={() => scrollToSection('email-tool')}
-              className="flex flex-col items-start p-5 rounded-xl bg-slate-950 border border-slate-800 hover:border-rose-500/60 hover:bg-slate-900/80 transition-all text-left group"
+              className="flex flex-col items-start p-5 rounded-xl bg-slate-950 border border-slate-800 hover:border-rose-500/60 hover:bg-slate-900/80 transition-all text-left group cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center mb-3">
+              <div className="w-10 h-10 rounded-lg bg-rose-600 text-white flex items-center justify-center mb-3 shadow-md">
                 <Mail className="w-5 h-5" />
               </div>
               <span className="text-[11px] font-bold text-rose-400 tracking-wider uppercase mb-1">Action 1</span>
               <h3 className="text-sm font-bold text-white group-hover:text-rose-300 transition-colors">
-                Email Authorities
+                Email Representation
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                1-Click mass blast to WBJEEB, DTE & Hon'ble CM demanding Offline Decentralized Counseling.
+                Fill details & send verified representation to WBJEEB, DTE & Hon'ble CM.
               </p>
             </button>
 
-            {/* 2. Post on X (Twitter) */}
-            <button
-              onClick={() => scrollToSection('twitter-storm')}
-              className="flex flex-col items-start p-5 rounded-xl bg-slate-950 border border-slate-800 hover:border-sky-500/60 hover:bg-slate-900/80 transition-all text-left group"
-            >
-              <div className="w-10 h-10 rounded-lg bg-sky-500 text-slate-950 flex items-center justify-center mb-3">
-                <TwitterIcon className="w-5 h-5 fill-current" />
-              </div>
-              <span className="text-[11px] font-bold text-sky-400 tracking-wider uppercase mb-1">Action 2</span>
-              <h3 className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors">
-                Post on X (Twitter)
-              </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                10 randomized spam-proof tweet drafts demanding Offline DC tagging @SuvenduWB & media.
-              </p>
-            </button>
-
-            {/* 3. Share to Groups */}
+            {/* 2. Share to Groups */}
             <button
               onClick={() => scrollToSection('share-campaign')}
-              className="flex flex-col items-start p-5 rounded-xl bg-slate-950 border border-slate-800 hover:border-emerald-500/60 hover:bg-slate-900/80 transition-all text-left group"
+              className="flex flex-col items-start p-5 rounded-xl bg-slate-950 border border-slate-800 hover:border-emerald-500/60 hover:bg-slate-900/80 transition-all text-left group cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-lg bg-emerald-500 text-white flex items-center justify-center mb-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center mb-3 shadow-md">
                 <Share2 className="w-5 h-5" />
               </div>
-              <span className="text-[11px] font-bold text-emerald-400 tracking-wider uppercase mb-1">Action 3</span>
+              <span className="text-[11px] font-bold text-emerald-400 tracking-wider uppercase mb-1">Action 2</span>
               <h3 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
-                Mobilize Groups
+                Mobilize Batches
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                Share campaign links across coaching batches, WhatsApp & Telegram channels.
+                Broadcast action portal to coaching groups, WhatsApp & Telegram circles.
               </p>
             </button>
-          </div>
-        </div>
 
-        {/* Clean Badges */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400">
-          <div className="flex items-center space-x-1.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>100% Free & Open-Access</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <CheckCircle2 className="w-4 h-4 text-rose-400" />
-            <span>Direct to Statutory Authorities</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <CheckCircle2 className="w-4 h-4 text-sky-400" />
-            <span>Client-Side Privacy Guaranteed</span>
+            {/* 3. Authority Directory */}
+            <button
+              onClick={() => scrollToSection('directory')}
+              className="flex flex-col items-start p-5 rounded-xl bg-slate-950 border border-slate-800 hover:border-sky-500/60 hover:bg-slate-900/80 transition-all text-left group cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-lg bg-sky-600 text-white flex items-center justify-center mb-3 shadow-md">
+                <PhoneCall className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-bold text-sky-400 tracking-wider uppercase mb-1">Action 3</span>
+              <h3 className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors">
+                Official Directory & FAQ
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Direct phone numbers, official portal links, and grievance legal grounds.
+              </p>
+            </button>
           </div>
         </div>
 

@@ -1,28 +1,37 @@
 import React from 'react';
-import { TrendingUp, Mail } from 'lucide-react';
-import { TwitterIcon } from './Icons';
+import { TrendingUp, Mail, Building2, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export default function LiveCounter({ stats }) {
   const counterCards = [
     {
       id: 'emails',
-      label: 'Emails Sent to Authorities',
+      label: 'Verified Representations Dispatched',
       value: (stats.emails || 0).toLocaleString(),
       icon: Mail,
       color: 'text-rose-400',
       bgColor: 'bg-rose-500/10',
       borderColor: 'border-rose-500/30',
-      desc: 'Direct representation to WBJEEB & Higher Ed'
+      desc: 'Submissions sent to WBJEEB, DTE & CMO'
     },
     {
-      id: 'tweets',
-      label: 'Posts Fired on X (Twitter)',
-      value: (stats.tweets || 0).toLocaleString(),
-      icon: TwitterIcon,
-      color: 'text-sky-400',
-      bgColor: 'bg-sky-500/10',
-      borderColor: 'border-sky-500/30',
-      desc: 'Tagging @SuvenduWB & Media'
+      id: 'desks',
+      label: 'Statutory Desks Targeted',
+      value: '7 Desks',
+      icon: Building2,
+      color: 'text-amber-400',
+      bgColor: 'bg-amber-500/10',
+      borderColor: 'border-amber-500/30',
+      desc: 'WBJEEB, DTE, Higher Ed, DPI & CM Desk'
+    },
+    {
+      id: 'demand',
+      label: 'Unified Student Demand',
+      value: '100% Offline DC',
+      icon: ShieldCheck,
+      color: 'text-emerald-400',
+      bgColor: 'bg-emerald-500/10',
+      borderColor: 'border-emerald-500/30',
+      desc: 'Scrap Online DC & restore campus spot rounds'
     }
   ];
 
@@ -38,16 +47,16 @@ export default function LiveCounter({ stats }) {
               <span>Real-Time Momentum Tracker</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Live Community Protest Metrics
+              Live Verified Participation Metrics
             </h2>
           </div>
           <p className="text-xs text-slate-400 mt-1 sm:mt-0">
-            Real-time public participation counter
+            Metrics increment only when 100% complete candidate details are submitted
           </p>
         </div>
 
-        {/* 2-Card Counter Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* 3-Card Counter Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {counterCards.map((card) => {
             const Icon = card.icon;
             return (
@@ -56,7 +65,7 @@ export default function LiveCounter({ stats }) {
                 className={`bg-slate-950/80 rounded-2xl p-5 border ${card.borderColor} flex items-center justify-between shadow-lg`}
               >
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black text-white tracking-tight font-mono mb-1">
+                  <div className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono mb-1">
                     {card.value}
                   </div>
                   <div className="text-xs sm:text-sm font-bold text-slate-200">
