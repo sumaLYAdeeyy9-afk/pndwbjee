@@ -10,25 +10,21 @@ export default function ShareCampaign() {
     ? window.location.origin
     : 'https://wbjee.playnodice.com';
 
-  const shareText = `🚨 MASS MAILING CAMPAIGN: DEMAND FOR OFFLINE DECENTRALIZED COUNSELING!
+  const shareText = `🚨 MASS MAILING CAMPAIGN: DEMAND OFFLINE DECENTRALIZED COUNSELING!
+👉 SEND 1-CLICK REPRESENTATION NOW: ${portalUrl}
+
 URGENT FOR ALL WBJEE 2026 CANDIDATES & PARENTS!
+We refuse to be the experimental batch of WBJEEB. Scrap the flawed Online DC portal!
 
-We are urgently protesting against the proposed Online Decentralized Counseling portal. WBJEE 2026 students REFUSE to be the experimental batch of WBJEEB!
-
-🛑 Why We Want to Scrap Online DC & Key Demands:
+🛑 Core Demands & Why We Oppose Online DC:
 1️⃣ Multiple Allotments & Rampant Seat Blocking
 2️⃣ Fresh Registration in Each Round destroying merit
 3️⃣ No real "Yes-Upgradation" mechanism
-4️⃣ Allow SC/ST/OBC/EWS candidates converted to General due to certificate issuance delays to opt for their correct category in DC
+4️⃣ Allow SC/ST/OBC/EWS candidates converted to General due to Govt certificate delays to opt for their correct category
 
-🏛️ What We Demand:
-Conduct Decentralized Counseling OFFLINE directly at respective university & college campuses (JU, CU, KGEC, JGEC, etc.) as per historical precedent!
+🏛️ Demand: Conduct Decentralized Counseling OFFLINE directly at institute campuses (JU, CU, KGEC, JGEC, etc.) as per historical precedent.
 
-Take Action Now (Takes 10 seconds):
-1️⃣ 1-Click Mass Email to WBJEEB, DTE & Hon'ble CM
-2️⃣ Mobilize your coaching batches and engineering aspirant groups
-
-👉 Open the Action Portal: ${portalUrl}
+👉 Action Portal (Takes 10 seconds): ${portalUrl}
 
 #WBJEEOfflineDC #ScrapOnlineDC #WBJEE2026 #JusticeForWBJEEStudents`;
 
