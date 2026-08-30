@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Mail, Share2, PhoneCall, Menu, X } from 'lucide-react';
+import { Mail, Share2, PhoneCall, Menu, X, Flame } from 'lucide-react';
 
 export default function Navbar({ activeSection, scrollToSection }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { id: 'email-tool', label: 'Email Authorities', icon: Mail, highlight: true },
+    { id: 'demands', label: 'Our Demands', icon: Flame },
     { id: 'share-campaign', label: 'Mobilize Batches', icon: Share2 },
     { id: 'directory', label: 'Contacts & FAQ', icon: PhoneCall },
   ];

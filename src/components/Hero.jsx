@@ -3,7 +3,7 @@ import { Mail, Share2, Sparkles, Flame, CheckCircle2, AlertTriangle, Ban, Buildi
 
 export default function Hero({ scrollToSection }) {
   return (
-    <section className="relative pt-10 pb-14 lg:pt-14 lg:pb-18 border-b border-slate-800/80 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <section id="demands" className="relative pt-10 pb-14 lg:pt-14 lg:pb-18 border-b border-slate-800/80 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 scroll-mt-16">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* Campaign Badge */}

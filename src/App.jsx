@@ -156,12 +156,12 @@ export default function App() {
       />
 
       <main className="flex-1">
-        <Hero 
-          scrollToSection={scrollToSection} 
-        />
-
         <EmailTool 
           onActionCompleted={handleActionCompleted} 
+        />
+
+        <Hero 
+          scrollToSection={scrollToSection} 
         />
 
         <LiveCounter 
