@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
   User, Hash, Award, School, Phone, Smartphone, CheckCircle2, Globe,
-  RotateCcw, Edit3, AlertCircle, AlertTriangle, ArrowRight, X, ChevronDown
+  RotateCcw, Edit3, AlertCircle, AlertTriangle, ArrowRight, X
 } from 'lucide-react';
 import { 
   PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, EMAIL_SUBJECT, 
@@ -342,98 +342,14 @@ export default function EmailTool({ onActionCompleted }) {
 
           </div>
 
-          {/* Right Column: Mail Sending Mechanism (UPWARDS) & Editable Preview (7 cols) */}
+          {/* Right Column: Editable Preview & Dispatch (7 cols) */}
           <div className="lg:col-span-7 space-y-4">
             
-            {/* 1. TOP DISPATCH ACTION MECHANISM BOX (MOVED UPWARDS) */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-950 rounded-2xl border-2 border-rose-500/40 shadow-2xl p-5 sm:p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-              <div className="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-3">
-                <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <h3 className="font-extrabold text-white text-sm sm:text-base tracking-tight flex items-center space-x-1.5">
-                    <Send className="w-4 h-4 text-rose-400" />
-                    <span>Send Representation Now</span>
-                  </h3>
-                </div>
-
-                <span className="text-[11px] font-bold text-slate-300 bg-slate-800/90 border border-slate-700 px-2.5 py-0.5 rounded-full">
-                  1-Click Dispatch
-                </span>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-3">
-                
-                {/* 1. Primary Native Mobile Email App Button */}
-                <button
-                  type="button"
-                  onClick={(e) => handleDispatchClick(e, 'app')}
-                  className="w-full py-3.5 px-4 rounded-xl font-black text-sm sm:text-base flex items-center justify-center space-x-2.5 shadow-xl transition-all text-center bg-gradient-to-r from-rose-600 via-red-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white shadow-rose-900/40 cursor-pointer active:scale-[0.99]"
-                >
-                  <Smartphone className="w-5 h-5 shrink-0" />
-                  <span>Send via Email App (Android / iPhone / Mail)</span>
-                </button>
-
-                {/* 2. Web Browser & Manual Copy Secondary Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={(e) => handleDispatchClick(e, 'web')}
-                    className="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 border transition-all text-center bg-slate-800 hover:bg-slate-750 text-slate-200 hover:text-white border-slate-700 cursor-pointer"
-                  >
-                    <Globe className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                    <span>Open in Web Gmail</span>
-                    <ExternalLink className="w-3 h-3 opacity-60" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleCopy('all')}
-                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-200 hover:text-white font-bold text-xs flex items-center justify-center space-x-2 border border-slate-700 transition-all cursor-pointer"
-                  >
-                    {copiedType === 'all' ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">All Text Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Copy Complete Draft</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-              </div>
-
-              <div className="mt-3.5 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                <span className="flex items-center space-x-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Targets 7 key statutory email desks simultaneously</span>
-                </span>
-                <span className="text-slate-500 hidden sm:inline">Takes ~10 seconds</span>
-              </div>
-            </div>
-
-            {/* Success Toast */}
-            {showSuccessToast && (
-              <div className="p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs flex items-center space-x-2 shadow-xl animate-fade-in">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>
-                  <strong>Representation Logged & Dispatched!</strong> Your representation has been recorded in the campaign count and opened in your email client.
-                </span>
-              </div>
-            )}
-
-            {/* 2. EDITABLE PREVIEW DRAFT ACCORDION / CONTAINER */}
-            <div className="bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl p-5 sm:p-6">
+            <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl p-5 sm:p-6">
               
               <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
                 <div className="flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
                   <h3 className="font-bold text-white text-sm sm:text-base flex items-center space-x-1.5">
                     <Edit3 className="w-4 h-4 text-rose-400" />
                     <span>Auto-Generated Representation Draft</span>
@@ -476,7 +392,7 @@ export default function EmailTool({ onActionCompleted }) {
               </div>
 
               {/* Editable Body */}
-              <div>
+              <div className="mb-5">
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Official Representation Body (Editable):
@@ -493,13 +409,69 @@ export default function EmailTool({ onActionCompleted }) {
                 <textarea
                   value={body}
                   onChange={handleBodyChange}
-                  rows={12}
+                  rows={13}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 leading-relaxed font-mono focus:outline-none focus:border-rose-500 transition-all resize-y"
                   placeholder="Draft content..."
                 />
               </div>
 
+              {/* Action Buttons */}
+              <div className="space-y-2.5">
+                
+                {/* 1. Native Mobile Email App Button */}
+                <button
+                  type="button"
+                  onClick={(e) => handleDispatchClick(e, 'app')}
+                  className="w-full py-3.5 px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg transition-all text-center bg-gradient-to-r from-rose-600 via-red-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white shadow-rose-900/40 cursor-pointer"
+                >
+                  <Smartphone className="w-4 h-4" />
+                  <span>Send via Email App (Android / iPhone / Mail)</span>
+                </button>
+
+                {/* 2. Web Browser & Manual Copy Secondary Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={(e) => handleDispatchClick(e, 'web')}
+                    className="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 border transition-all text-center bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 cursor-pointer"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Open in Web Gmail</span>
+                    <ExternalLink className="w-3 h-3 opacity-60" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('all')}
+                    className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center space-x-2 border border-slate-700 transition-all cursor-pointer"
+                  >
+                    {copiedType === 'all' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-emerald-400">All Text Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-slate-400" />
+                        <span>Copy Complete Draft</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+              </div>
+
             </div>
+
+            {/* Success Toast */}
+            {showSuccessToast && (
+              <div className="p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs flex items-center space-x-2 shadow-xl animate-fade-in">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>
+                  <strong>Representation Logged & Dispatched!</strong> Your representation has been recorded in the campaign count and opened in your email client.
+                </span>
+              </div>
+            )}
 
           </div>
 

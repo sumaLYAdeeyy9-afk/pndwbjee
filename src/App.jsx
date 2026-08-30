@@ -160,12 +160,12 @@ export default function App() {
           scrollToSection={scrollToSection} 
         />
 
-        <LiveCounter 
-          stats={stats} 
-        />
-
         <EmailTool 
           onActionCompleted={handleActionCompleted} 
+        />
+
+        <LiveCounter 
+          stats={stats} 
         />
 
         <ShareCampaign />
