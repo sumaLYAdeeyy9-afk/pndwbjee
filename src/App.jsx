@@ -24,13 +24,23 @@ export default function App() {
     };
   });
 
-  // Check URL query param `?admin=true` or hash `#admin` or key combination Ctrl+Shift+A
+  // Check URL routes (?admin=true, #admin, /admin) or key combination Ctrl+Shift+A
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('admin') === 'true' || window.location.hash === '#admin') {
-        setIsAdminOpen(true);
-      }
+      const checkAdminTriggers = () => {
+        const params = new URLSearchParams(window.location.search);
+        const hasAdminParam = params.has('admin');
+        const hasAdminHash = window.location.hash.toLowerCase().includes('admin');
+        const hasAdminPath = window.location.pathname.toLowerCase().endsWith('/admin');
+
+        if (hasAdminParam || hasAdminHash || hasAdminPath) {
+          setIsAdminOpen(true);
+        }
+      };
+
+      checkAdminTriggers();
+      window.addEventListener('popstate', checkAdminTriggers);
+      window.addEventListener('hashchange', checkAdminTriggers);
 
       const handleKeyDown = (e) => {
         if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
@@ -40,7 +50,11 @@ export default function App() {
       };
 
       window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('popstate', checkAdminTriggers);
+        window.removeEventListener('hashchange', checkAdminTriggers);
+        window.removeEventListener('keydown', handleKeyDown);
+      };
     }
   }, []);
 
@@ -139,7 +153,6 @@ export default function App() {
       <Navbar 
         activeSection={activeSection} 
         scrollToSection={scrollToSection} 
-        onOpenAdmin={() => setIsAdminOpen(true)}
       />
 
       <main className="flex-1">
@@ -153,7 +166,6 @@ export default function App() {
 
         <EmailTool 
           onActionCompleted={handleActionCompleted} 
-          onOpenAdmin={() => setIsAdminOpen(true)}
         />
 
         <ShareCampaign />
@@ -161,9 +173,9 @@ export default function App() {
         <Directory />
       </main>
 
-      <Footer onOpenAdmin={() => setIsAdminOpen(true)} />
+      <Footer />
 
-      {/* Admin Submissions Log & CSV Exporter Modal */}
+      {/* Password-Protected Admin Submissions Log & CSV Exporter Modal */}
       <AdminSubmissionsModal
         isOpen={isAdminOpen}
         onClose={() => setIsAdminOpen(false)}

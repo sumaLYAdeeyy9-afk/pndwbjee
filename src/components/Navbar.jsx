@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Mail, Share2, PhoneCall, Database, Menu, X } from 'lucide-react';
+import { Mail, Share2, PhoneCall, Menu, X } from 'lucide-react';
 
-export default function Navbar({ activeSection, scrollToSection, onOpenAdmin }) {
+export default function Navbar({ activeSection, scrollToSection }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -57,31 +57,10 @@ export default function Navbar({ activeSection, scrollToSection, onOpenAdmin }) 
                 );
               })}
             </nav>
-
-            {/* Admin Submissions Log Button */}
-            {onOpenAdmin && (
-              <button
-                onClick={onOpenAdmin}
-                className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-rose-400 border border-slate-700/80 transition-all cursor-pointer"
-                title="View All Inputted Candidate Submissions & Export CSV"
-              >
-                <Database className="w-3.5 h-3.5 text-rose-400" />
-                <span>Submissions Log</span>
-              </button>
-            )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center space-x-2">
-            {onOpenAdmin && (
-              <button
-                onClick={onOpenAdmin}
-                className="p-2 rounded-lg bg-slate-900 text-rose-400 border border-slate-800 text-xs font-bold"
-                title="View Submissions Log"
-              >
-                <Database className="w-4 h-4" />
-              </button>
-            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg bg-slate-900 text-slate-300 hover:text-white border border-slate-800"
@@ -112,18 +91,6 @@ export default function Navbar({ activeSection, scrollToSection, onOpenAdmin }) 
               </button>
             );
           })}
-          {onOpenAdmin && (
-            <button
-              onClick={() => {
-                onOpenAdmin();
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-left bg-slate-900 text-rose-400 border border-slate-800"
-            >
-              <Database className="w-4 h-4" />
-              <span>View Candidate Submissions Log & CSV</span>
-            </button>
-          )}
         </div>
       )}
     </header>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Heart, ShieldCheck, Database, ArrowUp } from 'lucide-react';
+import { ShieldCheck, ArrowUp } from 'lucide-react';
 
-export default function Footer({ onOpenAdmin }) {
+export default function Footer() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -37,33 +37,20 @@ export default function Footer({ onOpenAdmin }) {
           </div>
         </div>
 
-        {/* Disclaimer, Submissions Admin Link & Back to Top */}
+        {/* Disclaimer & Back to Top */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
           <div className="flex items-center space-x-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             <span>Non-commercial, student-built advocacy tool. All representations are sent directly through user-authorized email clients.</span>
           </div>
 
-          <div className="flex items-center space-x-3 shrink-0">
-            {onOpenAdmin && (
-              <button
-                onClick={onOpenAdmin}
-                className="flex items-center space-x-1 text-slate-400 hover:text-rose-400 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 transition-colors"
-                title="View Submissions & Export CSV"
-              >
-                <Database className="w-3.5 h-3.5 text-rose-400" />
-                <span>Submissions Registry</span>
-              </button>
-            )}
-
-            <button
-              onClick={scrollToTop}
-              className="flex items-center space-x-1 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 transition-colors"
-            >
-              <span>Back to top</span>
-              <ArrowUp className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <button
+            onClick={scrollToTop}
+            className="flex items-center space-x-1 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 transition-colors shrink-0"
+          >
+            <span>Back to top</span>
+            <ArrowUp className="w-3.5 h-3.5" />
+          </button>
         </div>
 
       </div>
