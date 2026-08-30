@@ -43,6 +43,10 @@ export default function Directory() {
       a: 'If it has "Decentralized" in its name, it cannot be run centrally online. Online DC causes multiple virtual allotments and rampant seat-blocking across colleges, allows fresh registrations per round that distort merit, and offers no real "yes-upgradation" mechanism. Offline spot counseling conducted directly at institute campuses (JU, CU, KGEC, JGEC, etc.) ensures 100% physical attendance, instant seat turnover, and zero ghost vacancies.'
     },
     {
+      q: 'Can SC/ST/OBC/EWS candidates converted to General reclaim their category?',
+      a: 'Yes, this is a top campaign demand. Many bonafide reserved category candidates were converted to General during Centralized Counseling solely because their certificates were delayed by issuing authorities beyond student control. We demand that candidates be allowed to opt for their correct category and produce issued certificates at Decentralized Counseling registration.'
+    },
+    {
       q: 'Why do students refuse to be the "experimental batch"?',
       a: 'WBJEE 2026 students already suffered immense cutoff compression, seat anomalies, and academic loss during the experimental centralized online rounds. Imposing another untested online portal for decentralized admissions will lead to complete administrative collapse and leave thousands of premier engineering seats vacant.'
     },

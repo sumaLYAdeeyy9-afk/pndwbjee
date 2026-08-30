@@ -40,10 +40,10 @@ export default function Hero({ scrollToSection }) {
           {/* 3 Pillars Why Online DC Must Be Scrapped */}
           <div className="space-y-2 pt-1">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
-              Why We Want to Scrap Online DC:
+              Why We Want to Scrap Online DC & Core Demands:
             </span>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
               
               <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
                 <div className="flex items-center space-x-1.5 text-rose-400 font-bold">
@@ -75,11 +75,21 @@ export default function Hero({ scrollToSection }) {
                 </p>
               </div>
 
+              <div className="bg-slate-950 p-3 rounded-xl border border-rose-500/30 space-y-1">
+                <div className="flex items-center space-x-1.5 text-emerald-400 font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>4. Category Restoration</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  Allow eligible SC/ST/OBC/EWS candidates converted to General due to administrative certificate issuance delays to opt for their correct category in DC.
+                </p>
+              </div>
+
             </div>
           </div>
 
           <div className="bg-rose-950/40 border border-rose-500/30 rounded-xl p-3 text-xs text-slate-200">
-            <strong className="text-rose-300">The Offline Solution:</strong> Offline spot counseling conducted at institute campuses guarantees 100% genuine physical attendance, immediate on-spot seat allocation, instant release of upgraded seats to waiting rankers, and complete transparency.
+            <strong className="text-rose-300">The Offline Solution:</strong> Offline spot counseling conducted at institute campuses guarantees 100% genuine physical attendance, immediate on-spot seat allocation, instant release of upgraded seats to waiting rankers, and proper on-the-spot verification of original category certificates.
           </div>
         </div>
 

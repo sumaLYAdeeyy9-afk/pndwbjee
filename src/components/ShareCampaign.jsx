@@ -15,10 +15,11 @@ URGENT FOR ALL WBJEE 2026 CANDIDATES & PARENTS!
 
 We are urgently protesting against the proposed Online Decentralized Counseling portal. WBJEE 2026 students REFUSE to be the experimental batch of WBJEEB!
 
-🛑 Why We Want to Scrap Online DC:
+🛑 Why We Want to Scrap Online DC & Key Demands:
 1️⃣ Multiple Allotments & Rampant Seat Blocking
 2️⃣ Fresh Registration in Each Round destroying merit
 3️⃣ No real "Yes-Upgradation" mechanism
+4️⃣ Allow SC/ST/OBC/EWS candidates converted to General due to certificate issuance delays to opt for their correct category in DC
 
 🏛️ What We Demand:
 Conduct Decentralized Counseling OFFLINE directly at respective university & college campuses (JU, CU, KGEC, JGEC, etc.) as per historical precedent!

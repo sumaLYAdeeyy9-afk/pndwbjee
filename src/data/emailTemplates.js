@@ -142,11 +142,15 @@ c) Absence of Real "Yes-Upgradation": Online procedures leave admitted students 
 4. The Proven Efficacy of Offline On-Campus Spot Counseling:
 Offline spot counseling held at institute premises ensures 100% genuine physical attendance, immediate merit-based GMR verification, and zero ghost vacancies. When an admitted student upgrades on the spot, their vacated seat is immediately allotted to the next waiting candidate in the hall in real time, ensuring complete fairness and total seat utilization.
 
+5. Urgent Request for SC/ST/OBC/EWS Category Restoration in Decentralized Counseling:
+We earnestly request permission for eligible SC/ST/OBC/EWS candidates, whose category was changed to General due to non-submission of certificates during Centralized Counseling, to opt for their correct category at the time of registration for Decentralized Counseling. Bonafide candidates were unable to submit category certificates earlier solely because certificates had not been issued by the competent authority within the stipulated timeline owing to procedural/administrative delays entirely beyond students' control. They must now be allowed to participate under their rightful category.
+
 PRAYERS & IMMEDIATE DEMANDS:
 In the interest of justice, merit, and thousands of engineering aspirants of West Bengal, we demand:
 1. Immediate scrapping of any proposed centralized Online Decentralized Counseling portal.
 2. Directives empowering universities and engineering colleges to independently conduct OFFLINE Decentralized / Spot Counseling on their respective campuses.
 3. Full and unconditional eligibility for ALL WBJEE 2026 candidates (admitted and non-admitted) to participate in offline spot counseling for branch and institute upgrades.
+4. Permission for eligible SC/ST/OBC/EWS candidates, whose category was converted to General due to administrative certificate issuance delays, to opt for and claim their correct category during Decentralized Counseling.
 
 We earnestly appeal to your immediate administrative intervention to protect our academic year and restore the established convention.
 
