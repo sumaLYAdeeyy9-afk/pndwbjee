@@ -12,15 +12,15 @@ import { supabase, isSupabaseConfigured } from './lib/supabase';
 export default function App() {
   const [activeSection, setActiveSection] = useState('hero');
 
-  // Real Community Stats (Fallback to initial verified stats if Supabase is connecting)
+  // Real Community Stats (Fallback to initial stats if Supabase is connecting)
   const [stats, setStats] = useState(() => {
     try {
-      const saved = localStorage.getItem('pnd_wbjee_stats_v4');
+      const saved = localStorage.getItem('pnd_wbjee_stats_v5');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
-      emails: 304,
-      tweets: 152
+      emails: 0,
+      tweets: 0
     };
   });
 
@@ -73,7 +73,7 @@ export default function App() {
 
   // Save to local storage as fallback
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stats_v4', JSON.stringify(stats));
+    localStorage.setItem('pnd_wbjee_stats_v5', JSON.stringify(stats));
   }, [stats]);
 
   // Increment action handler with automatic fallback

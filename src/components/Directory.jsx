@@ -39,16 +39,16 @@ export default function Directory() {
 
   const faqs = [
     {
-      q: 'Why must the August 27 notification be revoked?',
-      a: 'The sudden Aug 27 notice restricts already admitted students from taking part in decentralized counseling (DC), overturning historical precedent where DC was open to all. Due to WBJEEB allowing fresh registration in every round of centralized counseling, cutoffs shrank instead of getting relaxed, causing massive seat blocking and huge vacancies across colleges. Barring admitted students now unjustly traps them in locked seats.'
+      q: 'Why must Online DC be scrapped in favor of Offline DC?',
+      a: 'If it has "Decentralized" in its name, it cannot be run centrally online. Online DC causes multiple virtual allotments and rampant seat-blocking across colleges, allows fresh registrations per round that distort merit, and offers no real "yes-upgradation" mechanism. Offline spot counseling conducted directly at institute campuses (JU, CU, KGEC, JGEC, etc.) ensures 100% physical attendance, instant seat turnover, and zero ghost vacancies.'
     },
     {
-      q: 'Does sending this unified email blast violate any rules?',
-      a: 'No. Submitting a polite, fact-based grievance representation with your candidate details to statutory authorities (WBJEEB, DTE, and Higher Education Dept) is a legal and democratic representation right.'
+      q: 'Why do students refuse to be the "experimental batch"?',
+      a: 'WBJEE 2026 students already suffered immense cutoff compression, seat anomalies, and academic loss during the experimental centralized online rounds. Imposing another untested online portal for decentralized admissions will lead to complete administrative collapse and leave thousands of premier engineering seats vacant.'
     },
     {
-      q: 'Will my data or privacy be protected?',
-      a: 'Yes. PlayNoDice operates 100% on the client-side. No personal data or roll numbers are saved on any external database.'
+      q: 'Is participating in this grievance campaign safe?',
+      a: 'Yes. Submitting respectful, fact-based grievance representations to statutory authorities (WBJEEB, DTE, Higher Education Dept, and Hon\'ble CM) is a democratic right. PlayNoDice operates 100% client-side with zero storage of your personal credentials.'
     }
   ];
 

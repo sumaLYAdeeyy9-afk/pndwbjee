@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Share2, Sparkles, Flame, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Mail, Share2, Sparkles, Flame, CheckCircle2, AlertTriangle, Ban, Building2, Layers } from 'lucide-react';
 import { TwitterIcon } from './Icons';
 
 export default function Hero({ scrollToSection }) {
@@ -10,49 +10,78 @@ export default function Hero({ scrollToSection }) {
         {/* Campaign Badge */}
         <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-wider mb-5">
           <Flame className="w-4 h-4 text-rose-500" />
-          <span>WBJEE 2026 Emergency Protest Movement</span>
+          <span>Demand Offline Decentralized Counseling</span>
           <span className="w-1 h-1 rounded-full bg-slate-500"></span>
-          <span className="text-amber-400 font-semibold lowercase">#JusticeForWBJEE</span>
+          <span className="text-amber-400 font-semibold lowercase">#ScrapOnlineDC</span>
         </div>
 
         {/* Protest Headline */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white uppercase leading-tight mb-6">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white uppercase leading-tight mb-4">
           PLEASE DON'T PLAY WITH <br />
           <span className="text-rose-500">
             STUDENTS' FUTURE
           </span>
         </h1>
 
-        {/* Actual Ground Protest Context & Core Failure Points */}
-        <div className="max-w-3xl mx-auto text-left bg-slate-900/90 border border-rose-500/30 rounded-2xl p-5 sm:p-6 mb-8 text-slate-200 shadow-xl space-y-3.5">
-          <div className="flex items-center space-x-2 text-rose-400 text-xs sm:text-sm font-bold uppercase tracking-wide">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>Why We Are Protesting the August 27 WBJEEB Notification:</span>
+        <p className="text-sm sm:text-base text-amber-300 font-bold max-w-2xl mx-auto mb-7 uppercase tracking-wide">
+          If it has "Decentralized" in its name, do not conduct it online in a centralized way. Respect historical convention!
+        </p>
+
+        {/* Core Protest Manifesto Card */}
+        <div className="max-w-3xl mx-auto text-left bg-slate-900/95 border border-rose-500/40 rounded-2xl p-5 sm:p-6 mb-8 text-slate-200 shadow-2xl space-y-4">
+          <div className="flex items-center space-x-2 text-rose-400 text-xs sm:text-sm font-bold uppercase tracking-wide border-b border-slate-800 pb-2.5">
+            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+            <span>Our Core Stand: Scrap Online DC & Restore Offline Campus Counseling</span>
           </div>
 
           <p className="text-xs sm:text-sm leading-relaxed text-slate-300">
-            We are urgently protesting against the sudden WBJEEB notification released on <strong className="text-white">August 27, 2026</strong>, which abruptly <strong className="text-rose-400">debars already admitted students</strong> from participating in Decentralized Counseling (DC).
+            WBJEE 2026 students <strong className="text-white">refuse to be the experimental batch of WBJEEB</strong>. Having already suffered from the chaotic, flawed centralized online rounds, forcing an online centralized portal under the guise of "Decentralized Counseling" is unacceptable. We demand <strong className="text-rose-400">offline decentralized spot counseling directly at respective university and college campuses</strong> (JU, CU, KGEC, JGEC, etc.) as per historical precedent.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
-            <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-              <span className="text-amber-400 font-bold block">1. Violation of Historical Precedent:</span>
-              <p className="text-slate-400 leading-relaxed">
-                Historically, Decentralized Counseling (DC) has <strong>always been open to all students</strong>, allowing admitted candidates to upgrade branches at premier universities (JU, CU, KGEC, JGEC) without losing their academic year.
-              </p>
-            </div>
+          {/* 3 Pillars Why Online DC Must Be Scrapped */}
+          <div className="space-y-2 pt-1">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">
+              Why We Want to Scrap Online DC:
+            </span>
 
-            <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-              <span className="text-rose-400 font-bold block">2. Flawed Centralized Counseling:</span>
-              <p className="text-slate-400 leading-relaxed">
-                By allowing fresh registration in all 3 rounds, <strong>cutoffs shrank instead of getting relaxed</strong>—an unprecedented anomaly in WBJEE history that caused rampant seat blocking and massive seat vacancies statewide.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+              
+              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                <div className="flex items-center space-x-1.5 text-rose-400 font-bold">
+                  <Ban className="w-3.5 h-3.5 shrink-0" />
+                  <span>1. Multiple Allotments</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  Online systems cause rampant ghost seat-blocking across multiple colleges without physical commitment, keeping real cutoffs locked and wasting seats.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                <div className="flex items-center space-x-1.5 text-amber-400 font-bold">
+                  <Layers className="w-3.5 h-3.5 shrink-0" />
+                  <span>2. Fresh Registration</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  Permitting fresh registrations in subsequent rounds dilutes rank merit, distorts cutoffs, and destabilizes genuine rank holders.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
+                <div className="flex items-center space-x-1.5 text-sky-400 font-bold">
+                  <Building2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>3. No Yes-Upgradation</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  Admitted candidates are barred or trapped without a real-time transparent spot upgrade mechanism, leaving premier government seats vacant.
+                </p>
+              </div>
+
             </div>
           </div>
 
-          <p className="text-xs sm:text-sm text-slate-300 pt-1 border-t border-slate-800/80">
-            Trapping merit-holding students in locked seats while leaving thousands of university engineering seats vacant or allotting them to lower ranks is fundamentally unfair. <strong className="text-white">We demand the immediate withdrawal of the Aug 27 notice and full DC access for all students.</strong>
-          </p>
+          <div className="bg-rose-950/40 border border-rose-500/30 rounded-xl p-3 text-xs text-slate-200">
+            <strong className="text-rose-300">The Offline Solution:</strong> Offline spot counseling conducted at institute campuses guarantees 100% genuine physical attendance, immediate on-spot seat allocation, instant release of upgraded seats to waiting rankers, and complete transparency.
+          </div>
         </div>
 
         {/* Central Action Hub: 3 Clean Actions */}
@@ -76,7 +105,7 @@ export default function Hero({ scrollToSection }) {
                 Email Authorities
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                1-Click mass blast to WBJEEB & Higher Education Dept to revoke Aug 27 notice.
+                1-Click mass blast to WBJEEB, DTE & Hon'ble CM demanding Offline Decentralized Counseling.
               </p>
             </button>
 
@@ -93,7 +122,7 @@ export default function Hero({ scrollToSection }) {
                 Post on X (Twitter)
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                10 randomized spam-proof tweet drafts tagging @SuvenduWB & media.
+                10 randomized spam-proof tweet drafts demanding Offline DC tagging @SuvenduWB & media.
               </p>
             </button>
 

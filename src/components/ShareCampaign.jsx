@@ -10,26 +10,26 @@ export default function ShareCampaign() {
     ? window.location.origin
     : 'https://wbjee.playnodice.com';
 
-  const shareText = `🚨 PLEASE DON'T PLAY WITH STUDENTS' FUTURE!
+  const shareText = `🚨 DEMAND FOR OFFLINE DECENTRALIZED COUNSELING!
 URGENT FOR ALL WBJEE 2026 CANDIDATES & PARENTS!
 
-We are urgently protesting against the sudden WBJEEB notification released on August 27, 2026, which abruptly debars already admitted students from participating in Decentralized Counseling (DC).
+We are urgently protesting against the proposed Online Decentralized Counseling portal. WBJEE 2026 students REFUSE to be the experimental batch of WBJEEB!
 
-⚠️ 1. Violation of Historical Precedent:
-Historically, Decentralized Counseling (DC) has ALWAYS been open to all students, allowing admitted candidates to upgrade branches at premier state universities (JU, CU, KGEC, JGEC) without losing their academic year.
+🛑 Why We Want to Scrap Online DC:
+1️⃣ Multiple Allotments & Rampant Seat Blocking
+2️⃣ Fresh Registration in Each Round destroying merit
+3️⃣ No real "Yes-Upgradation" mechanism
 
-⚠️ 2. Flawed Centralized Counseling:
-By allowing fresh registration across all 3 rounds, cutoffs shrank instead of getting relaxed—an unprecedented anomaly in WBJEE history that caused rampant seat blocking and massive seat vacancies statewide.
-
-We demand the immediate withdrawal of the Aug 27 notice and full DC access for all students!
+🏛️ What We Demand:
+Conduct Decentralized Counseling OFFLINE directly at respective university & college campuses (JU, CU, KGEC, JGEC, etc.) as per historical precedent!
 
 Take Action Now (Takes 10 seconds):
-1️⃣ 1-Click Mass Email to WBJEEB & Higher Education Dept
+1️⃣ 1-Click Mass Email to WBJEEB, DTE & Hon'ble CM
 2️⃣ Fire Pre-Crafted Tweet Storm on X tagging @SuvenduWB & Media
 
 👉 Open the Action Portal: ${portalUrl}
 
-#WBJEEBDecentralized #JusticeForWBJEEStudents #DontPlayWithStudentsFuture`;
+#WBJEEOfflineDC #ScrapOnlineDC #WBJEE2026 #JusticeForWBJEEStudents`;
 
   const handleWhatsAppShare = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
@@ -61,63 +61,69 @@ Take Action Now (Takes 10 seconds):
   };
 
   return (
-    <section id="share-campaign" className="py-14 bg-slate-900/40 border-t border-slate-800/80 scroll-mt-16">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="share-campaign" className="py-14 bg-slate-900/40 scroll-mt-16">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="rounded-3xl p-6 sm:p-8 border border-emerald-500/30 bg-slate-950 shadow-2xl relative overflow-hidden text-center max-w-3xl mx-auto">
+        {/* Card Container */}
+        <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/30 rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden text-center">
           
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4">
             <Users className="w-3.5 h-3.5" />
-            <span>Action 3: Student Mobilizer</span>
+            <span>Action 3: Mobilize Student Batches</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2">
-            Mobilize WBJEE Batches & Groups
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight mb-3">
+            Amplify the Movement Across Channels
           </h2>
-          <p className="text-slate-300 text-xs sm:text-sm mb-6">
-            Share this campaign across batch WhatsApp groups and Telegram channels to scale mass representation.
+
+          <p className="text-slate-300 text-xs sm:text-sm max-w-2xl mx-auto mb-8 leading-relaxed">
+            Every share mobilizes another candidate. Forward this portal to your coaching batch groups, Telegram channels, and WhatsApp circles.
           </p>
 
-          {/* Quick Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          {/* Social Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mb-6">
+            
+            {/* WhatsApp */}
             <button
               onClick={handleWhatsAppShare}
-              className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950 transition-all"
+              className="py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950 transition-all cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Share to WhatsApp</span>
             </button>
 
+            {/* Telegram */}
             <button
               onClick={handleTelegramShare}
-              className="py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-lg shadow-sky-950 transition-all"
+              className="py-3.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-sky-950 transition-all cursor-pointer"
             >
               <Send className="w-4 h-4" />
-              <span>Share on Telegram</span>
+              <span>Share to Telegram</span>
             </button>
 
+            {/* Copy Share Text */}
             <button
               onClick={handleCopyLink}
-              className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 flex items-center justify-center space-x-2 transition-all"
+              className="py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 flex items-center justify-center space-x-2 transition-all cursor-pointer"
             >
               {copied ? (
                 <>
                   <Check className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-400">Copied Message!</span>
+                  <span className="text-emerald-400">Copied Text!</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-4 h-4 text-slate-400" />
-                  <span>Copy Share Text</span>
+                  <span>Copy Broadcast Text</span>
                 </>
               )}
             </button>
+
           </div>
 
-          {/* Preview of Broadcast Message */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 text-left text-xs font-mono text-slate-300 whitespace-pre-wrap select-text leading-relaxed">
-            {shareText}
-          </div>
+          <p className="text-[11px] text-slate-300">
+            Includes direct portal links and the grievance summary formatted for instant messaging.
+          </p>
 
         </div>
 

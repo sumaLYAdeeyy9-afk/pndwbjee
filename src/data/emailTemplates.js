@@ -65,7 +65,7 @@ export const OFFICIAL_RECIPIENTS = [
   }
 ];
 
-export const EMAIL_SUBJECT = 'URGENT: Representation against WBJEEB Decentralized Counseling Notification dated 27.08.2026';
+export const EMAIL_SUBJECT = 'DEMAND FOR OFFLINE DECENTRALIZED COUNSELING: Representation against Online DC & WBJEEB Experimental Framework for WBJEE 2026';
 
 export function generateMegaDraft({ studentName = '', rollNumber = '', currentInstitute = '' }) {
   const namePlaceholder = studentName.trim() || '[Your Full Name]';
@@ -75,42 +75,47 @@ export function generateMegaDraft({ studentName = '', rollNumber = '', currentIn
   return `To,
 The Chairman / Competent Authority,
 West Bengal Joint Entrance Examinations Board (WBJEEB),
-Kolkata, West Bengal.
+RUPANNA, DB-118, Sector-I, Salt Lake City, Kolkata - 700064.
 
-Copy forwarded for urgent perusal and intervention to:
+Copy forwarded for urgent perusal and immediate administrative intervention to:
 1. Directorate of Technical Education (DTE), Bikash Bhavan (dtewbgovt@gmail.com)
 2. Department of Higher Education, Govt. of West Bengal (highereducationwb@gmail.com)
 3. Hon'ble Chief Minister Shri Suvendu Adhikari (adhikarisuvenduwb1@gmail.com)
 
-Subject: URGENT: Representation regarding severe distress and academic loss caused by WBJEEB Decentralized Counseling Notification dated 27.08.2026.
+Subject: URGENT: Demand to Scrap Online DC and Conduct OFFLINE Decentralized Counseling as per Historical Precedent for WBJEE 2026.
 
 Respected Authorities,
 
-I am writing this representation as a bonafide candidate of WBJEE 2026 to register my deep anguish, distress, and formal grievance against the sudden notification issued on 27.08.2026 regarding Decentralized Counseling (DC).
+I am writing this representation as a bonafide candidate of WBJEE 2026 to register my strong protest, anguish, and collective demand regarding the proposed Decentralized Counseling (DC) modality for the 2026 academic session.
 
 Candidate Credentials:
 - Name: ${namePlaceholder}
 - WBJEE Roll / Rank: ${rollPlaceholder}
 - Currently Allotted Institute/Branch: ${institutePlaceholder}
 
-Grounds for Grievance & Appeal:
+Grounds for Grievance & Core Demands:
 
-1. Violation of Established Precedent & Legitimate Expectation:
-Historically and consistently across previous academic years, Decentralized Counseling in West Bengal has ALWAYS permitted already admitted students to participate and upgrade to their preferred branches/institutions (including Jadavpur University, Calcutta University, KGEC, JGEC, etc.) without forfeiting their existing seats. Millions of students planned their counseling choices relying in good faith on this established convention.
+1. Contradiction of the "Decentralized" Concept & Historical Convention:
+By definition, "Decentralized Counseling" must not and cannot be conducted through a centralized online portal. Historically and consistently across previous academic years, Decentralized / Spot Counseling in West Bengal has ALWAYS been conducted OFFLINE directly at the respective university and college campuses (including Jadavpur University, Calcutta University, KGEC, JGEC, MAKAUT in-house, and other government/private institutes). Attempting to centralize a decentralized process breaks time-tested administrative precedent.
 
-2. Flawed Centralized Counseling Framework & Artificial Cutoff Compression:
-During the WBJEE 2026 centralized rounds, permitting fresh registrations across all 3 rounds caused an artificial compression of cutoffs rather than expected relaxation. This resulted in unprecedented anomalies, widespread seat blocking, and arbitrary allocations that forced merit-holding students to freeze seats in sub-optimal branches just to secure an academic year.
+2. WBJEE 2026 Students Refuse to be an "Experimental Batch":
+WBJEE 2026 candidates have already suffered immense mental trauma, seat anomalies, and academic loss due to experimental changes introduced during the centralized rounds. Forcing another untested online system for decentralized admissions will only compound the crisis. We firmly demand an end to experimental policies on our careers.
 
-3. Unjust Trapping of Meritorious Candidates & Creation of Artificial Vacancies:
-The sudden notification dated 27.08.2026 barring admitted candidates effectively locks high-rankers into colleges while allowing lower-ranked or unregistered candidates to claim vacant seats in premier government institutes. This directly penalizes merit and violates equitable access to higher education in our state.
+3. Fatal Inherent Flaws of Online Decentralized Counseling:
+a) Multiple Allotments & Rampant Seat Blocking: An online portal permits candidates to virtually hold allotments across multiple colleges without physical commitment, keeping real cutoffs artificially elevated and causing massive final vacancies.
+b) Fresh Registration in Each Round: Permitting continuous fresh registrations dilutes merit, distorts cutoffs, and destabilizes genuine rank holders who participated diligently from Round 1.
+c) Absence of Real "Yes-Upgradation": Online procedures leave admitted students without a transparent, dynamic upgrade path, trapping high-rankers in sub-optimal branches while top government seats remain vacant.
 
-Prayer / Demands:
-In the greater interest of justice and the future of thousands of West Bengal engineering aspirants, I humbly request:
-a) Immediate withdrawal or reconsideration of the restrictive clause in the 27.08.2026 notification.
-b) Unconditional permission for ALL admitted WBJEE 2026 candidates to participate in Decentralized Counseling across all state universities and government/private colleges.
-c) Directives ensuring uniform, transparent, and merit-based spot/decentralized counseling across all institutions.
+4. The Proven Efficacy of Offline On-Campus Spot Counseling:
+Offline spot counseling held at institute premises ensures 100% genuine physical attendance, immediate merit-based GMR verification, and zero ghost vacancies. When an admitted student upgrades on the spot, their vacated seat is immediately allotted to the next waiting candidate in the hall in real time, ensuring complete fairness and total seat utilization.
 
-I earnestly appeal to the competent authorities to intervene at the earliest to prevent irreparable career and academic damage.
+PRAYERS & IMMEDIATE DEMANDS:
+In the interest of justice, merit, and thousands of engineering aspirants of West Bengal, we demand:
+1. Immediate scrapping of any proposed centralized Online Decentralized Counseling portal.
+2. Directives empowering universities and engineering colleges to independently conduct OFFLINE Decentralized / Spot Counseling on their respective campuses.
+3. Full and unconditional eligibility for ALL WBJEE 2026 candidates (admitted and non-admitted) to participate in offline spot counseling for branch and institute upgrades.
+
+We earnestly appeal to your immediate administrative intervention to protect our academic year and restore the established convention.
 
 Yours faithfully,
 ${namePlaceholder}
@@ -151,10 +156,13 @@ export function buildGmailComposeUrl(toEmails, ccEmails, subject, body) {
     view: 'cm',
     fs: '1',
     to: toStr,
-    cc: ccStr,
     su: subject,
     body: body
   });
+
+  if (ccStr) {
+    params.append('cc', ccStr);
+  }
 
   return `https://mail.google.com/mail/?${params.toString()}`;
 }
