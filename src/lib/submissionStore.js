@@ -3,13 +3,13 @@ import { supabase, isSupabaseConfigured } from './supabase';
 const LOCAL_STORAGE_KEY = 'pnd_wbjee_submissions_archive_v1';
 
 /**
- * Saves a verified student submission both locally and to Supabase
+ * Saves a student submission (complete or anonymous) both locally and to Supabase
  */
 export async function saveStudentSubmission(submission = {}) {
   const record = {
     id: 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-    studentName: (submission.studentName || '').trim(),
-    rollNumber: (submission.rollNumber || '').trim(),
+    studentName: (submission.studentName || '').trim() || 'Anonymous Candidate',
+    rollNumber: (submission.rollNumber || '').trim() || 'Unspecified',
     rankGmr: (submission.rankGmr || '').trim(),
     currentInstitute: (submission.currentInstitute || '').trim(),
     contactInfo: (submission.contactInfo || '').trim(),
