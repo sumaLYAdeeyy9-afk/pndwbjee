@@ -3,16 +3,16 @@ import confetti from 'canvas-confetti';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
   User, Hash, Award, School, Phone, Smartphone, CheckCircle2, Globe,
-  RotateCcw, Edit3, AlertCircle, AlertTriangle, ArrowRight, X
+  RotateCcw, Edit3, AlertCircle, AlertTriangle, ArrowRight, X, Shuffle, Sparkles
 } from 'lucide-react';
 import { 
-  PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, EMAIL_SUBJECT, 
-  generateMegaDraft, buildMailtoUrl, buildGmailComposeUrl 
+  PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, 
+  generateUniqueEmail, buildMailtoUrl, buildGmailComposeUrl, TOTAL_PRESET_VARIATIONS 
 } from '../data/emailTemplates';
 import { saveStudentSubmission } from '../lib/submissionStore';
 
 export default function EmailTool({ onActionCompleted }) {
-  // Form State with candidate fields
+  // Candidate info state
   const [formData, setFormData] = useState({
     studentName: '',
     rollNumber: '',
@@ -23,9 +23,20 @@ export default function EmailTool({ onActionCompleted }) {
 
   const nameInputRef = useRef(null);
 
-  // Editable Subject & Body State
-  const [subject, setSubject] = useState(EMAIL_SUBJECT);
-  const [body, setBody] = useState(() => generateMegaDraft({}));
+  // Dynamic variation seed (starts on a random variation between 1 and 200)
+  const [variationSeed, setVariationSeed] = useState(() => {
+    return Math.floor(Math.random() * 180) + 1;
+  });
+
+  // Editable Subject & Body State initialized with dynamic variation
+  const [subject, setSubject] = useState(() => {
+    const initial = generateUniqueEmail({ seed: 1 });
+    return initial.subject;
+  });
+  const [body, setBody] = useState(() => {
+    const initial = generateUniqueEmail({ seed: 1 });
+    return initial.body;
+  });
   const [isManuallyEdited, setIsManuallyEdited] = useState(false);
 
   // Missing credentials prompt modal state
@@ -35,12 +46,14 @@ export default function EmailTool({ onActionCompleted }) {
   const [copiedType, setCopiedType] = useState(null); // 'all' | 'subject' | 'body'
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // Auto-fill template unless user has manually customized the body text
+  // Synchronize draft dynamically with formData and variationSeed unless manually edited
   useEffect(() => {
     if (!isManuallyEdited) {
-      setBody(generateMegaDraft(formData));
+      const generated = generateUniqueEmail({ ...formData, seed: variationSeed });
+      setSubject(generated.subject);
+      setBody(generated.body);
     }
-  }, [formData, isManuallyEdited]);
+  }, [formData, variationSeed, isManuallyEdited]);
 
   // Form input handler
   const handleInputChange = (e) => {
@@ -54,10 +67,21 @@ export default function EmailTool({ onActionCompleted }) {
     setIsManuallyEdited(true);
   };
 
-  // Reset body to default template with current form data
+  // Shuffle to next unique draft format & subject
+  const handleShuffleDraft = () => {
+    const nextSeed = (variationSeed % TOTAL_PRESET_VARIATIONS) + 1;
+    setVariationSeed(nextSeed);
+    const generated = generateUniqueEmail({ ...formData, seed: nextSeed });
+    setSubject(generated.subject);
+    setBody(generated.body);
+    setIsManuallyEdited(false);
+  };
+
+  // Reset body to default template with current form data and current seed
   const handleResetDraft = () => {
-    setSubject(EMAIL_SUBJECT);
-    setBody(generateMegaDraft(formData));
+    const generated = generateUniqueEmail({ ...formData, seed: variationSeed });
+    setSubject(generated.subject);
+    setBody(generated.body);
     setIsManuallyEdited(false);
   };
 
@@ -347,30 +371,49 @@ export default function EmailTool({ onActionCompleted }) {
             
             <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl p-5 sm:p-6">
               
-              <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-slate-800 pb-3">
                 <div className="flex items-center space-x-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
-                  <h3 className="font-bold text-white text-sm sm:text-base flex items-center space-x-1.5">
-                    <Edit3 className="w-4 h-4 text-rose-400" />
-                    <span>Auto-Generated Representation Draft</span>
-                  </h3>
+                  <div>
+                    <h3 className="font-bold text-white text-sm sm:text-base flex items-center space-x-1.5">
+                      <Edit3 className="w-4 h-4 text-rose-400" />
+                      <span>Live Representation Draft</span>
+                    </h3>
+                  </div>
                 </div>
 
-                <button
-                  onClick={handleResetDraft}
-                  className="flex items-center space-x-1 text-[11px] font-semibold text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors cursor-pointer"
-                  title="Reset to default template"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Reset Draft</span>
-                </button>
+                {/* Variation Controls */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-[10px] font-mono font-semibold bg-rose-500/10 text-rose-300 border border-rose-500/20 px-2 py-1 rounded-lg flex items-center space-x-1">
+                    <Sparkles className="w-3 h-3 text-rose-400" />
+                    <span>Variant #{variationSeed} / {TOTAL_PRESET_VARIATIONS}</span>
+                  </span>
+
+                  <button
+                    onClick={handleShuffleDraft}
+                    className="flex items-center space-x-1 text-[11px] font-semibold text-sky-400 hover:text-white px-2.5 py-1 rounded-lg bg-sky-950/60 hover:bg-sky-900/80 border border-sky-500/30 transition-colors cursor-pointer"
+                    title="Generate another unique subject & tone to avoid spam classification"
+                  >
+                    <Shuffle className="w-3 h-3 text-sky-400" />
+                    <span>Shuffle Variation</span>
+                  </button>
+
+                  <button
+                    onClick={handleResetDraft}
+                    className="flex items-center space-x-1 text-[11px] font-semibold text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors cursor-pointer"
+                    title="Reset to default template"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset</span>
+                  </button>
+                </div>
               </div>
 
               {/* Editable Subject */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
-                    <span>Subject Line (Editable):</span>
+                    <span>Subject Line (Editable & Varied):</span>
                   </label>
                   <button
                     onClick={() => handleCopy('subject')}

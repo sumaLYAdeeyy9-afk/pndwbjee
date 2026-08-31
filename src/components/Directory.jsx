@@ -47,6 +47,10 @@ export default function Directory() {
       a: 'Yes, this is a top campaign demand. Many bonafide reserved category candidates were converted to General during Centralized Counseling solely because their certificates were delayed by issuing authorities beyond student control. We demand that candidates be allowed to opt for their correct category and produce issued certificates at Decentralized Counseling registration.'
     },
     {
+      q: 'What is the Fee Refund Policy when changing colleges during Decentralized Counseling?',
+      a: 'A previous government notification explicitly states that if a student\'s allotted college changes during the counselling process, the fees paid to the former institution must be refunded upon taking admission to the newly allotted college. We are seeking urgent confirmation and binding enforcement from the Board and Higher Education Department that this exact fee refund protection applies to all Decentralized Counseling admissions.'
+    },
+    {
       q: 'Why do students refuse to be the "experimental batch"?',
       a: 'WBJEE 2026 students already suffered immense cutoff compression, seat anomalies, and academic loss during the experimental centralized online rounds. Imposing another untested online portal for decentralized admissions will lead to complete administrative collapse and leave thousands of premier engineering seats vacant.'
     },

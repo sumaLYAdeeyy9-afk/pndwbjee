@@ -21,12 +21,13 @@ We refuse to be the experimental batch of WBJEEB. Scrap the flawed Online DC por
 2️⃣ Fresh Registration in Each Round destroying merit
 3️⃣ No real "Yes-Upgradation" mechanism
 4️⃣ Allow SC/ST/OBC/EWS candidates converted to General due to Govt certificate delays to opt for their correct category
+5️⃣ Urgent Confirmation & Enforcement of Fee Refund Policy when changing colleges during Decentralized Counseling
 
 🏛️ Demand: Conduct Decentralized Counseling OFFLINE directly at institute campuses (JU, CU, KGEC, JGEC, etc.) as per historical precedent.
 
 👉 Action Portal (Takes 10 seconds): ${portalUrl}
 
-#WBJEEOfflineDC #ScrapOnlineDC #WBJEE2026 #JusticeForWBJEEStudents`;
+#WBJEEOfflineDC #ScrapOnlineDC #FeeRefundWBJEE #WBJEE2026 #JusticeForWBJEEStudents`;
 
   const handleWhatsAppShare = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;

@@ -43,7 +43,7 @@ export default function Hero({ scrollToSection }) {
               Why We Want to Scrap Online DC & Core Demands:
             </span>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 text-xs">
               
               <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1">
                 <div className="flex items-center space-x-1.5 text-rose-400 font-bold">
@@ -75,13 +75,23 @@ export default function Hero({ scrollToSection }) {
                 </p>
               </div>
 
-              <div className="bg-slate-950 p-3 rounded-xl border border-rose-500/30 space-y-1">
+              <div className="bg-slate-950 p-3 rounded-xl border border-emerald-500/30 space-y-1">
                 <div className="flex items-center space-x-1.5 text-emerald-400 font-bold">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                   <span>4. Category Restoration</span>
                 </div>
                 <p className="text-slate-400 text-[11px] leading-relaxed">
                   Allow eligible SC/ST/OBC/EWS candidates converted to General due to administrative certificate issuance delays to opt for their correct category in DC.
+                </p>
+              </div>
+
+              <div className="bg-slate-950 p-3 rounded-xl border border-amber-500/30 space-y-1">
+                <div className="flex items-center space-x-1.5 text-amber-300 font-bold">
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                  <span>5. Fee Refund Guarantee</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  Enforce prior government notification ensuring full refund of fees from previous college upon taking admission into a new college during DC.
                 </p>
               </div>
 
