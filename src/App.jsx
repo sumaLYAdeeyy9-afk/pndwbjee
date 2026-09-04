@@ -1,185 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import LiveCounter from './components/LiveCounter';
-import EmailTool from './components/EmailTool';
-import ShareCampaign from './components/ShareCampaign';
-import Directory from './components/Directory';
-import Footer from './components/Footer';
-import AdminSubmissionsModal from './components/AdminSubmissionsModal';
-import { supabase, isSupabaseConfigured } from './lib/supabase';
+import React from 'react';
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState('hero');
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
-
-  // Real Community Stats (Fallback to initial stats if Supabase is connecting)
-  const [stats, setStats] = useState(() => {
-    try {
-      const saved = localStorage.getItem('pnd_wbjee_stats_v6');
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return {
-      emails: 0
-    };
-  });
-
-  // Check URL routes (?admin=true, #admin, /admin) or key combination Ctrl+Shift+A
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const checkAdminTriggers = () => {
-        const params = new URLSearchParams(window.location.search);
-        const hasAdminParam = params.has('admin');
-        const hasAdminHash = window.location.hash.toLowerCase().includes('admin');
-        const hasAdminPath = window.location.pathname.toLowerCase().endsWith('/admin');
-
-        if (hasAdminParam || hasAdminHash || hasAdminPath) {
-          setIsAdminOpen(true);
-        }
-      };
-
-      checkAdminTriggers();
-      window.addEventListener('popstate', checkAdminTriggers);
-      window.addEventListener('hashchange', checkAdminTriggers);
-
-      const handleKeyDown = (e) => {
-        if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-          e.preventDefault();
-          setIsAdminOpen(prev => !prev);
-        }
-      };
-
-      window.addEventListener('keydown', handleKeyDown);
-      return () => {
-        window.removeEventListener('popstate', checkAdminTriggers);
-        window.removeEventListener('hashchange', checkAdminTriggers);
-        window.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, []);
-
-  // Load and subscribe to real-time stats from Supabase
-  useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) return;
-
-    async function fetchGlobalStats() {
-      try {
-        const { data, error } = await supabase
-          .from('campaign_stats')
-          .select('*')
-          .eq('id', 'global')
-          .single();
-
-        if (data && !error) {
-          setStats({
-            emails: data.emails || 0
-          });
-        }
-      } catch (err) {
-        console.error('Failed to fetch stats from Supabase:', err);
-      }
-    }
-
-    fetchGlobalStats();
-
-    // Subscribe to live changes
-    const channel = supabase
-      .channel('campaign_stats_realtime')
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'campaign_stats', filter: 'id=eq.global' },
-        (payload) => {
-          if (payload.new) {
-            setStats({
-              emails: payload.new.emails || 0
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  // Save to local storage as fallback
-  useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stats_v6', JSON.stringify(stats));
-  }, [stats]);
-
-  // Increment action handler with automatic fallback
-  const handleActionCompleted = async (type = 'emails') => {
-    // 1. Optimistic local increment
-    setStats(prev => {
-      const updated = {
-        ...prev,
-        [type]: (prev[type] || 0) + 1
-      };
-
-      // 2. Sync to Supabase
-      if (isSupabaseConfigured && supabase) {
-        supabase.rpc('increment_campaign_stat', { stat_column: type }).then(({ error }) => {
-          if (error) {
-            supabase
-              .from('campaign_stats')
-              .update({ [type]: updated[type], updated_at: new Date().toISOString() })
-              .eq('id', 'global')
-              .catch(console.error);
-          }
-        }).catch(() => {
-          supabase
-            .from('campaign_stats')
-            .update({ [type]: updated[type], updated_at: new Date().toISOString() })
-            .eq('id', 'global')
-            .catch(console.error);
-        });
-      }
-
-      return updated;
-    });
-  };
-
-  const scrollToSection = (id) => {
-    setActiveSection(id);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-rose-500 selection:text-white">
-      <Navbar 
-        activeSection={activeSection} 
-        scrollToSection={scrollToSection} 
-      />
-
-      <main className="flex-1">
-        <EmailTool 
-          onActionCompleted={handleActionCompleted} 
-        />
-
-        <Hero 
-          scrollToSection={scrollToSection} 
-        />
-
-        <LiveCounter 
-          stats={stats} 
-        />
-
-        <ShareCampaign />
-
-        <Directory />
-      </main>
-
-      <Footer />
-
-      {/* Password-Protected Admin Submissions Log & CSV Exporter Modal */}
-      <AdminSubmissionsModal
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-      />
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 selection:bg-indigo-500 selection:text-white">
+      <div className="max-w-md w-full text-center space-y-4">
+        <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-2xl font-black">
+          🚀
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+          Ready for Your New Project
+        </h1>
+        <p className="text-slate-400 text-sm leading-relaxed">
+          The canvas has been completely cleaned and reset. Tell me what you would like to build!
+        </p>
+      </div>
     </div>
   );
 }
