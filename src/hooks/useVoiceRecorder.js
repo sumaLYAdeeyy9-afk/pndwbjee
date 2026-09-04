@@ -5,6 +5,7 @@ export function useVoiceRecorder() {
   const [duration, setDuration] = useState(0);
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [error, setError] = useState(null);
+  const [liveTranscript, setLiveTranscript] = useState('');
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -15,7 +16,7 @@ export function useVoiceRecorder() {
   const timerRef = useRef(null);
   const resolvePromiseRef = useRef(null);
 
-  // Browser live speech recognition ref for zero-latency fallback
+  // Browser live speech recognition ref
   const speechRecognitionRef = useRef(null);
   const liveTranscriptRef = useRef('');
 
@@ -65,10 +66,11 @@ export function useVoiceRecorder() {
     animFrameRef.current = requestAnimationFrame(updateVolume);
   };
 
-  const startRecording = useCallback(async () => {
+  const startRecording = useCallback(async (preferredLang = 'bn-IN') => {
     setError(null);
     audioChunksRef.current = [];
     liveTranscriptRef.current = '';
+    setLiveTranscript('');
     setDuration(0);
     setVolumeLevel(0);
 
@@ -86,14 +88,14 @@ export function useVoiceRecorder() {
       });
       streamRef.current = stream;
 
-      // Initialize speech recognition if supported
+      // Initialize SpeechRecognition with user's selected language (bn-IN for Bengali)
       try {
         const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognitionClass) {
           const recognition = new SpeechRecognitionClass();
           recognition.continuous = true;
           recognition.interimResults = true;
-          recognition.lang = 'bn-IN';
+          recognition.lang = preferredLang || 'bn-IN';
 
           recognition.onresult = (event) => {
             let current = '';
@@ -101,6 +103,7 @@ export function useVoiceRecorder() {
               current += event.results[i][0].transcript;
             }
             liveTranscriptRef.current = current;
+            setLiveTranscript(current);
           };
 
           recognition.onerror = (e) => {
@@ -160,67 +163,61 @@ export function useVoiceRecorder() {
       mediaRecorder.start(200);
       setIsRecording(true);
 
+      // Duration counter
+      const startTime = Date.now();
       timerRef.current = setInterval(() => {
-        setDuration(prev => prev + 1);
+        setDuration(Math.floor((Date.now() - startTime) / 1000));
       }, 1000);
 
+      // Start volume animation
       if (analyserRef.current) {
         animFrameRef.current = requestAnimationFrame(updateVolume);
       }
-
     } catch (err) {
       cleanupResources();
+      setError(err.message || 'Microphone access was denied or is unavailable.');
       setIsRecording(false);
-      let message = err.message || 'Could not access microphone.';
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        message = 'Microphone permission was denied. Please allow microphone access in your browser.';
-      }
-      setError(message);
-      throw new Error(message);
+      throw err;
     }
   }, []);
 
   const stopRecording = useCallback(() => {
     return new Promise((resolve) => {
-      if (speechRecognitionRef.current) {
-        try { speechRecognitionRef.current.stop(); } catch (e) {}
-      }
-
       if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
-        const transcript = liveTranscriptRef.current.trim();
         cleanupResources();
         setIsRecording(false);
-        resolve({ audioBlob: null, liveTranscript: transcript });
+        resolve({ audioBlob: null, liveTranscript: liveTranscriptRef.current.trim() });
         return;
       }
 
       resolvePromiseRef.current = resolve;
-      mediaRecorderRef.current.stop();
+      try {
+        if (speechRecognitionRef.current) {
+          speechRecognitionRef.current.stop();
+        }
+        mediaRecorderRef.current.stop();
+      } catch (e) {
+        console.warn('Error during mediaRecorder stop:', e);
+      }
+
       cleanupResources();
       setIsRecording(false);
-      setVolumeLevel(0);
     });
   }, []);
 
   const cancelRecording = useCallback(() => {
-    if (speechRecognitionRef.current) {
-      try { speechRecognitionRef.current.stop(); } catch (e) {}
-    }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
     cleanupResources();
     setIsRecording(false);
+    setLiveTranscript('');
     audioChunksRef.current = [];
-    liveTranscriptRef.current = '';
-    setVolumeLevel(0);
-    setDuration(0);
+    resolvePromiseRef.current = null;
   }, []);
 
   return {
     isRecording,
     duration,
     volumeLevel,
+    liveTranscript,
     error,
     startRecording,
     stopRecording,

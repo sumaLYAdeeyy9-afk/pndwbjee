@@ -25,7 +25,7 @@ const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
 const INITIAL_WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  content: `### Welcome to the Official WBJEE 2026 Counselling Assistant 🎙️\n\nI am powered by **Azure OpenAI (GPT 5.4 Mini & Whisper STT)** with the **complete 14-page Revised Notification** and **full Bengali (বিশুদ্ধ বাংলা) voice input & TTS** support.\n\n* 🎙️ **Tap "Speak Query"** to ask your question in **বাংলা** or **English**.\n* 🔊 **Text-to-Speech (TTS)**: Listens and speaks back in clear Bengali or English audio.\n* 🧠 **Conversation Memory**: Remembers past questions so you can ask follow-ups naturally!`,
+  content: `### Welcome to the Official WBJEE 2026 Counselling Assistant 🎙️\n\nI am powered by **Azure OpenAI (GPT 5.4 Mini)** with the **complete 14-page Revised Notification** and **full Bengali (বিশুদ্ধ বাংলা) voice input & TTS** support.\n\n* 🎙️ **Tap "Speak (বাংলা / EN)"** to ask your question in **বাংলা** or **English**.\n* 🔊 **Text-to-Speech (TTS)**: Reads out answers automatically in natural Bengali audio.\n* 🧠 **Conversation Memory**: Remembers past questions so you can ask follow-ups naturally!`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 };
 
@@ -58,6 +58,7 @@ export default function VoiceAssistant({ defaultQuery }) {
     isRecording, 
     duration, 
     volumeLevel, 
+    liveTranscript,
     error: recorderError, 
     startRecording, 
     stopRecording, 
@@ -130,7 +131,7 @@ export default function VoiceAssistant({ defaultQuery }) {
       {
         id: `welcome-reset-${Date.now()}`,
         role: 'assistant',
-        content: `Chat memory cleared. Tap **Speak Query** or select a topic to ask another question in **বাংলা** or **English**.`,
+        content: `Chat memory cleared. Tap **Speak (বাংলা / EN)** or select a topic to ask another question in **বাংলা** or **English**.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -230,37 +231,45 @@ export default function VoiceAssistant({ defaultQuery }) {
     processQuery(query.trim(), false);
   };
 
-  // Handle Voice Record Button Click with Whisper Pure Bengali Transcription
+  // Handle Voice Record Button Click with Bengali STT & Robust Fallbacks
   const handleToggleRecord = async () => {
     if (isRecording) {
       setStatusState('transcribing');
       stopSpeech();
       try {
         const recordResult = await stopRecording();
+        const capturedLiveText = recordResult?.liveTranscript || liveTranscript;
         const audioBlob = recordResult?.audioBlob;
 
-        // 1. Send pristine audio blob directly to Whisper API with Bengali language parameter
-        if (audioBlob && audioBlob.size > 100) {
-          const transcript = await transcribeAudio(audioBlob, selectedLanguage);
-          if (transcript && transcript.trim().length > 0) {
-            processQuery(transcript.trim(), true);
-            return;
+        let detectedSpeech = '';
+
+        // 1. First priority: Live Bengali/English transcript from speech recognition
+        if (capturedLiveText && capturedLiveText.trim().length > 0) {
+          detectedSpeech = capturedLiveText.trim();
+        } else if (audioBlob && audioBlob.size > 100) {
+          // 2. Second priority: Try Whisper API
+          try {
+            const whisperTranscript = await transcribeAudio(audioBlob, selectedLanguage);
+            if (whisperTranscript && whisperTranscript.trim().length > 0) {
+              detectedSpeech = whisperTranscript.trim();
+            }
+          } catch (whisperErr) {
+            console.warn('Whisper API call fallback notice:', whisperErr.message);
           }
         }
 
-        // 2. Fallback to live transcript if available
-        const liveText = recordResult?.liveTranscript;
-        if (liveText && liveText.trim().length > 0) {
-          processQuery(liveText.trim(), true);
+        if (detectedSpeech && detectedSpeech.length > 0) {
+          processQuery(detectedSpeech, true);
           return;
         }
 
+        // If no speech was detected
         setMessages(prev => [
           ...prev,
           {
             id: `warn-${Date.now()}`,
             role: 'assistant',
-            content: '🎙️ *কোনো স্পষ্ট কথা শনাক্ত করা যায়নি। অনুগ্রহ করে মাইক্রোফোনের কাছে এসে আবার বলুন।* (Could not detect clear speech. Please try speaking closer to your microphone.)',
+            content: '🎙️ *কোনো কথা শনাক্ত করা যায়নি। অনুগ্রহ করে মাইক্রোফোনে পরিষ্কার করে আবার বলুন বা নিচে টাইপ করুন।* (No clear speech detected. Please speak clearly into your mic or type your query below.)',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
@@ -272,16 +281,17 @@ export default function VoiceAssistant({ defaultQuery }) {
           {
             id: `err-${Date.now()}`,
             role: 'assistant',
-            content: `⚠️ **Voice Transcription Error:** ${err.message}`,
+            content: `⚠️ **Voice Notice:** ${err.message || 'Speech could not be processed. Please try speaking again or type your question.'}`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
       }
     } else {
-      // Start recording
+      // Start recording with Bengali (bn-IN) or English (en-IN)
       stopSpeech();
       try {
-        await startRecording();
+        const preferredLang = selectedLanguage === 'bn' ? 'bn-IN' : 'en-IN';
+        await startRecording(preferredLang);
         setStatusState('recording');
       } catch (err) {
         setStatusState(null);
@@ -483,7 +493,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         {statusState === 'transcribing' && (
           <div className="flex items-center justify-center p-3 text-amber-300 bg-amber-950/30 border border-amber-800/40 rounded-xl space-x-2">
             <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-            <span className="text-xs font-medium">Whisper AI transcribing pure Bengali audio (বাংলা অনুলিপি)...</span>
+            <span className="text-xs font-medium">Processing speech (বাংলা অনুলিপি)...</span>
           </div>
         )}
 
@@ -510,20 +520,22 @@ export default function VoiceAssistant({ defaultQuery }) {
         </div>
       </div>
 
-      {/* Voice Recording Active Bar */}
+      {/* Voice Recording Active Bar with Live Spoken Bengali Transcript */}
       {isRecording && (
-        <div className="bg-gradient-to-r from-red-950 via-slate-900 to-red-950 border-t border-red-800/60 p-3 flex items-center justify-between animate-pulse shrink-0">
+        <div className="bg-gradient-to-r from-red-950 via-slate-900 to-red-950 border-t border-red-800/60 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 animate-pulse shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-red-500 animate-ping" />
+            <div className="w-3 h-3 rounded-full bg-red-500 animate-ping shrink-0" />
             <div>
-              <p className="text-xs font-bold text-red-200">বাংলায় বা ইংরেজিতে কথা বলুন (Listening)...</p>
+              <p className="text-xs font-bold text-red-200">
+                {liveTranscript ? `🔴 ${liveTranscript}` : 'বাংলায় কথা বলুন (Listening in Bengali)...'}
+              </p>
               <p className="text-[10px] text-red-300">
                 Duration: {Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')} | Level: {Math.round(volumeLevel * 100)}%
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 self-end sm:self-auto">
             <button
               onClick={handleCancelRecord}
               className="px-3 py-1 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg cursor-pointer"
