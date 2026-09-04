@@ -23,25 +23,31 @@ export function getSavedModel() {
 }
 
 /**
- * Transcribe recorded audio using Whisper Large v3 STT
- * Accepts 16kHz Mono WAV audio and transcribes directly into pure Bengali script (বাংলা হরফ)
+ * Transcribe recorded audio using Groq Whisper Large v3 STT
+ * Accepts WebM, MP4, WAV, or OGG audio and transcribes directly into pure Bengali script (বাংলা হরফ)
  */
 export async function transcribeAudio(audioBlob) {
-  if (!audioBlob || audioBlob.size < 500) {
+  if (!audioBlob || audioBlob.size < 100) {
     throw new Error('Recorded audio is too short. Please speak clearly into your mic.');
   }
 
-  const audioFile = new File([audioBlob], 'speech.wav', {
-    type: 'audio/wav'
+  const fileType = audioBlob.type || 'audio/webm';
+  const fileExt = fileType.includes('mp4') || fileType.includes('m4a') ? 'm4a'
+    : fileType.includes('ogg') ? 'ogg'
+    : fileType.includes('wav') ? 'wav'
+    : 'webm';
+
+  const audioFile = new File([audioBlob], `speech.${fileExt}`, {
+    type: fileType
   });
 
   const formData = new FormData();
   formData.append('file', audioFile);
-  formData.append('model', 'whisper-large-v3');
+  formData.append('model', 'whisper-large-v3-turbo');
   formData.append('language', 'bn');
   formData.append(
     'prompt',
-    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা WBJEE বিকেন্দ্রীভূত কাউন্সিলিং সংক্রান্ত প্রশ্ন ও উত্তর। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে লিখুন।'
+    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা WBJEE বিকেন্দ্রীভূত কাউন্সিলিং সংক্রান্ত প্রশ্ন। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে লিখুন।'
   );
 
   // 1. Try serverless /api/transcribe first
