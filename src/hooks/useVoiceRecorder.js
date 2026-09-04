@@ -15,7 +15,10 @@ export function useVoiceRecorder() {
   const timerRef = useRef(null);
   const resolvePromiseRef = useRef(null);
 
-  // Clean up on unmount
+  // Browser live speech recognition ref for zero-latency fallback
+  const speechRecognitionRef = useRef(null);
+  const liveTranscriptRef = useRef('');
+
   useEffect(() => {
     return () => {
       cleanupResources();
@@ -39,6 +42,12 @@ export function useVoiceRecorder() {
       audioContextRef.current.close().catch(() => {});
       audioContextRef.current = null;
     }
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.stop();
+      } catch (e) {}
+      speechRecognitionRef.current = null;
+    }
   };
 
   const updateVolume = () => {
@@ -51,7 +60,6 @@ export function useVoiceRecorder() {
       sum += dataArray[i];
     }
     const avg = sum / dataArray.length;
-    // Normalize to 0-100 range with sensitivity
     setVolumeLevel(Math.min(100, Math.round((avg / 128) * 100)));
 
     animFrameRef.current = requestAnimationFrame(updateVolume);
@@ -60,6 +68,7 @@ export function useVoiceRecorder() {
   const startRecording = useCallback(async () => {
     setError(null);
     audioChunksRef.current = [];
+    liveTranscriptRef.current = '';
     setDuration(0);
     setVolumeLevel(0);
 
@@ -77,7 +86,35 @@ export function useVoiceRecorder() {
       });
       streamRef.current = stream;
 
-      // Audio analysis for waveform animation
+      // Initialize speech recognition if supported
+      try {
+        const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognitionClass) {
+          const recognition = new SpeechRecognitionClass();
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.lang = 'en-US';
+
+          recognition.onresult = (event) => {
+            let current = '';
+            for (let i = 0; i < event.results.length; i++) {
+              current += event.results[i][0].transcript;
+            }
+            liveTranscriptRef.current = current;
+          };
+
+          recognition.onerror = (e) => {
+            console.warn('SpeechRecognition notice:', e.error);
+          };
+
+          recognition.start();
+          speechRecognitionRef.current = recognition;
+        }
+      } catch (e) {
+        console.warn('Browser SpeechRecognition not active:', e);
+      }
+
+      // Audio analysis for volume wave animation
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioContextClass();
@@ -91,7 +128,6 @@ export function useVoiceRecorder() {
         console.warn('AudioContext analysis not available:', err);
       }
 
-      // Determine best audio mimeType supported by browser
       let mimeType = 'audio/webm';
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
         mimeType = 'audio/webm;codecs=opus';
@@ -113,20 +149,21 @@ export function useVoiceRecorder() {
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         if (resolvePromiseRef.current) {
-          resolvePromiseRef.current(audioBlob);
+          resolvePromiseRef.current({
+            audioBlob,
+            liveTranscript: liveTranscriptRef.current.trim()
+          });
           resolvePromiseRef.current = null;
         }
       };
 
-      mediaRecorder.start(200); // 200ms timeslices
+      mediaRecorder.start(200);
       setIsRecording(true);
 
-      // Start duration timer
       timerRef.current = setInterval(() => {
         setDuration(prev => prev + 1);
       }, 1000);
 
-      // Start volume animation
       if (analyserRef.current) {
         animFrameRef.current = requestAnimationFrame(updateVolume);
       }
@@ -145,10 +182,15 @@ export function useVoiceRecorder() {
 
   const stopRecording = useCallback(() => {
     return new Promise((resolve) => {
+      if (speechRecognitionRef.current) {
+        try { speechRecognitionRef.current.stop(); } catch (e) {}
+      }
+
       if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
+        const transcript = liveTranscriptRef.current.trim();
         cleanupResources();
         setIsRecording(false);
-        resolve(null);
+        resolve({ audioBlob: null, liveTranscript: transcript });
         return;
       }
 
@@ -161,12 +203,16 @@ export function useVoiceRecorder() {
   }, []);
 
   const cancelRecording = useCallback(() => {
+    if (speechRecognitionRef.current) {
+      try { speechRecognitionRef.current.stop(); } catch (e) {}
+    }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
     cleanupResources();
     setIsRecording(false);
     audioChunksRef.current = [];
+    liveTranscriptRef.current = '';
     setVolumeLevel(0);
     setDuration(0);
   }, []);

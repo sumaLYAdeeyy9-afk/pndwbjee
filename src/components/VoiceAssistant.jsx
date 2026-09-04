@@ -22,7 +22,7 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
     {
       id: 'welcome',
       role: 'assistant',
-      content: `### Welcome to the Official WBJEE 2026 Counselling Assistant 🎙️\n\nI have the **complete 14-page Revised Decentralised Counselling Notification (No. WBE/EX-56/2026)** loaded in memory.\n\n* **Tap the Microphone** below to ask your question by voice.\n* **Or click any topic chip** or type your query in the box below.\n\nHow can I help you today?`,
+      content: `### Welcome to the Official WBJEE 2026 Counselling Assistant 🎙️\n\nI am powered by **Azure OpenAI (GPT 5.4 Mini)** with the **complete 14-page Revised Decentralised Counselling Notification (No. WBE/EX-56/2026)** loaded in memory.\n\n* 🎙️ **Tap "Speak Query"** below to ask your question by voice.\n* ⚡ **Or click any topic chip** or type your query in the box below.\n\nAsk me anything about eligibility, seat protection, fee refunds, or counseling rounds!`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -31,7 +31,6 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
   const [statusState, setStatusState] = useState(null); // 'recording' | 'transcribing' | 'thinking' | null
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
-  const [currentModel, setCurrentModel] = useState(() => getSavedModel());
 
   const messagesEndRef = useRef(null);
   const { 
@@ -67,7 +66,6 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
     }
 
     window.speechSynthesis.cancel();
-    // Clean markdown symbols for cleaner TTS speech
     const cleanText = text
       .replace(/[#*`_~[\]()]/g, '')
       .replace(/\n+/g, '. ');
@@ -98,7 +96,7 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
       {
         id: 'welcome-reset',
         role: 'assistant',
-        content: `Chat history cleared. Tap the **Microphone** or select a topic to ask another question based on the official 14-page notification.`,
+        content: `Chat history cleared. Tap **Speak Query** or select a topic to ask another question based on the official 14-page notification.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -107,10 +105,6 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
   // Main dispatch query logic
   const processQuery = async (queryText, isVoice = false) => {
     const apiKey = getSavedApiKey();
-    if (!apiKey) {
-      onOpenSettings();
-      return;
-    }
 
     const userMsgId = `user-${Date.now()}`;
     const userMessage = {
@@ -128,7 +122,7 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
       const assistantMsgId = `assistant-${Date.now()}`;
       
       const answer = await askPdfAssistant({
-        messages: messages.slice(-6), // context window
+        messages: messages.slice(-6),
         question: queryText,
         apiKey,
         model: getSavedModel()
@@ -146,7 +140,7 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
       const errorMsg = {
         id: `err-${Date.now()}`,
         role: 'assistant',
-        content: `⚠️ **Error Processing Request:**\n\n${err.message || 'Could not connect to OpenAI API.'}\n\nPlease check your API key in **Settings**.`,
+        content: `⚠️ **Error Processing Request:**\n\n${err.message || 'Could not connect to AI service.'}`,
         isError: true,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -167,39 +161,38 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
 
   // Handle Voice Record Button Click
   const handleToggleRecord = async () => {
-    const apiKey = getSavedApiKey();
-    if (!apiKey) {
-      onOpenSettings();
-      return;
-    }
-
     if (isRecording) {
-      // User tapped stop recording -> transcribe audio
       setStatusState('transcribing');
       try {
-        const audioBlob = await stopRecording();
-        if (!audioBlob || audioBlob.size < 100) {
-          setStatusState(null);
+        const recordResult = await stopRecording();
+        const liveText = recordResult?.liveTranscript;
+        const audioBlob = recordResult?.audioBlob;
+
+        // 1. If live transcript was captured by speech recognition, use it immediately!
+        if (liveText && liveText.trim().length > 0) {
+          processQuery(liveText.trim(), true);
           return;
         }
 
-        const transcript = await transcribeAudio(audioBlob, apiKey);
-        if (!transcript || !transcript.trim()) {
-          setMessages(prev => [
-            ...prev,
-            {
-              id: `warn-${Date.now()}`,
-              role: 'assistant',
-              content: '🎙️ *Could not detect any clear speech. Please try speaking closer to your microphone.*',
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }
-          ]);
-          setStatusState(null);
-          return;
+        // 2. Otherwise transcribe audio blob with Whisper API
+        if (audioBlob && audioBlob.size > 100) {
+          const transcript = await transcribeAudio(audioBlob);
+          if (transcript && transcript.trim().length > 0) {
+            processQuery(transcript.trim(), true);
+            return;
+          }
         }
 
-        // Successfully transcribed! Send to GPT
-        processQuery(transcript.trim(), true);
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `warn-${Date.now()}`,
+            role: 'assistant',
+            content: '🎙️ *Could not detect any clear speech. Please try speaking closer to your microphone.*',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setStatusState(null);
       } catch (err) {
         setStatusState(null);
         setMessages(prev => [
@@ -283,7 +276,7 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
               {msg.isVoice && (
                 <div className="flex items-center space-x-1 text-[10px] font-semibold text-indigo-200 bg-indigo-950/60 px-2 py-0.5 rounded-full w-fit">
                   <Mic className="w-3 h-3" />
-                  <span>Spoken Query (Whisper)</span>
+                  <span>Spoken Voice Query</span>
                 </div>
               )}
 
@@ -359,14 +352,14 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
         {statusState === 'transcribing' && (
           <div className="flex items-center space-x-2 p-3 rounded-xl bg-indigo-950/50 border border-indigo-500/30 text-indigo-300 text-xs animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Transcribing your voice with OpenAI Whisper...</span>
+            <span>Transcribing your voice...</span>
           </div>
         )}
 
         {statusState === 'thinking' && (
           <div className="flex items-center space-x-2 p-3 rounded-xl bg-indigo-950/50 border border-indigo-500/30 text-indigo-300 text-xs animate-pulse">
             <Sparkles className="w-4 h-4 animate-spin text-indigo-400" />
-            <span>Analyzing notification rules & formulating answer...</span>
+            <span>Analyzing notification rules with GPT-5.4 Mini...</span>
           </div>
         )}
 
@@ -448,7 +441,7 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
               onClick={handleToggleRecord}
               disabled={Boolean(statusState)}
               className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 shrink-0"
-              title="Speak Question into Microphone (Transcribed by Whisper)"
+              title="Speak Question into Microphone"
             >
               <Mic className="w-4 h-4 text-white animate-pulse" />
               <span className="hidden sm:inline">Speak Query</span>

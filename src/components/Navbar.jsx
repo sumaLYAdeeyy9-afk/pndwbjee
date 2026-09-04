@@ -1,11 +1,8 @@
 import React from 'react';
-import { FileText, Mic, Key, CheckCircle2, AlertCircle, Download, ExternalLink, Sparkles, Settings } from 'lucide-react';
+import { FileText, Mic, Download, Sparkles, CheckCircle2 } from 'lucide-react';
 import { PDF_METADATA } from '../data/pdfContext';
 
 export default function Navbar({
-  hasApiKey,
-  currentModel,
-  onOpenSettings,
   activeTab,
   onTabChange
 }) {
@@ -59,51 +56,25 @@ export default function Navbar({
           </button>
         </div>
 
-        {/* Right: Actions & API Key status */}
+        {/* Right: Status Pill & Download Action */}
         <div className="flex items-center space-x-2.5">
           
+          {/* Active AI Status Pill */}
+          <div className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-950/50 border border-emerald-500/40 text-emerald-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="hidden sm:inline">GPT 5.4 Mini Active</span>
+            <span className="sm:hidden">AI Online</span>
+          </div>
+
           <a
             href={PDF_METADATA.fileUrl}
             download="WBJEE-2026-Decentralised-Counselling-Notification.pdf"
-            className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition-all"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition-all"
             title="Download PDF"
           >
             <Download className="w-3.5 h-3.5 text-slate-400" />
-            <span>Download</span>
+            <span className="hidden sm:inline">Download PDF</span>
           </a>
-
-          {/* API Key Pill */}
-          <button
-            onClick={onOpenSettings}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-              hasApiKey
-                ? 'bg-emerald-950/50 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-500 shadow-md shadow-indigo-600/30 animate-pulse'
-            }`}
-            title="Configure OpenAI API Key"
-          >
-            {hasApiKey ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="hidden sm:inline">OpenAI Connected</span>
-                <span className="sm:hidden">Ready</span>
-              </>
-            ) : (
-              <>
-                <Key className="w-3.5 h-3.5" />
-                <span>Connect API Key</span>
-              </>
-            )}
-          </button>
-
-          {/* Settings Button */}
-          <button
-            onClick={onOpenSettings}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all cursor-pointer"
-            title="Settings & Model Selection"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
 
         </div>
 
