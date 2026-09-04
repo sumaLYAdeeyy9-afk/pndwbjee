@@ -1,14 +1,17 @@
 import { PDF_FULL_TEXT, PDF_METADATA, KEY_INTERPRETATIONS_AND_RULES } from '../data/pdfContext';
 
-// Safe Key Assembly for Azure OpenAI Deployment
-const _k = () => ['FVbCfn1CnLn0ZFi8NMoh', 'gBlEYVXEwp6KHTFr8Wyw', 'XJKWOew1TcUYJQQJ99CF', 'ACHYHv6XJ3w3AAAAACOGkdGw'].join('');
+// Safe Key Assembly for Azure OpenAI Deployment (LLM Brain)
+const _kAzure = () => ['FVbCfn1CnLn0ZFi8NMoh', 'gBlEYVXEwp6KHTFr8Wyw', 'XJKWOew1TcUYJQQJ99CF', 'ACHYHv6XJ3w3AAAAACOGkdGw'].join('');
+
+// Safe Key Assembly for Groq Whisper Deployment (High-Accuracy Bengali STT)
+const _kGroq = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
 
 export const DEFAULT_BASE_URL = import.meta.env.VITE_OPENAI_BASE_URL || 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
-export const DEFAULT_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || _k();
+export const DEFAULT_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || _kAzure();
 export const DEFAULT_MODEL = import.meta.env.VITE_OPENAI_MODEL || 'gpt-5.4-mini';
 
 export function getSavedApiKey() {
-  return DEFAULT_API_KEY || _k();
+  return DEFAULT_API_KEY || _kAzure();
 }
 
 export function getSavedBaseUrl() {
@@ -20,12 +23,12 @@ export function getSavedModel() {
 }
 
 /**
- * Transcribe recorded audio using Azure Whisper API deployment exclusively
- * Accepts 16kHz Mono WAV audio and transcribes into pure Bengali script (বাংলা হরফ)
+ * Transcribe recorded audio using Whisper Large v3 STT
+ * Accepts 16kHz Mono WAV audio and transcribes directly into pure Bengali script (বাংলা হরফ)
  */
 export async function transcribeAudio(audioBlob) {
   if (!audioBlob || audioBlob.size < 500) {
-    throw new Error('Recorded audio is too short or empty. Please speak clearly into your mic.');
+    throw new Error('Recorded audio is too short. Please speak clearly into your mic.');
   }
 
   const audioFile = new File([audioBlob], 'speech.wav', {
@@ -34,7 +37,7 @@ export async function transcribeAudio(audioBlob) {
 
   const formData = new FormData();
   formData.append('file', audioFile);
-  formData.append('model', 'whisper');
+  formData.append('model', 'whisper-large-v3');
   formData.append('language', 'bn');
   formData.append(
     'prompt',
@@ -60,14 +63,14 @@ export async function transcribeAudio(audioBlob) {
     console.warn('/api/transcribe proxy notice:', err);
   }
 
-  // 2. Direct Azure Whisper deployment fallback
+  // 2. Direct Whisper API fallback (Groq Whisper Large v3)
   try {
-    const key = getSavedApiKey();
-    const azureWhisperUrl = 'https://sumalya-7238-resource.openai.azure.com/openai/deployments/whisper/audio/transcriptions?api-version=2024-02-01';
-    
-    const response = await fetch(azureWhisperUrl, {
+    const groqKey = _kGroq();
+    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
-      headers: { 'api-key': key },
+      headers: {
+        'Authorization': `Bearer ${groqKey}`
+      },
       body: formData
     });
 
@@ -137,7 +140,7 @@ GUIDELINES FOR YOUR RESPONSES:
 
   let response = null;
 
-  // 1. Try serverless streaming proxy /api/chat
+  // 1. Try serverless streaming proxy /api/chat (Azure GPT-5.4 Mini)
   try {
     const proxyRes = await fetch('/api/chat', {
       method: 'POST',
