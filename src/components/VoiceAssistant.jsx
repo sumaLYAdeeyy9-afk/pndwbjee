@@ -17,7 +17,7 @@ const STARTER_QUESTIONS = [
   'What are the grounds for rejection during document verification?'
 ];
 
-export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
+export default function VoiceAssistant({ defaultQuery }) {
   const [messages, setMessages] = useState([
     {
       id: 'welcome',
@@ -102,10 +102,8 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
     ]);
   };
 
-  // Main dispatch query logic
+  // Main dispatch query logic with real-time SSE streaming
   const processQuery = async (queryText, isVoice = false) => {
-    const apiKey = getSavedApiKey();
-
     const userMsgId = `user-${Date.now()}`;
     const userMessage = {
       id: userMsgId,
@@ -115,36 +113,56 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const assistantMsgId = `assistant-${Date.now()}`;
+    const initialAssistantMsg = {
+      id: assistantMsgId,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setMessages(prev => [...prev, userMessage, initialAssistantMsg]);
     setStatusState('thinking');
 
     try {
-      const assistantMsgId = `assistant-${Date.now()}`;
-      
-      const answer = await askPdfAssistant({
-        messages: messages.slice(-6),
+      let streamed = false;
+
+      const finalAnswer = await askPdfAssistant({
+        messages: messages.filter(m => m.id !== 'welcome').slice(-6),
         question: queryText,
-        apiKey,
-        model: getSavedModel()
+        apiKey: getSavedApiKey(),
+        model: getSavedModel(),
+        onChunk: (accumulatedText) => {
+          if (!streamed) {
+            streamed = true;
+            setStatusState(null); // Clear loading state as soon as first word streams in
+          }
+          setMessages(prev =>
+            prev.map(m =>
+              m.id === assistantMsgId ? { ...m, content: accumulatedText } : m
+            )
+          );
+        }
       });
 
-      const assistantMessage = {
-        id: assistantMsgId,
-        role: 'assistant',
-        content: answer,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
+      // Ensure final state is set cleanly
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === assistantMsgId ? { ...m, content: finalAnswer } : m
+        )
+      );
     } catch (err) {
-      const errorMsg = {
-        id: `err-${Date.now()}`,
-        role: 'assistant',
-        content: `⚠️ **Error Processing Request:**\n\n${err.message || 'Could not connect to AI service.'}`,
-        isError: true,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === assistantMsgId
+            ? {
+                ...m,
+                content: `⚠️ **Error:** ${err.message || 'Could not connect to AI service. Please try again.'}`,
+                isError: true
+              }
+            : m
+        )
+      );
     } finally {
       setStatusState(null);
     }
@@ -168,7 +186,7 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
         const liveText = recordResult?.liveTranscript;
         const audioBlob = recordResult?.audioBlob;
 
-        // 1. If live transcript was captured by speech recognition, use it immediately!
+        // 1. If live transcript was captured by browser speech recognition, use it immediately!
         if (liveText && liveText.trim().length > 0) {
           processQuery(liveText.trim(), true);
           return;
@@ -250,103 +268,112 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
 
       {/* Message Stream */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex items-start gap-2.5 ${
-              msg.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
-            {msg.role === 'assistant' && (
-              <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center shrink-0 mt-0.5">
-                <Bot className="w-4 h-4" />
-              </div>
-            )}
+        {messages.map((msg) => {
+          // If empty streaming placeholder and thinking, don't show empty bubble
+          if (msg.role === 'assistant' && !msg.content && statusState === 'thinking') {
+            return null;
+          }
 
+          return (
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-md space-y-2 ${
-                msg.role === 'user'
-                  ? 'bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-tr-none'
-                  : msg.isError
-                  ? 'bg-rose-950/60 border border-rose-500/40 text-rose-200 rounded-tl-none'
-                  : 'bg-slate-950/90 border border-slate-800 text-slate-200 rounded-tl-none'
+              key={msg.id}
+              className={`flex items-start gap-2.5 ${
+                msg.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              {/* Voice indicator badge on user message */}
-              {msg.isVoice && (
-                <div className="flex items-center space-x-1 text-[10px] font-semibold text-indigo-200 bg-indigo-950/60 px-2 py-0.5 rounded-full w-fit">
-                  <Mic className="w-3 h-3" />
-                  <span>Spoken Voice Query</span>
+              {msg.role === 'assistant' && (
+                <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot className="w-4 h-4" />
                 </div>
               )}
 
-              {/* Message Body with Markdown */}
-              <div className="prose prose-invert prose-xs max-w-none leading-relaxed space-y-2">
-                <ReactMarkdown
-                  components={{
-                    p: ({ node, ...props }) => <p className="mb-2 last:mb-0 leading-relaxed text-xs" {...props} />,
-                    ul: ({ node, ...props }) => <ul className="list-disc pl-4 space-y-1 my-2" {...props} />,
-                    ol: ({ node, ...props }) => <ol className="list-decimal pl-4 space-y-1 my-2" {...props} />,
-                    li: ({ node, ...props }) => <li className="text-slate-300" {...props} />,
-                    strong: ({ node, ...props }) => <strong className="font-bold text-white" {...props} />,
-                    h3: ({ node, ...props }) => <h3 className="text-sm font-bold text-indigo-300 mt-2 mb-1" {...props} />,
-                    h4: ({ node, ...props }) => <h4 className="text-xs font-bold text-indigo-200 mt-2 mb-1" {...props} />,
-                    code: ({ node, inline, ...props }) => (
-                      <code className="bg-slate-800 px-1 py-0.5 rounded font-mono text-[11px] text-indigo-300" {...props} />
-                    )
-                  }}
-                >
-                  {msg.content}
-                </ReactMarkdown>
-              </div>
-
-              {/* Message Footer: Timestamp, TTS, Copy */}
-              <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px] text-slate-400">
-                <span>{msg.timestamp}</span>
-
-                {msg.role === 'assistant' && !msg.isError && (
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleSpeak(msg.id, msg.content)}
-                      className={`flex items-center space-x-1 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors cursor-pointer ${
-                        speakingId === msg.id ? 'text-indigo-400 font-bold animate-pulse' : 'hover:text-white'
-                      }`}
-                      title={speakingId === msg.id ? 'Stop Voice' : 'Listen Aloud'}
-                    >
-                      {speakingId === msg.id ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-                      <span>{speakingId === msg.id ? 'Stop' : 'Read'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleCopy(msg.id, msg.content)}
-                      className="flex items-center space-x-1 px-1.5 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
-                      title="Copy text"
-                    >
-                      {copiedId === msg.id ? (
-                        <>
-                          <Check className="w-3 h-3 text-emerald-400" />
-                          <span className="text-emerald-400">Copied</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>Copy</span>
-                        </>
-                      )}
-                    </button>
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-md space-y-2 ${
+                  msg.role === 'user'
+                    ? 'bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-tr-none'
+                    : msg.isError
+                    ? 'bg-rose-950/60 border border-rose-500/40 text-rose-200 rounded-tl-none'
+                    : 'bg-slate-950/90 border border-slate-800 text-slate-200 rounded-tl-none'
+                }`}
+              >
+                {/* Voice indicator badge on user message */}
+                {msg.isVoice && (
+                  <div className="flex items-center space-x-1 text-[10px] font-semibold text-indigo-200 bg-indigo-950/60 px-2 py-0.5 rounded-full w-fit">
+                    <Mic className="w-3 h-3" />
+                    <span>Spoken Voice Query</span>
                   </div>
                 )}
+
+                {/* Message Body with Markdown */}
+                <div className="prose prose-invert prose-xs max-w-none leading-relaxed space-y-2">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ node, ...props }) => <p className="mb-2 last:mb-0 leading-relaxed text-xs" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc pl-4 space-y-1 my-2" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal pl-4 space-y-1 my-2" {...props} />,
+                      li: ({ node, ...props }) => <li className="text-slate-300" {...props} />,
+                      strong: ({ node, ...props }) => <strong className="font-bold text-white" {...props} />,
+                      h3: ({ node, ...props }) => <h3 className="text-sm font-bold text-indigo-300 mt-2 mb-1" {...props} />,
+                      h4: ({ node, ...props }) => <h4 className="text-xs font-bold text-indigo-200 mt-2 mb-1" {...props} />,
+                      code: ({ node, inline, ...props }) => (
+                        <code className="bg-slate-800 px-1 py-0.5 rounded font-mono text-[11px] text-indigo-300" {...props} />
+                      )
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
+
+                {/* Message Footer: Timestamp, TTS, Copy */}
+                {msg.content && (
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px] text-slate-400">
+                    <span>{msg.timestamp}</span>
+
+                    {msg.role === 'assistant' && !msg.isError && (
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleSpeak(msg.id, msg.content)}
+                          className={`flex items-center space-x-1 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors cursor-pointer ${
+                            speakingId === msg.id ? 'text-indigo-400 font-bold animate-pulse' : 'hover:text-white'
+                          }`}
+                          title={speakingId === msg.id ? 'Stop Voice' : 'Listen Aloud'}
+                        >
+                          {speakingId === msg.id ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                          <span>{speakingId === msg.id ? 'Stop' : 'Read'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleCopy(msg.id, msg.content)}
+                          className="flex items-center space-x-1 px-1.5 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+                          title="Copy text"
+                        >
+                          {copiedId === msg.id ? (
+                            <>
+                              <Check className="w-3 h-3 text-emerald-400" />
+                              <span className="text-emerald-400">Copied</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3 h-3" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
               </div>
 
+              {msg.role === 'user' && (
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <User className="w-4 h-4" />
+                </div>
+              )}
             </div>
-
-            {msg.role === 'user' && (
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-500 text-white flex items-center justify-center shrink-0 mt-0.5">
-                <User className="w-4 h-4" />
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
 
         {/* Status indicator when thinking or transcribing */}
         {statusState === 'transcribing' && (
@@ -359,7 +386,7 @@ export default function VoiceAssistant({ onOpenSettings, defaultQuery }) {
         {statusState === 'thinking' && (
           <div className="flex items-center space-x-2 p-3 rounded-xl bg-indigo-950/50 border border-indigo-500/30 text-indigo-300 text-xs animate-pulse">
             <Sparkles className="w-4 h-4 animate-spin text-indigo-400" />
-            <span>Analyzing notification rules with GPT-5.4 Mini...</span>
+            <span>Formulating answer from WBJEE notification...</span>
           </div>
         )}
 

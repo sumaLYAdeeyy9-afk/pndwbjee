@@ -26,9 +26,6 @@ export const AVAILABLE_MODELS = [
   { id: 'gpt-4o', name: 'GPT-4o', desc: 'High capability model' }
 ];
 
-/**
- * Retrieve active API key (localStorage override or pre-configured default)
- */
 export function getSavedApiKey() {
   if (typeof window !== 'undefined') {
     const local = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -37,9 +34,6 @@ export function getSavedApiKey() {
   return DEFAULT_API_KEY || _k();
 }
 
-/**
- * Retrieve active Base URL
- */
 export function getSavedBaseUrl() {
   if (typeof window !== 'undefined') {
     const local = localStorage.getItem(LOCAL_STORAGE_BASE_URL_KEY);
@@ -48,9 +42,6 @@ export function getSavedBaseUrl() {
   return DEFAULT_BASE_URL.replace(/\/+$/, '');
 }
 
-/**
- * Retrieve active Model
- */
 export function getSavedModel() {
   if (typeof window !== 'undefined') {
     const local = localStorage.getItem(LOCAL_STORAGE_MODEL_KEY);
@@ -60,34 +51,16 @@ export function getSavedModel() {
 }
 
 /**
- * Save configuration overrides
- */
-export function saveConfiguration({ apiKey, baseUrl, model }) {
-  if (typeof window !== 'undefined') {
-    if (apiKey !== undefined) {
-      if (apiKey) localStorage.setItem(LOCAL_STORAGE_KEY, apiKey.trim());
-      else localStorage.removeItem(LOCAL_STORAGE_KEY);
-    }
-    if (baseUrl !== undefined) {
-      if (baseUrl) localStorage.setItem(LOCAL_STORAGE_BASE_URL_KEY, baseUrl.trim());
-      else localStorage.removeItem(LOCAL_STORAGE_BASE_URL_KEY);
-    }
-    if (model !== undefined) {
-      if (model) localStorage.setItem(LOCAL_STORAGE_MODEL_KEY, model.trim());
-      else localStorage.removeItem(LOCAL_STORAGE_MODEL_KEY);
-    }
-  }
-}
-
-/**
- * Build request headers supporting Azure OpenAI and standard OpenAI
+ * Build CORS-friendly headers for Azure OpenAI
+ * (Azure CORS preflight specifically allows 'api-key,content-type')
  */
 function getAuthHeaders(apiKey) {
   const key = apiKey || getSavedApiKey();
-  return {
-    'api-key': key,
-    'Authorization': `Bearer ${key}`
+  const headers = {
+    'Content-Type': 'application/json',
+    'api-key': key
   };
+  return headers;
 }
 
 /**
@@ -115,7 +88,9 @@ export async function transcribeAudio(audioBlob, customApiKey = '') {
   try {
     const response = await fetch(`${baseUrl}/audio/transcriptions`, {
       method: 'POST',
-      headers: getAuthHeaders(key),
+      headers: {
+        'api-key': key
+      },
       body: formData
     });
 
@@ -134,6 +109,7 @@ export async function transcribeAudio(audioBlob, customApiKey = '') {
 
 /**
  * Query GPT-5.4 Mini with the official 14-page WBJEE notification context
+ * Supports real-time token streaming via onChunk callback
  */
 export async function askPdfAssistant({
   messages = [],
@@ -174,24 +150,73 @@ INSTRUCTIONS:
     { role: 'user', content: question }
   ];
 
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(key)
-    },
-    body: JSON.stringify({
-      model: targetModel,
-      messages: apiMessages,
-      temperature: 0.2
-    })
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s safety timeout
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error?.message || `GPT request failed (Status ${response.status})`);
+  try {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: getAuthHeaders(key),
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: targetModel,
+        messages: apiMessages,
+        temperature: 0.2,
+        stream: Boolean(onChunk)
+      })
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `GPT request failed (Status ${response.status})`);
+    }
+
+    // Stream chunks if onChunk is provided
+    if (onChunk && response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let fullText = '';
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ') && trimmed !== 'data: [DONE]') {
+            try {
+              const json = JSON.parse(trimmed.replace('data: ', ''));
+              const chunk = json.choices?.[0]?.delta?.content || '';
+              if (chunk) {
+                fullText += chunk;
+                onChunk(fullText, chunk);
+              }
+            } catch (e) {
+              // Ignore JSON parse errors on partial chunks
+            }
+          }
+        }
+      }
+
+      if (fullText.trim().length > 0) {
+        return fullText;
+      }
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || 'No response generated.';
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('The request timed out. Please check your internet connection and try asking again.');
+    }
+    throw err;
   }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || 'No response generated.';
 }
