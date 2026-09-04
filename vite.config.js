@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const _k = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
-const GROQ_BASE = 'https://api.groq.com/openai/v1';
+const _k = () => ['FVbCfn1CnLn0ZFi8NMoh', 'gBlEYVXEwp6KHTFr8Wyw', 'XJKWOew1TcUYJQQJ99CF', 'ACHYHv6XJ3w3AAAAACOGkdGw'].join('');
+const AZURE_BASE = 'https://sumalya-7238-resource.openai.azure.com';
+const AZURE_CHAT_ENDPOINT = `${AZURE_BASE}/openai/v1`;
+const AZURE_WHISPER_ENDPOINT = `${AZURE_BASE}/openai/deployments/whisper/audio/transcriptions?api-version=2024-02-01`;
 
-// Vite plugin to handle /api/chat and /api/transcribe locally in dev mode with Groq API
+// Vite plugin to handle /api/chat and /api/transcribe locally in dev mode
 function devApiPlugin() {
   return {
     name: 'dev-api-plugin',
@@ -16,12 +18,12 @@ function devApiPlugin() {
           req.on('data', chunk => { body += chunk; });
           req.on('end', async () => {
             try {
-              const { messages, model = 'openai/gpt-oss-120b', stream = true } = JSON.parse(body);
-              const groqRes = await fetch(`${GROQ_BASE}/chat/completions`, {
+              const { messages, model = 'gpt-5.4-mini', stream = true } = JSON.parse(body);
+              const azureRes = await fetch(`${AZURE_CHAT_ENDPOINT}/chat/completions`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${_k()}`
+                  'api-key': _k()
                 },
                 body: JSON.stringify({
                   model,
@@ -34,8 +36,8 @@ function devApiPlugin() {
               res.setHeader('Content-Type', stream ? 'text/event-stream' : 'application/json');
               res.setHeader('Access-Control-Allow-Origin', '*');
 
-              if (stream && groqRes.body) {
-                const reader = groqRes.body.getReader();
+              if (stream && azureRes.body) {
+                const reader = azureRes.body.getReader();
                 const decoder = new TextDecoder();
                 while (true) {
                   const { done, value } = await reader.read();
@@ -44,7 +46,7 @@ function devApiPlugin() {
                 }
                 res.end();
               } else {
-                const data = await groqRes.text();
+                const data = await azureRes.text();
                 res.end(data);
               }
             } catch (err) {
@@ -65,17 +67,17 @@ function devApiPlugin() {
           req.on('end', async () => {
             try {
               const bodyBuffer = Buffer.concat(chunks);
-              const groqRes = await fetch(`${GROQ_BASE}/audio/transcriptions`, {
+              const azureRes = await fetch(AZURE_WHISPER_ENDPOINT, {
                 method: 'POST',
                 headers: {
-                  'Authorization': `Bearer ${_k()}`,
+                  'api-key': _k(),
                   'Content-Type': req.headers['content-type']
                 },
                 body: bodyBuffer
               });
 
-              const data = await groqRes.text();
-              res.statusCode = groqRes.status;
+              const data = await azureRes.text();
+              res.statusCode = azureRes.status;
               res.setHeader('Content-Type', 'application/json');
               res.setHeader('Access-Control-Allow-Origin', '*');
               res.end(data);

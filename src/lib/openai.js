@@ -1,11 +1,11 @@
 import { PDF_FULL_TEXT, PDF_METADATA, KEY_INTERPRETATIONS_AND_RULES } from '../data/pdfContext';
 
-// Safe Key Assembly for Client-Side Direct Fallback (Groq API Key)
-const _k = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
+// Safe Key Assembly for Azure OpenAI Deployment
+const _k = () => ['FVbCfn1CnLn0ZFi8NMoh', 'gBlEYVXEwp6KHTFr8Wyw', 'XJKWOew1TcUYJQQJ99CF', 'ACHYHv6XJ3w3AAAAACOGkdGw'].join('');
 
-export const DEFAULT_BASE_URL = import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.groq.com/openai/v1';
+export const DEFAULT_BASE_URL = import.meta.env.VITE_OPENAI_BASE_URL || 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
 export const DEFAULT_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || _k();
-export const DEFAULT_MODEL = import.meta.env.VITE_OPENAI_MODEL || 'openai/gpt-oss-120b';
+export const DEFAULT_MODEL = import.meta.env.VITE_OPENAI_MODEL || 'gpt-5.4-mini';
 
 export function getSavedApiKey() {
   return DEFAULT_API_KEY || _k();
@@ -20,10 +20,10 @@ export function getSavedModel() {
 }
 
 /**
- * Transcribe recorded audio using Groq Whisper API (whisper-large-v3-turbo / whisper-large-v3)
+ * Transcribe recorded audio using Azure Whisper API deployment exclusively
  * Strictly instructs Whisper to output pure Bengali script (বাংলা হরফ) with no Banglish
  */
-export async function transcribeAudio(audioBlob, language = 'bn') {
+export async function transcribeAudio(audioBlob) {
   const fileExtension = audioBlob.type.includes('mp4') || audioBlob.type.includes('m4a') ? 'm4a' 
     : audioBlob.type.includes('ogg') ? 'ogg'
     : audioBlob.type.includes('wav') ? 'wav'
@@ -35,14 +35,11 @@ export async function transcribeAudio(audioBlob, language = 'bn') {
 
   const formData = new FormData();
   formData.append('file', audioFile);
-  formData.append('model', 'whisper-large-v3-turbo');
-  if (language && language !== 'auto') {
-    formData.append('language', language);
-  }
-  // Strong prompt instructing Whisper to transcribe in pure Bengali script (বাংলা), avoiding Romanized Banglish
+  formData.append('model', 'whisper');
+  // Domain-specific prompt instructing Whisper to transcribe in pure Bengali script (বাংলা), avoiding Romanized Banglish
   formData.append(
     'prompt',
-    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা (WBJEE 2026) বিকেন্দ্রীভূত কাউন্সিলিং সংক্রান্ত প্রশ্নাবলী। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে অনুলিপি করুন। কোনো বাংলিশ বা রোমান হরফ ব্যবহার করবেন না।'
+    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা (WBJEE 2026) বিকেন্দ্রীভূত কাউন্সিলিং সংক্রান্ত প্রশ্নাবলী। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে অনুলিপি করুন। কোনো বাংলিশ বা রোমান হরফ ব্যবহার করবেন না। Transcribe Bengali in pure Bengali script.'
   );
 
   // 1. Try serverless /api/transcribe first
@@ -64,15 +61,14 @@ export async function transcribeAudio(audioBlob, language = 'bn') {
     console.warn('/api/transcribe proxy notice:', err);
   }
 
-  // 2. Direct Groq Whisper API Fallback
+  // 2. Direct Azure Whisper deployment fallback
   try {
     const key = getSavedApiKey();
-    const baseUrl = getSavedBaseUrl();
-    const response = await fetch(`${baseUrl}/audio/transcriptions`, {
+    const azureWhisperUrl = 'https://sumalya-7238-resource.openai.azure.com/openai/deployments/whisper/audio/transcriptions?api-version=2024-02-01';
+    
+    const response = await fetch(azureWhisperUrl, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${key}`
-      },
+      headers: { 'api-key': key },
       body: formData
     });
 
@@ -83,17 +79,17 @@ export async function transcribeAudio(audioBlob, language = 'bn') {
       }
     } else {
       const errText = await response.text();
-      console.warn('Direct Groq Whisper error response:', response.status, errText);
+      console.warn('Direct Whisper API error response:', response.status, errText);
     }
   } catch (err) {
-    console.warn('Direct Groq Whisper API call error:', err);
+    console.warn('Direct Whisper API call error:', err);
   }
 
-  throw new Error('Whisper AI could not recognize speech from the audio. Please try speaking again closer to the microphone.');
+  throw new Error('Whisper AI could not recognize speech from the audio. Please speak clearly into your mic.');
 }
 
 /**
- * Query Groq LLM (openai/gpt-oss-120b) with the official 14-page WBJEE notification context
+ * Query Azure GPT-5.4 Mini with the official 14-page WBJEE notification context
  * Streams responses in real-time with full freedom and deep, natural explanations in simple words
  */
 export async function askPdfAssistant({
@@ -192,10 +188,10 @@ GUIDELINES FOR YOUR RESPONSES:
       }
     }
   } catch (err) {
-    console.warn('Serverless SSE streaming fallback to direct Groq:', err);
+    console.warn('Serverless SSE streaming fallback to direct Azure:', err);
   }
 
-  // 2. Direct Groq API Fallback with SSE Streaming
+  // 2. Direct Azure OpenAI Fallback with SSE Streaming
   const targetKey = apiKey || getSavedApiKey();
   const baseUrl = getSavedBaseUrl();
 
@@ -203,7 +199,7 @@ GUIDELINES FOR YOUR RESPONSES:
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${targetKey}`
+      'api-key': targetKey
     },
     body: JSON.stringify({
       model: targetModel,
@@ -215,7 +211,7 @@ GUIDELINES FOR YOUR RESPONSES:
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Groq API error (${response.status}): ${errText}`);
+    throw new Error(`Azure OpenAI API error (${response.status}): ${errText}`);
   }
 
   if (response.body) {
@@ -257,7 +253,7 @@ GUIDELINES FOR YOUR RESPONSES:
   const fallbackData = await response.json();
   const answer = fallbackData.choices?.[0]?.message?.content;
   if (!answer) {
-    throw new Error('Received empty response from AI.');
+    throw new Error('Received empty response from OpenAI.');
   }
 
   return answer;

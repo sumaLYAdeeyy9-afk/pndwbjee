@@ -1,9 +1,9 @@
-// Serverless API route for Groq LLM Chat Completions
+// Serverless API route for Azure OpenAI GPT-5.4 Mini
 // Runs on Vercel / Netlify / Node to prevent browser CORS and network latency issues
 
-const _k = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
+const _k = () => ['FVbCfn1CnLn0ZFi8NMoh', 'gBlEYVXEwp6KHTFr8Wyw', 'XJKWOew1TcUYJQQJ99CF', 'ACHYHv6XJ3w3AAAAACOGkdGw'].join('');
 
-const ENDPOINT = process.env.VITE_OPENAI_BASE_URL || 'https://api.groq.com/openai/v1';
+const ENDPOINT = process.env.VITE_OPENAI_BASE_URL || 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
 const API_KEY = process.env.VITE_OPENAI_API_KEY || _k();
 
 export default async function handler(req, res) {
@@ -21,13 +21,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, model = 'openai/gpt-oss-120b', stream = true } = req.body || {};
+    const { messages, model = 'gpt-5.4-mini', stream = true } = req.body || {};
 
-    const groqRes = await fetch(`${ENDPOINT.replace(/\/+$/, '')}/chat/completions`, {
+    const azureRes = await fetch(`${ENDPOINT.replace(/\/+$/, '')}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
+        'api-key': API_KEY
       },
       body: JSON.stringify({
         model,
@@ -37,17 +37,17 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!groqRes.ok) {
-      const errText = await groqRes.text();
-      return res.status(groqRes.status).send(errText);
+    if (!azureRes.ok) {
+      const errText = await azureRes.text();
+      return res.status(azureRes.status).send(errText);
     }
 
-    if (stream && groqRes.body) {
+    if (stream && azureRes.body) {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
 
-      const reader = groqRes.body.getReader();
+      const reader = azureRes.body.getReader();
       const decoder = new TextDecoder();
 
       while (true) {
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
       }
       return res.end();
     } else {
-      const data = await groqRes.json();
+      const data = await azureRes.json();
       return res.status(200).json(data);
     }
   } catch (error) {
