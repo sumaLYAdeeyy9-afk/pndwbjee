@@ -35,7 +35,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model,
         messages,
-        temperature: 0.2,
+        temperature: 0.5,
         stream: Boolean(stream)
       })
     });

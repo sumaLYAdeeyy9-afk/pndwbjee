@@ -83,7 +83,7 @@ export async function transcribeAudio(audioBlob) {
 
 /**
  * Query GPT-5.4 Mini with the official 14-page WBJEE notification context
- * Streams responses in real-time
+ * Streams responses in real-time with full freedom and deep, natural explanations in simple words
  */
 export async function askPdfAssistant({
   messages = [],
@@ -94,24 +94,19 @@ export async function askPdfAssistant({
 }) {
   const targetModel = model || getSavedModel();
 
-  const systemPrompt = `You are the Official AI Assistant for the West Bengal Joint Entrance Examinations Board (WBJEEB) Revised Decentralised Counselling Notification 2026.
-Document Title: ${PDF_METADATA.title}
-Notification Number: ${PDF_METADATA.documentNumber}
-Date: ${PDF_METADATA.date}
-Total Pages: ${PDF_METADATA.totalPages}
+  const systemPrompt = `You are an intelligent, thoughtful, and deeply knowledgeable AI advisor for the West Bengal Joint Entrance Examinations Board (WBJEEB) Revised Decentralised Counselling Notification 2026.
 
-DOCUMENT CONTENT (OFFICIAL 14 PAGES GROUND TRUTH):
+OFFICIAL 14-PAGE NOTIFICATION CONTENT (GROUND TRUTH):
 =========================================
 ${PDF_FULL_TEXT}
 =========================================
 
-INSTRUCTIONS:
-1. Provide accurate, clear, and comprehensive answers strictly based on the official notification text above.
-2. Whenever relevant, cite the specific Page Number(s) and Clause / Section Number (e.g., "[Page 3, Clause 5]", "[Page 7, Clause 14]", "[Page 11, Clause 18]").
-3. Format your responses with structured Markdown: bold key terms, clear bullet points, and numbered steps.
-4. Give explicit answers on eligibility, 5 candidate categories (Category I to V), Rs. 250 fee, two-round structure, seat protection, document verification rejection codes, and fee refund rules.
-5. If something is not mentioned in the official notification, explicitly state that it is not specified in the document.
-6. Tone: Authoritative, helpful, and student-friendly.`;
+GUIDELINES FOR YOUR RESPONSES:
+- You have complete freedom in how you explain and structure your answers. Do NOT constrain yourself to rigid formatting templates or robotic structures.
+- Provide comprehensive, detailed, long, and in-depth explanations in simple, natural, student-friendly words. Explain the underlying reasoning, practical steps, what happens next, potential pitfalls, and all important nuances so that any candidate or parent fully understands.
+- Base your answers accurately on the official notification content provided above. You may freely reference relevant sections, pages, or clauses whenever helpful to support your explanation.
+- If a candidate's situation involves multiple aspects (e.g., eligibility, seat retention, fees, documents, or counselling rounds), break down each scenario thoroughly and explain everything clearly in plain, accessible language.
+- Speak naturally, warmly, and helpfully like an experienced counsellor.`;
 
   const apiMessages = [
     { role: 'system', content: systemPrompt },
@@ -155,7 +150,7 @@ INSTRUCTIONS:
       body: JSON.stringify({
         model: targetModel,
         messages: apiMessages,
-        temperature: 0.2,
+        temperature: 0.5,
         stream: true
       })
     });

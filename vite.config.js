@@ -25,7 +25,7 @@ function devApiPlugin() {
                 body: JSON.stringify({
                   model,
                   messages,
-                  temperature: 0.2,
+                  temperature: 0.5,
                   stream: Boolean(stream)
                 })
               });
