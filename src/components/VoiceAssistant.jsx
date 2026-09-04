@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { 
   Mic, MicOff, Send, Volume2, VolumeX, Copy, Check, Sparkles, 
   RotateCcw, Loader2, AlertCircle, MessageSquare, Bot, User, 
-  HelpCircle, ChevronDown, CheckCircle2, Volume
+  HelpCircle, ChevronDown, CheckCircle2, Volume, History, Database
 } from 'lucide-react';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import { transcribeAudio, askPdfAssistant, getSavedApiKey, getSavedModel } from '../lib/openai';
@@ -11,21 +11,38 @@ import { transcribeAudio, askPdfAssistant, getSavedApiKey, getSavedModel } from 
 const STARTER_QUESTIONS = [
   'Who is eligible for Common Online Decentralised Counselling?',
   'Can already-admitted students participate without losing their seat?',
+  'If I take admission in DC Phase 1, is my replacement quota exhausted?',
   'What is the Fee Refund Policy if a student changes college?',
   'Explain the 5 candidate categories (Category I to V)',
   'How does Round 2 Upgradation work in each Phase?',
   'What are the grounds for rejection during document verification?'
 ];
 
+const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
+
+const INITIAL_WELCOME = {
+  id: 'welcome',
+  role: 'assistant',
+  content: `### Welcome to the Official WBJEE 2026 Counselling Assistant 🎙️\n\nI am powered by **Azure OpenAI (GPT 5.4 Mini)** with the **complete 14-page Revised Decentralised Counselling Notification (No. WBE/EX-56/2026)** and **conversation memory** active.\n\n* 🎙️ **Tap "Speak Query"** below to ask your question by voice.\n* ⚡ **Or click any topic chip** or type your query in the box below.\n* 🧠 **Memory is active**: Your questions and answers are remembered so you can ask follow-ups naturally!`,
+  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+};
+
 export default function VoiceAssistant({ defaultQuery }) {
-  const [messages, setMessages] = useState([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: `### Welcome to the Official WBJEE 2026 Counselling Assistant 🎙️\n\nI am powered by **Azure OpenAI (GPT 5.4 Mini)** with the **complete 14-page Revised Decentralised Counselling Notification (No. WBE/EX-56/2026)** loaded in memory.\n\n* 🎙️ **Tap "Speak Query"** below to ask your question by voice.\n* ⚡ **Or click any topic chip** or type your query in the box below.\n\nAsk me anything about eligibility, seat protection, fee refunds, or counseling rounds!`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  // Load conversation history from localStorage
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load chat history from localStorage', e);
     }
-  ]);
+    return [INITIAL_WELCOME];
+  });
 
   const [inputQuery, setInputQuery] = useState('');
   const [statusState, setStatusState] = useState(null); // 'recording' | 'transcribing' | 'thinking' | null
@@ -42,6 +59,16 @@ export default function VoiceAssistant({ defaultQuery }) {
     stopRecording, 
     cancelRecording 
   } = useVoiceRecorder();
+
+  // Persist conversation history to localStorage on update
+  useEffect(() => {
+    try {
+      const validMessages = messages.filter(m => m.content && m.content.trim().length > 0);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(validMessages));
+    } catch (e) {
+      console.warn('Failed to persist chat memory to localStorage', e);
+    }
+  }, [messages]);
 
   // Scroll chat to bottom on new message
   useEffect(() => {
@@ -88,21 +115,25 @@ export default function VoiceAssistant({ defaultQuery }) {
     });
   };
 
-  // Clear chat
+  // Clear chat memory
   const handleClearChat = () => {
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     setSpeakingId(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+
     setMessages([
       {
-        id: 'welcome-reset',
+        id: `welcome-reset-${Date.now()}`,
         role: 'assistant',
-        content: `Chat history cleared. Tap **Speak Query** or select a topic to ask another question based on the official 14-page notification.`,
+        content: `Chat memory cleared. Tap **Speak Query** or select a topic to ask another question based on the official 14-page notification.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
   };
 
-  // Main dispatch query logic with real-time SSE streaming
+  // Main dispatch query logic with conversational memory and SSE streaming
   const processQuery = async (queryText, isVoice = false) => {
     const userMsgId = `user-${Date.now()}`;
     const userMessage = {
@@ -121,6 +152,15 @@ export default function VoiceAssistant({ defaultQuery }) {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
+    // Extract all previous dialogue turns to send as conversational memory to AI
+    const conversationMemory = messages
+      .filter(m => m.content && m.content.trim().length > 0 && !m.isError && !m.id.startsWith('welcome'))
+      .map(m => ({
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: m.content
+      }))
+      .slice(-20); // Keep past 20 messages for rich conversational context
+
     setMessages(prev => [...prev, userMessage, initialAssistantMsg]);
     setStatusState('thinking');
 
@@ -128,7 +168,7 @@ export default function VoiceAssistant({ defaultQuery }) {
       let streamed = false;
 
       const finalAnswer = await askPdfAssistant({
-        messages: messages.filter(m => m.id !== 'welcome').slice(-6),
+        messages: conversationMemory,
         question: queryText,
         apiKey: getSavedApiKey(),
         model: getSavedModel(),
@@ -145,7 +185,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         }
       });
 
-      // Ensure final state is set cleanly
+      // Ensure final state is saved cleanly
       setMessages(prev =>
         prev.map(m =>
           m.id === assistantMsgId ? { ...m, content: finalAnswer } : m
@@ -256,14 +296,21 @@ export default function VoiceAssistant({ defaultQuery }) {
           </div>
         </div>
 
-        <button
-          onClick={handleClearChat}
-          className="flex items-center space-x-1 text-slate-400 hover:text-slate-200 px-2 py-1 rounded-lg text-xs bg-slate-800/60 hover:bg-slate-800 transition-all cursor-pointer"
-          title="Reset conversation"
-        >
-          <RotateCcw className="w-3 h-3" />
-          <span className="hidden sm:inline">Clear</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/70 border border-emerald-500/30 text-emerald-400">
+            <Database className="w-3 h-3" />
+            <span>Memory Active</span>
+          </span>
+
+          <button
+            onClick={handleClearChat}
+            className="flex items-center space-x-1 text-slate-400 hover:text-slate-200 px-2 py-1 rounded-lg text-xs bg-slate-800/60 hover:bg-slate-800 transition-all cursor-pointer"
+            title="Clear conversation memory and reset chat"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span className="hidden sm:inline">Clear Memory</span>
+          </button>
+        </div>
       </div>
 
       {/* Message Stream */}
@@ -274,239 +321,209 @@ export default function VoiceAssistant({ defaultQuery }) {
             return null;
           }
 
+          const isUser = msg.role === 'user';
+
           return (
             <div
               key={msg.id}
-              className={`flex items-start gap-2.5 ${
-                msg.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+              className={`flex items-start space-x-2.5 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`}
             >
-              {msg.role === 'assistant' && (
-                <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center shrink-0 mt-0.5">
-                  <Bot className="w-4 h-4" />
-                </div>
-              )}
-
+              {/* Avatar */}
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-md space-y-2 ${
-                  msg.role === 'user'
-                    ? 'bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-tr-none'
+                className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-white ${
+                  isUser
+                    ? 'bg-blue-600'
                     : msg.isError
-                    ? 'bg-rose-950/60 border border-rose-500/40 text-rose-200 rounded-tl-none'
-                    : 'bg-slate-950/90 border border-slate-800 text-slate-200 rounded-tl-none'
+                    ? 'bg-red-600'
+                    : 'bg-indigo-600'
                 }`}
               >
-                {/* Voice indicator badge on user message */}
-                {msg.isVoice && (
-                  <div className="flex items-center space-x-1 text-[10px] font-semibold text-indigo-200 bg-indigo-950/60 px-2 py-0.5 rounded-full w-fit">
-                    <Mic className="w-3 h-3" />
-                    <span>Spoken Voice Query</span>
-                  </div>
-                )}
-
-                {/* Message Body with Markdown */}
-                <div className="prose prose-invert prose-xs max-w-none leading-relaxed space-y-2">
-                  <ReactMarkdown
-                    components={{
-                      p: ({ node, ...props }) => <p className="mb-2 last:mb-0 leading-relaxed text-xs" {...props} />,
-                      ul: ({ node, ...props }) => <ul className="list-disc pl-4 space-y-1 my-2" {...props} />,
-                      ol: ({ node, ...props }) => <ol className="list-decimal pl-4 space-y-1 my-2" {...props} />,
-                      li: ({ node, ...props }) => <li className="text-slate-300" {...props} />,
-                      strong: ({ node, ...props }) => <strong className="font-bold text-white" {...props} />,
-                      h3: ({ node, ...props }) => <h3 className="text-sm font-bold text-indigo-300 mt-2 mb-1" {...props} />,
-                      h4: ({ node, ...props }) => <h4 className="text-xs font-bold text-indigo-200 mt-2 mb-1" {...props} />,
-                      code: ({ node, inline, ...props }) => (
-                        <code className="bg-slate-800 px-1 py-0.5 rounded font-mono text-[11px] text-indigo-300" {...props} />
-                      )
-                    }}
-                  >
-                    {msg.content}
-                  </ReactMarkdown>
-                </div>
-
-                {/* Message Footer: Timestamp, TTS, Copy */}
-                {msg.content && (
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px] text-slate-400">
-                    <span>{msg.timestamp}</span>
-
-                    {msg.role === 'assistant' && !msg.isError && (
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleSpeak(msg.id, msg.content)}
-                          className={`flex items-center space-x-1 px-1.5 py-0.5 rounded hover:bg-slate-800 transition-colors cursor-pointer ${
-                            speakingId === msg.id ? 'text-indigo-400 font-bold animate-pulse' : 'hover:text-white'
-                          }`}
-                          title={speakingId === msg.id ? 'Stop Voice' : 'Listen Aloud'}
-                        >
-                          {speakingId === msg.id ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-                          <span>{speakingId === msg.id ? 'Stop' : 'Read'}</span>
-                        </button>
-
-                        <button
-                          onClick={() => handleCopy(msg.id, msg.content)}
-                          className="flex items-center space-x-1 px-1.5 py-0.5 rounded hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
-                          title="Copy text"
-                        >
-                          {copiedId === msg.id ? (
-                            <>
-                              <Check className="w-3 h-3 text-emerald-400" />
-                              <span className="text-emerald-400">Copied</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3 h-3" />
-                              <span>Copy</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
+                {isUser ? <User className="w-3.5 h-3.5" /> : <Bot className="w-3.5 h-3.5" />}
               </div>
 
-              {msg.role === 'user' && (
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-500 text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <User className="w-4 h-4" />
+              {/* Message Box */}
+              <div
+                className={`group relative max-w-[85%] rounded-2xl p-3.5 text-slate-200 leading-relaxed ${
+                  isUser
+                    ? 'bg-blue-600 text-white rounded-tr-none'
+                    : msg.isError
+                    ? 'bg-red-950/50 border border-red-800/50 text-red-200 rounded-tl-none'
+                    : 'bg-slate-800/90 border border-slate-700/60 rounded-tl-none shadow-sm'
+                }`}
+              >
+                {/* Voice badge */}
+                {msg.isVoice && (
+                  <div className="inline-flex items-center space-x-1 text-[10px] text-blue-200 mb-1.5 px-2 py-0.5 rounded-full bg-blue-700/50">
+                    <Mic className="w-2.5 h-2.5" />
+                    <span>Voice Query</span>
+                  </div>
+                )}
+
+                {/* Content */}
+                <div className="prose prose-invert prose-xs max-w-none break-words text-slate-100 leading-normal">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
-              )}
+
+                {/* Footer / Actions */}
+                <div className="mt-2.5 pt-2 border-t border-slate-700/40 flex items-center justify-between text-[10px] text-slate-400">
+                  <span>{msg.timestamp}</span>
+
+                  {!isUser && msg.content && !msg.isError && (
+                    <div className="flex items-center space-x-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleSpeak(msg.id, msg.content)}
+                        className="p-1 hover:text-white rounded hover:bg-slate-700/50 cursor-pointer"
+                        title={speakingId === msg.id ? 'Stop reading' : 'Read aloud'}
+                      >
+                        {speakingId === msg.id ? (
+                          <VolumeX className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                        ) : (
+                          <Volume2 className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => handleCopy(msg.id, msg.content)}
+                        className="p-1 hover:text-white rounded hover:bg-slate-700/50 cursor-pointer"
+                        title="Copy text"
+                      >
+                        {copiedId === msg.id ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           );
         })}
 
-        {/* Status indicator when thinking or transcribing */}
-        {statusState === 'transcribing' && (
-          <div className="flex items-center space-x-2 p-3 rounded-xl bg-indigo-950/50 border border-indigo-500/30 text-indigo-300 text-xs animate-pulse">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Transcribing your voice...</span>
+        {/* Live Status Indicators */}
+        {statusState === 'thinking' && (
+          <div className="flex items-start space-x-2.5">
+            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 text-white animate-pulse">
+              <Bot className="w-3.5 h-3.5" />
+            </div>
+            <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 flex items-center space-x-3 text-slate-300">
+              <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold text-slate-200">Analyzing notification & conversation memory...</p>
+                <p className="text-[10px] text-slate-400">GPT 5.4 Mini reasoning over 14 pages</p>
+              </div>
+            </div>
           </div>
         )}
 
-        {statusState === 'thinking' && (
-          <div className="flex items-center space-x-2 p-3 rounded-xl bg-indigo-950/50 border border-indigo-500/30 text-indigo-300 text-xs animate-pulse">
-            <Sparkles className="w-4 h-4 animate-spin text-indigo-400" />
-            <span>Formulating answer from WBJEE notification...</span>
+        {statusState === 'transcribing' && (
+          <div className="flex items-center justify-center p-3 text-amber-300 bg-amber-950/30 border border-amber-800/40 rounded-xl space-x-2">
+            <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+            <span className="text-xs font-medium">Transcribing voice with Whisper AI...</span>
           </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Starter Quick Topics Chips */}
-      <div className="px-3.5 py-2 bg-slate-950/80 border-t border-slate-800/80 overflow-x-auto shrink-0 flex items-center space-x-1.5 no-scrollbar">
-        <span className="text-[10px] uppercase font-bold text-slate-500 shrink-0 mr-1 flex items-center space-x-1">
-          <Sparkles className="w-3 h-3 text-indigo-400" />
-          <span>Quick:</span>
-        </span>
-        {STARTER_QUESTIONS.map((q, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleSendText(q)}
-            disabled={Boolean(statusState)}
-            className="text-[11px] whitespace-nowrap bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white px-2.5 py-1 rounded-full border border-slate-800 hover:border-slate-700 transition-all cursor-pointer shrink-0 disabled:opacity-50"
-          >
-            {q}
-          </button>
-        ))}
-      </div>
-
-      {/* Interactive Bottom Control Bar */}
-      <div className="p-3.5 bg-slate-950 border-t border-slate-800 shrink-0 space-y-3">
-        
-        {/* Active Recording State Banner */}
-        {isRecording ? (
-          <div className="bg-rose-950/80 border border-rose-500/40 rounded-2xl p-4 flex items-center justify-between gap-4 animate-pulse">
-            
-            <div className="flex items-center space-x-3 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center animate-bounce shadow-lg shadow-rose-600/50 shrink-0">
-                <Mic className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-white flex items-center space-x-2">
-                  <span>Listening to your voice...</span>
-                  <span className="text-rose-400 font-mono text-xs">
-                    00:{duration < 10 ? `0${duration}` : duration}
-                  </span>
-                </div>
-                {/* Audio visualizer bar */}
-                <div className="w-32 sm:w-44 h-1.5 bg-slate-800 rounded-full mt-1.5 overflow-hidden">
-                  <div
-                    className="h-full bg-rose-500 transition-all duration-75"
-                    style={{ width: `${Math.max(10, volumeLevel)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2 shrink-0">
-              <button
-                type="button"
-                onClick={handleCancelRecord}
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleToggleRecord}
-                className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md transition-all flex items-center space-x-1 cursor-pointer"
-              >
-                <Check className="w-3.5 h-3.5" />
-                <span>Done</span>
-              </button>
-            </div>
-
-          </div>
-        ) : (
-          /* Normal Voice & Text Input Layout */
-          <div className="flex items-center space-x-2">
-            
-            {/* Big Voice Microphone Button */}
+      {/* Suggested Questions Carousel */}
+      <div className="bg-slate-950/70 border-t border-slate-800 px-3 py-2 shrink-0">
+        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar py-1 text-[11px]">
+          <span className="text-slate-400 font-semibold shrink-0 flex items-center space-x-1 pl-1">
+            <Sparkles className="w-3 h-3 text-amber-400" />
+            <span>Topics:</span>
+          </span>
+          {STARTER_QUESTIONS.map((q, idx) => (
             <button
-              type="button"
-              onClick={handleToggleRecord}
-              disabled={Boolean(statusState)}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs flex items-center space-x-1.5 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer disabled:opacity-50 shrink-0"
-              title="Speak Question into Microphone"
+              key={idx}
+              onClick={() => handleSendText(q)}
+              disabled={statusState !== null || isRecording}
+              className="shrink-0 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 hover:border-slate-600 transition-all cursor-pointer whitespace-nowrap disabled:opacity-50"
             >
-              <Mic className="w-4 h-4 text-white animate-pulse" />
-              <span className="hidden sm:inline">Speak Query</span>
+              {q}
             </button>
-
-            {/* Text Input Box */}
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                value={inputQuery}
-                onChange={(e) => setInputQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendText();
-                  }
-                }}
-                placeholder="Or type a question about rules, fee refund, schedule..."
-                disabled={Boolean(statusState)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all pr-9 disabled:opacity-50"
-              />
-              
-              <button
-                type="button"
-                onClick={() => handleSendText()}
-                disabled={!inputQuery.trim() || Boolean(statusState)}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition-all disabled:opacity-30 cursor-pointer"
-                title="Send query"
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-          </div>
-        )}
-
+          ))}
+        </div>
       </div>
 
+      {/* Voice Recording Active Bar */}
+      {isRecording && (
+        <div className="bg-gradient-to-r from-red-950 via-slate-900 to-red-950 border-t border-red-800/60 p-3 flex items-center justify-between animate-pulse shrink-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-3 h-3 rounded-full bg-red-500 animate-ping" />
+            <div>
+              <p className="text-xs font-bold text-red-200">Listening to your voice...</p>
+              <p className="text-[10px] text-red-300">
+                Duration: {Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')} | Level: {Math.round(volumeLevel * 100)}%
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleCancelRecord}
+              className="px-3 py-1 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleToggleRecord}
+              className="px-3 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg flex items-center space-x-1 cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Done Speaking</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Input Area */}
+      <div className="bg-slate-950 p-3 border-t border-slate-800 shrink-0">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendText();
+          }}
+          className="flex items-center space-x-2"
+        >
+          {/* Big Voice Microphone Button */}
+          <button
+            type="button"
+            onClick={handleToggleRecord}
+            disabled={statusState === 'transcribing' || statusState === 'thinking'}
+            className={`px-3.5 py-2.5 rounded-xl font-medium text-xs flex items-center space-x-1.5 transition-all shadow-md cursor-pointer shrink-0 disabled:opacity-50 ${
+              isRecording
+                ? 'bg-red-600 text-white animate-pulse shadow-red-600/30'
+                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
+            }`}
+            title="Ask by voice"
+          >
+            {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            <span className="hidden sm:inline">{isRecording ? 'Stop Recording' : 'Speak Query'}</span>
+          </button>
+
+          {/* Text Input */}
+          <input
+            type="text"
+            value={inputQuery}
+            onChange={(e) => setInputQuery(e.target.value)}
+            placeholder="Ask question about WBJEE 2026 notification..."
+            disabled={statusState !== null || isRecording}
+            className="flex-1 bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition-all disabled:opacity-50"
+          />
+
+          {/* Send Button */}
+          <button
+            type="submit"
+            disabled={!inputQuery.trim() || statusState !== null || isRecording}
+            className="p-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
+            title="Send query"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
