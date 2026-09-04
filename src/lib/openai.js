@@ -26,9 +26,10 @@ export function getSavedModel() {
 }
 
 /**
- * Transcribe recorded audio using Whisper API endpoint with fallbacks
+ * Transcribe recorded audio using Whisper API endpoint with Bengali & English support
+ * Strictly instructs Whisper to output pure Bengali script (বাংলা হরফ) with no Banglish
  */
-export async function transcribeAudio(audioBlob) {
+export async function transcribeAudio(audioBlob, language = 'bn') {
   const fileExtension = audioBlob.type.includes('mp4') || audioBlob.type.includes('m4a') ? 'm4a' 
     : audioBlob.type.includes('ogg') ? 'ogg'
     : audioBlob.type.includes('wav') ? 'wav'
@@ -41,7 +42,14 @@ export async function transcribeAudio(audioBlob) {
   const formData = new FormData();
   formData.append('file', audioFile);
   formData.append('model', 'whisper');
-  formData.append('language', 'en');
+  if (language && language !== 'auto') {
+    formData.append('language', language);
+  }
+  // Strong prompt instructing Whisper to transcribe in pure Bengali script (বাংলা), avoiding Romanized Banglish
+  formData.append(
+    'prompt',
+    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা (WBJEE 2026) বিকেন্দ্রীভূত কাউন্সিলিং (Decentralised Counselling) সংক্রান্ত শিক্ষার্থী ও অভিভাবকদের প্রশ্ন। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে লিখুন, কোনো বাংলিশ (Banglish / Roman script) ব্যবহার করবেন না। Transcribe Bengali in Bengali script (বাংলা হরফে).'
+  );
 
   // Try serverless /api/transcribe first
   try {
@@ -94,6 +102,11 @@ export async function askPdfAssistant({
   const targetModel = model || getSavedModel();
 
   const systemPrompt = `You are an intelligent, thoughtful, and deeply knowledgeable AI advisor for the West Bengal Joint Entrance Examinations Board (WBJEEB) Revised Decentralised Counselling Notification 2026.
+
+LANGUAGE & SCRIPT INSTRUCTIONS:
+- If the candidate speaks or asks in Bengali (বাংলা), you MUST respond in fluent, pure, and elegant Bengali in Bengali script (বিশুদ্ধ বাংলা হরফ). Do NOT use Banglish (English letters for Bengali words). Explain everything thoroughly, warmly, and clearly in Bengali.
+- If the candidate asks in English, respond in English.
+- If the candidate mixes both, respond predominantly in Bengali with standard technical terms.
 
 OFFICIAL 14-PAGE NOTIFICATION CONTENT (GROUND TRUTH):
 =========================================

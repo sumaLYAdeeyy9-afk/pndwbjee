@@ -93,7 +93,7 @@ export function useVoiceRecorder() {
           const recognition = new SpeechRecognitionClass();
           recognition.continuous = true;
           recognition.interimResults = true;
-          recognition.lang = 'en-US';
+          recognition.lang = 'bn-IN';
 
           recognition.onresult = (event) => {
             let current = '';

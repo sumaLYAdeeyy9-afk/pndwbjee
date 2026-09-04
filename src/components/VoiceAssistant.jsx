@@ -3,19 +3,21 @@ import ReactMarkdown from 'react-markdown';
 import { 
   Mic, MicOff, Send, Volume2, VolumeX, Copy, Check, Sparkles, 
   RotateCcw, Loader2, AlertCircle, MessageSquare, Bot, User, 
-  HelpCircle, ChevronDown, CheckCircle2, Volume, History, Database
+  HelpCircle, ChevronDown, CheckCircle2, Volume, History, Database,
+  Languages, Radio
 } from 'lucide-react';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import { transcribeAudio, askPdfAssistant, getSavedApiKey, getSavedModel } from '../lib/openai';
+import { speakText, stopSpeech, isBengaliText } from '../lib/tts';
 
 const STARTER_QUESTIONS = [
   'Who is eligible for Common Online Decentralised Counselling?',
+  'ডিসি ফেজ ১ এ ভর্তি হলে কি রিপ্লেসমেন্ট কোটা শেষ হবে?',
   'Can already-admitted students participate without losing their seat?',
-  'If I take admission in DC Phase 1, is my replacement quota exhausted?',
   'What is the Fee Refund Policy if a student changes college?',
-  'Explain the 5 candidate categories (Category I to V)',
+  'ক্যাটেগরি ১ থেকে ৫ এর নিয়মগুলি সহজ ভাষায় বুঝিয়ে বলুন',
   'How does Round 2 Upgradation work in each Phase?',
-  'What are the grounds for rejection during document verification?'
+  'ডকুমেন্ট ভেরিফিকেশনে কী কী কারণে বাতিল হতে পারে?'
 ];
 
 const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
@@ -23,7 +25,7 @@ const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
 const INITIAL_WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  content: `### Welcome to the Official WBJEE 2026 Counselling Assistant 🎙️\n\nI am powered by **Azure OpenAI (GPT 5.4 Mini)** with the **complete 14-page Revised Decentralised Counselling Notification (No. WBE/EX-56/2026)** and **conversation memory** active.\n\n* 🎙️ **Tap "Speak Query"** below to ask your question by voice.\n* ⚡ **Or click any topic chip** or type your query in the box below.\n* 🧠 **Memory is active**: Your questions and answers are remembered so you can ask follow-ups naturally!`,
+  content: `### Welcome to the Official WBJEE 2026 Counselling Assistant 🎙️\n\nI am powered by **Azure OpenAI (GPT 5.4 Mini & Whisper STT)** with the **complete 14-page Revised Notification** and **full Bengali (বিশুদ্ধ বাংলা) voice input & TTS** support.\n\n* 🎙️ **Tap "Speak Query"** to ask your question in **বাংলা** or **English**.\n* 🔊 **Text-to-Speech (TTS)**: Listens and speaks back in clear Bengali or English audio.\n* 🧠 **Conversation Memory**: Remembers past questions so you can ask follow-ups naturally!`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 };
 
@@ -48,6 +50,8 @@ export default function VoiceAssistant({ defaultQuery }) {
   const [statusState, setStatusState] = useState(null); // 'recording' | 'transcribing' | 'thinking' | null
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('bn'); // 'bn' (Pure Bengali) | 'auto'
+  const [autoVoiceTts, setAutoVoiceTts] = useState(true); // Auto-read answers with TTS
 
   const messagesEndRef = useRef(null);
   const { 
@@ -70,6 +74,13 @@ export default function VoiceAssistant({ defaultQuery }) {
     }
   }, [messages]);
 
+  // Clean up speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      stopSpeech();
+    };
+  }, []);
+
   // Scroll chat to bottom on new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -82,29 +93,21 @@ export default function VoiceAssistant({ defaultQuery }) {
     }
   }, [defaultQuery]);
 
-  // Handle SpeechSynthesis Text-To-Speech
-  const handleSpeak = (messageId, text) => {
-    if (!window.speechSynthesis) return;
-
+  // Toggle TTS audio playback for a message
+  const handleToggleSpeak = (messageId, text) => {
     if (speakingId === messageId) {
-      window.speechSynthesis.cancel();
+      stopSpeech();
       setSpeakingId(null);
       return;
     }
 
-    window.speechSynthesis.cancel();
-    const cleanText = text
-      .replace(/[#*`_~[\]()]/g, '')
-      .replace(/\n+/g, '. ');
-
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.onend = () => setSpeakingId(null);
-    utterance.onerror = () => setSpeakingId(null);
-
+    stopSpeech();
     setSpeakingId(messageId);
-    window.speechSynthesis.speak(utterance);
+    speakText(text, {
+      onStart: () => setSpeakingId(messageId),
+      onEnd: () => setSpeakingId(null),
+      onError: () => setSpeakingId(null)
+    });
   };
 
   // Copy message text
@@ -117,7 +120,7 @@ export default function VoiceAssistant({ defaultQuery }) {
 
   // Clear chat memory
   const handleClearChat = () => {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopSpeech();
     setSpeakingId(null);
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -127,13 +130,13 @@ export default function VoiceAssistant({ defaultQuery }) {
       {
         id: `welcome-reset-${Date.now()}`,
         role: 'assistant',
-        content: `Chat memory cleared. Tap **Speak Query** or select a topic to ask another question based on the official 14-page notification.`,
+        content: `Chat memory cleared. Tap **Speak Query** or select a topic to ask another question in **বাংলা** or **English**.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
   };
 
-  // Main dispatch query logic with conversational memory and SSE streaming
+  // Main dispatch query logic with conversational memory, SSE streaming and TTS
   const processQuery = async (queryText, isVoice = false) => {
     const userMsgId = `user-${Date.now()}`;
     const userMessage = {
@@ -191,6 +194,16 @@ export default function VoiceAssistant({ defaultQuery }) {
           m.id === assistantMsgId ? { ...m, content: finalAnswer } : m
         )
       );
+
+      // Speak response using TTS if voice query or autoVoiceTts is enabled
+      if (finalAnswer && (isVoice || autoVoiceTts)) {
+        setSpeakingId(assistantMsgId);
+        speakText(finalAnswer, {
+          onStart: () => setSpeakingId(assistantMsgId),
+          onEnd: () => setSpeakingId(null),
+          onError: () => setSpeakingId(null)
+        });
+      }
     } catch (err) {
       setMessages(prev =>
         prev.map(m =>
@@ -217,28 +230,29 @@ export default function VoiceAssistant({ defaultQuery }) {
     processQuery(query.trim(), false);
   };
 
-  // Handle Voice Record Button Click
+  // Handle Voice Record Button Click with Whisper Pure Bengali Transcription
   const handleToggleRecord = async () => {
     if (isRecording) {
       setStatusState('transcribing');
+      stopSpeech();
       try {
         const recordResult = await stopRecording();
-        const liveText = recordResult?.liveTranscript;
         const audioBlob = recordResult?.audioBlob;
 
-        // 1. If live transcript was captured by browser speech recognition, use it immediately!
-        if (liveText && liveText.trim().length > 0) {
-          processQuery(liveText.trim(), true);
-          return;
-        }
-
-        // 2. Otherwise transcribe audio blob with Whisper API
+        // 1. Send pristine audio blob directly to Whisper API with Bengali language parameter
         if (audioBlob && audioBlob.size > 100) {
-          const transcript = await transcribeAudio(audioBlob);
+          const transcript = await transcribeAudio(audioBlob, selectedLanguage);
           if (transcript && transcript.trim().length > 0) {
             processQuery(transcript.trim(), true);
             return;
           }
+        }
+
+        // 2. Fallback to live transcript if available
+        const liveText = recordResult?.liveTranscript;
+        if (liveText && liveText.trim().length > 0) {
+          processQuery(liveText.trim(), true);
+          return;
         }
 
         setMessages(prev => [
@@ -246,7 +260,7 @@ export default function VoiceAssistant({ defaultQuery }) {
           {
             id: `warn-${Date.now()}`,
             role: 'assistant',
-            content: '🎙️ *Could not detect any clear speech. Please try speaking closer to your microphone.*',
+            content: '🎙️ *কোনো স্পষ্ট কথা শনাক্ত করা যায়নি। অনুগ্রহ করে মাইক্রোফোনের কাছে এসে আবার বলুন।* (Could not detect clear speech. Please try speaking closer to your microphone.)',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
@@ -265,6 +279,7 @@ export default function VoiceAssistant({ defaultQuery }) {
       }
     } else {
       // Start recording
+      stopSpeech();
       try {
         await startRecording();
         setStatusState('recording');
@@ -296,19 +311,47 @@ export default function VoiceAssistant({ defaultQuery }) {
           </div>
         </div>
 
+        {/* Controls Bar */}
         <div className="flex items-center space-x-2">
-          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/70 border border-emerald-500/30 text-emerald-400">
-            <Database className="w-3 h-3" />
-            <span>Memory Active</span>
-          </span>
+          {/* Language Toggle */}
+          <button
+            onClick={() => setSelectedLanguage(prev => prev === 'bn' ? 'auto' : 'bn')}
+            className={`flex items-center space-x-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${
+              selectedLanguage === 'bn'
+                ? 'bg-emerald-950/80 border-emerald-500/40 text-emerald-300'
+                : 'bg-slate-800/80 border-slate-700 text-slate-300'
+            }`}
+            title="Click to toggle language mode (Pure Bengali / Auto)"
+          >
+            <Languages className="w-3 h-3 text-emerald-400" />
+            <span>{selectedLanguage === 'bn' ? 'বাংলা (Bengali)' : 'Auto / EN'}</span>
+          </button>
 
+          {/* Auto-TTS Toggle */}
+          <button
+            onClick={() => {
+              if (speakingId) stopSpeech();
+              setAutoVoiceTts(prev => !prev);
+            }}
+            className={`flex items-center space-x-1 px-2 py-0.5 rounded-full text-[11px] font-medium border transition-all cursor-pointer ${
+              autoVoiceTts
+                ? 'bg-indigo-950/80 border-indigo-500/40 text-indigo-300'
+                : 'bg-slate-800/80 border-slate-700 text-slate-400'
+            }`}
+            title="Toggle Auto Text-To-Speech audio readout"
+          >
+            {autoVoiceTts ? <Volume2 className="w-3 h-3 text-indigo-400" /> : <VolumeX className="w-3 h-3 text-slate-500" />}
+            <span className="hidden sm:inline">TTS {autoVoiceTts ? 'ON' : 'OFF'}</span>
+          </button>
+
+          {/* Clear Memory */}
           <button
             onClick={handleClearChat}
             className="flex items-center space-x-1 text-slate-400 hover:text-slate-200 px-2 py-1 rounded-lg text-xs bg-slate-800/60 hover:bg-slate-800 transition-all cursor-pointer"
             title="Clear conversation memory and reset chat"
           >
             <RotateCcw className="w-3 h-3" />
-            <span className="hidden sm:inline">Clear Memory</span>
+            <span className="hidden sm:inline">Reset</span>
           </button>
         </div>
       </div>
@@ -316,12 +359,12 @@ export default function VoiceAssistant({ defaultQuery }) {
       {/* Message Stream */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
         {messages.map((msg) => {
-          // If empty streaming placeholder and thinking, don't show empty bubble
           if (msg.role === 'assistant' && !msg.content && statusState === 'thinking') {
             return null;
           }
 
           const isUser = msg.role === 'user';
+          const isCurrentlySpeaking = speakingId === msg.id;
 
           return (
             <div
@@ -348,6 +391,8 @@ export default function VoiceAssistant({ defaultQuery }) {
                     ? 'bg-blue-600 text-white rounded-tr-none'
                     : msg.isError
                     ? 'bg-red-950/50 border border-red-800/50 text-red-200 rounded-tl-none'
+                    : isCurrentlySpeaking
+                    ? 'bg-slate-800 border-2 border-indigo-500/70 rounded-tl-none shadow-lg shadow-indigo-500/10'
                     : 'bg-slate-800/90 border border-slate-700/60 rounded-tl-none shadow-sm'
                 }`}
               >
@@ -356,6 +401,14 @@ export default function VoiceAssistant({ defaultQuery }) {
                   <div className="inline-flex items-center space-x-1 text-[10px] text-blue-200 mb-1.5 px-2 py-0.5 rounded-full bg-blue-700/50">
                     <Mic className="w-2.5 h-2.5" />
                     <span>Voice Query</span>
+                  </div>
+                )}
+
+                {/* Speaking Audio Banner */}
+                {isCurrentlySpeaking && (
+                  <div className="flex items-center space-x-1.5 text-[10px] font-semibold text-indigo-300 mb-2 px-2 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/30 animate-pulse">
+                    <Volume2 className="w-3 h-3 text-indigo-400" />
+                    <span>Reading out loud (TTS)...</span>
                   </div>
                 )}
 
@@ -369,22 +422,32 @@ export default function VoiceAssistant({ defaultQuery }) {
                   <span>{msg.timestamp}</span>
 
                   {!isUser && msg.content && !msg.isError && (
-                    <div className="flex items-center space-x-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center space-x-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => handleSpeak(msg.id, msg.content)}
-                        className="p-1 hover:text-white rounded hover:bg-slate-700/50 cursor-pointer"
-                        title={speakingId === msg.id ? 'Stop reading' : 'Read aloud'}
+                        onClick={() => handleToggleSpeak(msg.id, msg.content)}
+                        className={`p-1.5 rounded transition-colors cursor-pointer flex items-center space-x-1 ${
+                          isCurrentlySpeaking
+                            ? 'bg-indigo-600 text-white font-bold'
+                            : 'hover:text-white hover:bg-slate-700/60 text-slate-300'
+                        }`}
+                        title={isCurrentlySpeaking ? 'Stop reading' : 'Read aloud with Bengali/English TTS'}
                       >
-                        {speakingId === msg.id ? (
-                          <VolumeX className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                        {isCurrentlySpeaking ? (
+                          <>
+                            <VolumeX className="w-3.5 h-3.5 text-white" />
+                            <span className="text-[10px]">Stop</span>
+                          </>
                         ) : (
-                          <Volume2 className="w-3.5 h-3.5" />
+                          <>
+                            <Volume2 className="w-3.5 h-3.5" />
+                            <span className="text-[10px] hidden sm:inline">Listen</span>
+                          </>
                         )}
                       </button>
 
                       <button
                         onClick={() => handleCopy(msg.id, msg.content)}
-                        className="p-1 hover:text-white rounded hover:bg-slate-700/50 cursor-pointer"
+                        className="p-1.5 hover:text-white rounded hover:bg-slate-700/60 cursor-pointer"
                         title="Copy text"
                       >
                         {copiedId === msg.id ? (
@@ -410,8 +473,8 @@ export default function VoiceAssistant({ defaultQuery }) {
             <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 flex items-center space-x-3 text-slate-300">
               <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
               <div className="space-y-0.5">
-                <p className="text-xs font-semibold text-slate-200">Analyzing notification & conversation memory...</p>
-                <p className="text-[10px] text-slate-400">GPT 5.4 Mini reasoning over 14 pages</p>
+                <p className="text-xs font-semibold text-slate-200">Analyzing 14-page notification & memory...</p>
+                <p className="text-[10px] text-slate-400">GPT 5.4 Mini reasoning in pure Bengali / English</p>
               </div>
             </div>
           </div>
@@ -420,7 +483,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         {statusState === 'transcribing' && (
           <div className="flex items-center justify-center p-3 text-amber-300 bg-amber-950/30 border border-amber-800/40 rounded-xl space-x-2">
             <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-            <span className="text-xs font-medium">Transcribing voice with Whisper AI...</span>
+            <span className="text-xs font-medium">Whisper AI transcribing pure Bengali audio (বাংলা অনুলিপি)...</span>
           </div>
         )}
 
@@ -453,7 +516,7 @@ export default function VoiceAssistant({ defaultQuery }) {
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 rounded-full bg-red-500 animate-ping" />
             <div>
-              <p className="text-xs font-bold text-red-200">Listening to your voice...</p>
+              <p className="text-xs font-bold text-red-200">বাংলায় বা ইংরেজিতে কথা বলুন (Listening)...</p>
               <p className="text-[10px] text-red-300">
                 Duration: {Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')} | Level: {Math.round(volumeLevel * 100)}%
               </p>
@@ -497,10 +560,10 @@ export default function VoiceAssistant({ defaultQuery }) {
                 ? 'bg-red-600 text-white animate-pulse shadow-red-600/30'
                 : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
             }`}
-            title="Ask by voice"
+            title="Ask question by Bengali or English voice"
           >
             {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            <span className="hidden sm:inline">{isRecording ? 'Stop Recording' : 'Speak Query'}</span>
+            <span className="hidden sm:inline">{isRecording ? 'Stop Recording' : 'Speak (বাংলা / EN)'}</span>
           </button>
 
           {/* Text Input */}
@@ -508,7 +571,7 @@ export default function VoiceAssistant({ defaultQuery }) {
             type="text"
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
-            placeholder="Ask question about WBJEE 2026 notification..."
+            placeholder="বাংলায় বা ইংরেজিতে প্রশ্ন লিখুন (e.g., ডিসি ফেজ ১ এ সিট নিলে কি হবে?)..."
             disabled={statusState !== null || isRecording}
             className="flex-1 bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition-all disabled:opacity-50"
           />
