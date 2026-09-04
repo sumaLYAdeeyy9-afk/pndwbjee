@@ -23,7 +23,7 @@ const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
 const INITIAL_WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: 100% powered by **OpenAI Whisper AI API** (Bengali & English audio).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification.\n* 🔊 **Voice Speech (TTS)**: Automatic high-clarity voice output in Bengali & English.\n* 🧠 **Chat Memory**: Remembers past context and follow-ups across questions.\n\nTap **Speak (Whisper AI)** to talk or type your query below!`,
+  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Groq Whisper Large v3** (Pure Bengali & English audio transcription).\n* 🤖 **Reasoning Intelligence**: Powered by **Groq AI** with the full 14-page official notification.\n* 🔊 **Voice Speech (TTS)**: Automatic high-clarity voice output in Bengali & English.\n* 🧠 **Chat Memory**: Remembers past context and follow-ups across questions.\n\nTap **Speak (Whisper AI)** to talk or type your query below!`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 };
 
@@ -463,7 +463,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         {statusState === 'transcribing' && (
           <div className="flex items-center justify-center p-3 text-amber-300 bg-amber-950/40 border border-amber-800/40 rounded-xl space-x-2 animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-            <span className="text-xs font-semibold">OpenAI Whisper AI transcribing audio in pure Bengali (বাংলা অনুলিপি)...</span>
+            <span className="text-xs font-semibold">Groq Whisper Large v3 transcribing audio in pure Bengali (বাংলা অনুলিপি)...</span>
           </div>
         )}
 
@@ -476,7 +476,7 @@ export default function VoiceAssistant({ defaultQuery }) {
               <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
               <div className="space-y-0.5">
                 <p className="text-xs font-semibold text-slate-200">Analyzing 14-page notification & memory...</p>
-                <p className="text-[10px] text-slate-400">GPT 5.4 Mini reasoning in pure Bengali / English</p>
+                <p className="text-[10px] text-slate-400">Groq AI reasoning in pure Bengali / English</p>
               </div>
             </div>
           </div>

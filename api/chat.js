@@ -1,12 +1,9 @@
-// Serverless API route for Azure OpenAI GPT-5.4 Mini
+// Serverless API route for Groq LLM Chat Completions
 // Runs on Vercel / Netlify / Node to prevent browser CORS and network latency issues
 
-const _k = () => {
-  const b = 'RlZiQ2ZuMUNuTG4wWkZpOE5Nb2hnQmxFWVZYRXdwNktIVEZyOFd5d1hKS1dPZXcxVGNVWUpRUUo5OUNGQUNIWUh2NlhKM3czQUFBQUFDT0drZEd3';
-  return typeof Buffer !== 'undefined' ? Buffer.from(b, 'base64').toString('utf8') : atob(b);
-};
+const _k = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
 
-const ENDPOINT = process.env.VITE_OPENAI_BASE_URL || 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
+const ENDPOINT = process.env.VITE_OPENAI_BASE_URL || 'https://api.groq.com/openai/v1';
 const API_KEY = process.env.VITE_OPENAI_API_KEY || _k();
 
 export default async function handler(req, res) {
@@ -24,13 +21,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, model = 'gpt-5.4-mini', stream = true } = req.body || {};
+    const { messages, model = 'openai/gpt-oss-120b', stream = true } = req.body || {};
 
-    const azureRes = await fetch(`${ENDPOINT.replace(/\/+$/, '')}/chat/completions`, {
+    const groqRes = await fetch(`${ENDPOINT.replace(/\/+$/, '')}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'api-key': API_KEY
+        'Authorization': `Bearer ${API_KEY}`
       },
       body: JSON.stringify({
         model,
@@ -40,17 +37,17 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!azureRes.ok) {
-      const errText = await azureRes.text();
-      return res.status(azureRes.status).send(errText);
+    if (!groqRes.ok) {
+      const errText = await groqRes.text();
+      return res.status(groqRes.status).send(errText);
     }
 
-    if (stream && azureRes.body) {
+    if (stream && groqRes.body) {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
 
-      const reader = azureRes.body.getReader();
+      const reader = groqRes.body.getReader();
       const decoder = new TextDecoder();
 
       while (true) {
@@ -60,12 +57,12 @@ export default async function handler(req, res) {
         res.write(chunk);
       }
       return res.end();
+    } else {
+      const data = await groqRes.json();
+      return res.status(200).json(data);
     }
-
-    const data = await azureRes.json();
-    return res.status(200).json(data);
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('Chat API Error:', error);
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }

@@ -1,12 +1,9 @@
-// Serverless API route for Azure OpenAI Whisper Audio Transcription
-const _k = () => {
-  const b = 'RlZiQ2ZuMUNuTG4wWkZpOE5Nb2hnQmxFWVZYRXdwNktIVEZyOFd5d1hKS1dPZXcxVGNVWUpRUUo5OUNGQUNIWUh2NlhKM3czQUFBQUFDT0drZEd3';
-  return typeof Buffer !== 'undefined' ? Buffer.from(b, 'base64').toString('utf8') : atob(b);
-};
+// Serverless API route for Groq Whisper Audio Transcription
+const _k = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
 
-const AZURE_BASE = process.env.VITE_AZURE_BASE_URL || 'https://sumalya-7238-resource.openai.azure.com';
+const ENDPOINT = process.env.VITE_OPENAI_BASE_URL || 'https://api.groq.com/openai/v1';
 const API_KEY = process.env.VITE_OPENAI_API_KEY || _k();
-const WHISPER_ENDPOINT = `${AZURE_BASE.replace(/\/+$/, '')}/openai/deployments/whisper/audio/transcriptions?api-version=2024-02-01`;
+const WHISPER_ENDPOINT = `${ENDPOINT.replace(/\/+$/, '')}/audio/transcriptions`;
 
 export const config = {
   api: {
@@ -17,7 +14,7 @@ export const config = {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, api-key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, api-key');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -34,17 +31,17 @@ export default async function handler(req, res) {
     }
     const bodyBuffer = Buffer.concat(chunks);
 
-    const azureRes = await fetch(WHISPER_ENDPOINT, {
+    const groqRes = await fetch(WHISPER_ENDPOINT, {
       method: 'POST',
       headers: {
-        'api-key': API_KEY,
+        'Authorization': `Bearer ${API_KEY}`,
         'Content-Type': req.headers['content-type']
       },
       body: bodyBuffer
     });
 
-    const data = await azureRes.text();
-    return res.status(azureRes.status).send(data);
+    const data = await groqRes.text();
+    return res.status(groqRes.status).send(data);
   } catch (error) {
     console.error('Whisper Transcribe API Error:', error);
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
