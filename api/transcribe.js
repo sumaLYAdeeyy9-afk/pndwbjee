@@ -1,11 +1,12 @@
-// Serverless API route for Whisper Audio Transcription
+// Serverless API route for Azure OpenAI Whisper Audio Transcription
 const _k = () => {
   const b = 'RlZiQ2ZuMUNuTG4wWkZpOE5Nb2hnQmxFWVZYRXdwNktIVEZyOFd5d1hKS1dPZXcxVGNVWUpRUUo5OUNGQUNIWUh2NlhKM3czQUFBQUFDT0drZEd3';
   return typeof Buffer !== 'undefined' ? Buffer.from(b, 'base64').toString('utf8') : atob(b);
 };
 
-const ENDPOINT = process.env.VITE_OPENAI_BASE_URL || 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
+const AZURE_BASE = process.env.VITE_AZURE_BASE_URL || 'https://sumalya-7238-resource.openai.azure.com';
 const API_KEY = process.env.VITE_OPENAI_API_KEY || _k();
+const WHISPER_ENDPOINT = `${AZURE_BASE.replace(/\/+$/, '')}/openai/deployments/whisper/audio/transcriptions?api-version=2024-02-01`;
 
 export const config = {
   api: {
@@ -27,19 +28,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    const azureRes = await fetch(`${ENDPOINT.replace(/\/+$/, '')}/audio/transcriptions`, {
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+    const bodyBuffer = Buffer.concat(chunks);
+
+    const azureRes = await fetch(WHISPER_ENDPOINT, {
       method: 'POST',
       headers: {
         'api-key': API_KEY,
         'Content-Type': req.headers['content-type']
       },
-      body: req
+      body: bodyBuffer
     });
 
     const data = await azureRes.text();
     return res.status(azureRes.status).send(data);
   } catch (error) {
-    console.error('Transcribe API Error:', error);
+    console.error('Whisper Transcribe API Error:', error);
     return res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 }

@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+/**
+ * Clean Voice Audio Recorder Hook (Pure Whisper Audio Capture)
+ * Records raw microphone audio stream via MediaRecorder without any local speech engine
+ */
 export function useVoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [error, setError] = useState(null);
-  const [liveTranscript, setLiveTranscript] = useState('');
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -15,10 +18,6 @@ export function useVoiceRecorder() {
   const animFrameRef = useRef(null);
   const timerRef = useRef(null);
   const resolvePromiseRef = useRef(null);
-
-  // Browser live speech recognition ref
-  const speechRecognitionRef = useRef(null);
-  const liveTranscriptRef = useRef('');
 
   useEffect(() => {
     return () => {
@@ -43,12 +42,6 @@ export function useVoiceRecorder() {
       audioContextRef.current.close().catch(() => {});
       audioContextRef.current = null;
     }
-    if (speechRecognitionRef.current) {
-      try {
-        speechRecognitionRef.current.stop();
-      } catch (e) {}
-      speechRecognitionRef.current = null;
-    }
   };
 
   const updateVolume = () => {
@@ -66,11 +59,9 @@ export function useVoiceRecorder() {
     animFrameRef.current = requestAnimationFrame(updateVolume);
   };
 
-  const startRecording = useCallback(async (preferredLang = 'bn-IN') => {
+  const startRecording = useCallback(async () => {
     setError(null);
     audioChunksRef.current = [];
-    liveTranscriptRef.current = '';
-    setLiveTranscript('');
     setDuration(0);
     setVolumeLevel(0);
 
@@ -83,39 +74,12 @@ export function useVoiceRecorder() {
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
+          autoGainControl: true,
+          channelCount: 1,
+          sampleRate: 16000
         }
       });
       streamRef.current = stream;
-
-      // Initialize SpeechRecognition with user's selected language (bn-IN for Bengali)
-      try {
-        const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognitionClass) {
-          const recognition = new SpeechRecognitionClass();
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          recognition.lang = preferredLang || 'bn-IN';
-
-          recognition.onresult = (event) => {
-            let current = '';
-            for (let i = 0; i < event.results.length; i++) {
-              current += event.results[i][0].transcript;
-            }
-            liveTranscriptRef.current = current;
-            setLiveTranscript(current);
-          };
-
-          recognition.onerror = (e) => {
-            console.warn('SpeechRecognition notice:', e.error);
-          };
-
-          recognition.start();
-          speechRecognitionRef.current = recognition;
-        }
-      } catch (e) {
-        console.warn('Browser SpeechRecognition not active:', e);
-      }
 
       // Audio analysis for volume wave animation
       try {
@@ -152,10 +116,7 @@ export function useVoiceRecorder() {
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         if (resolvePromiseRef.current) {
-          resolvePromiseRef.current({
-            audioBlob,
-            liveTranscript: liveTranscriptRef.current.trim()
-          });
+          resolvePromiseRef.current({ audioBlob });
           resolvePromiseRef.current = null;
         }
       };
@@ -186,15 +147,12 @@ export function useVoiceRecorder() {
       if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
         cleanupResources();
         setIsRecording(false);
-        resolve({ audioBlob: null, liveTranscript: liveTranscriptRef.current.trim() });
+        resolve({ audioBlob: null });
         return;
       }
 
       resolvePromiseRef.current = resolve;
       try {
-        if (speechRecognitionRef.current) {
-          speechRecognitionRef.current.stop();
-        }
         mediaRecorderRef.current.stop();
       } catch (e) {
         console.warn('Error during mediaRecorder stop:', e);
@@ -208,7 +166,6 @@ export function useVoiceRecorder() {
   const cancelRecording = useCallback(() => {
     cleanupResources();
     setIsRecording(false);
-    setLiveTranscript('');
     audioChunksRef.current = [];
     resolvePromiseRef.current = null;
   }, []);
@@ -217,7 +174,6 @@ export function useVoiceRecorder() {
     isRecording,
     duration,
     volumeLevel,
-    liveTranscript,
     error,
     startRecording,
     stopRecording,

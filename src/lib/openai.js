@@ -26,10 +26,10 @@ export function getSavedModel() {
 }
 
 /**
- * Transcribe recorded audio using Whisper API endpoint with Bengali & English support
- * Strictly instructs Whisper to output pure Bengali script (বাংলা হরফ) with no Banglish
+ * Transcribe recorded audio using Whisper API endpoint exclusively
+ * Instructs Whisper to output pure Bengali script (বাংলা হরফ) with no Banglish
  */
-export async function transcribeAudio(audioBlob, language = 'bn') {
+export async function transcribeAudio(audioBlob) {
   const fileExtension = audioBlob.type.includes('mp4') || audioBlob.type.includes('m4a') ? 'm4a' 
     : audioBlob.type.includes('ogg') ? 'ogg'
     : audioBlob.type.includes('wav') ? 'wav'
@@ -42,16 +42,13 @@ export async function transcribeAudio(audioBlob, language = 'bn') {
   const formData = new FormData();
   formData.append('file', audioFile);
   formData.append('model', 'whisper');
-  if (language && language !== 'auto') {
-    formData.append('language', language);
-  }
   // Strong prompt instructing Whisper to transcribe in pure Bengali script (বাংলা), avoiding Romanized Banglish
   formData.append(
     'prompt',
-    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা (WBJEE 2026) বিকেন্দ্রীভূত কাউন্সিলিং (Decentralised Counselling) সংক্রান্ত শিক্ষার্থী ও অভিভাবকদের প্রশ্ন। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে লিখুন, কোনো বাংলিশ (Banglish / Roman script) ব্যবহার করবেন না। Transcribe Bengali in Bengali script (বাংলা হরফে).'
+    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা (WBJEE 2026) বিকেন্দ্রীভূত কাউন্সিলিং (Decentralised Counselling) সংক্রান্ত শিক্ষার্থী ও অভিভাবকদের প্রশ্নাবলী। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে অনুলিপি করুন। কোনো বাংলিশ বা রোমান হরফ ব্যবহার করবেন না। Transcribe spoken Bengali in pure Bengali script (বাংলা).'
   );
 
-  // Try serverless /api/transcribe first
+  // 1. Try serverless /api/transcribe first
   try {
     const res = await fetch('/api/transcribe', {
       method: 'POST',
@@ -59,17 +56,23 @@ export async function transcribeAudio(audioBlob, language = 'bn') {
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.text) return data.text.trim();
+      if (data.text && data.text.trim().length > 0) {
+        return data.text.trim();
+      }
+    } else {
+      const errText = await res.text();
+      console.warn('/api/transcribe response status:', res.status, errText);
     }
   } catch (err) {
-    // fallback
+    console.warn('/api/transcribe proxy notice:', err);
   }
 
-  // Fallback to direct Azure endpoint
+  // 2. Direct Azure Whisper deployment fallback
   try {
     const key = getSavedApiKey();
-    const baseUrl = getSavedBaseUrl();
-    const response = await fetch(`${baseUrl}/audio/transcriptions`, {
+    const azureWhisperUrl = 'https://sumalya-7238-resource.openai.azure.com/openai/deployments/whisper/audio/transcriptions?api-version=2024-02-01';
+    
+    const response = await fetch(azureWhisperUrl, {
       method: 'POST',
       headers: { 'api-key': key },
       body: formData
@@ -80,12 +83,15 @@ export async function transcribeAudio(audioBlob, language = 'bn') {
       if (data.text && data.text.trim().length > 0) {
         return data.text.trim();
       }
+    } else {
+      const errText = await response.text();
+      console.warn('Direct Whisper API error response:', response.status, errText);
     }
   } catch (err) {
     console.warn('Direct Whisper API call error:', err);
   }
 
-  throw new Error('Audio transcription could not be completed. Please try speaking again or type your query below.');
+  throw new Error('Whisper AI could not recognize speech from the audio. Please try speaking again closer to the mic.');
 }
 
 /**
@@ -138,52 +144,85 @@ GUIDELINES FOR YOUR RESPONSES:
 
   let response = null;
 
-  // 1. First attempt: Same-origin /api/chat route (0 CORS, highest reliability)
+  // 1. Try serverless streaming proxy /api/chat
   try {
-    response = await fetch('/api/chat', {
+    const proxyRes = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: targetModel,
         messages: apiMessages,
+        model: targetModel,
         stream: true
       })
     });
-  } catch (apiErr) {
-    console.warn('/api/chat route unavailable, falling back to direct Azure connection:', apiErr);
+
+    if (proxyRes.ok && proxyRes.body) {
+      const reader = proxyRes.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith('data:')) continue;
+          const dataStr = trimmed.replace(/^data:\s*/, '');
+          if (dataStr === '[DONE]') break;
+
+          try {
+            const parsed = JSON.parse(dataStr);
+            const delta = parsed.choices?.[0]?.delta?.content || '';
+            if (delta) {
+              fullText += delta;
+              if (onChunk) onChunk(fullText);
+            }
+          } catch (e) {
+            // keep collecting
+          }
+        }
+      }
+
+      if (fullText.trim().length > 0) {
+        return fullText.trim();
+      }
+    }
+  } catch (err) {
+    console.warn('Serverless SSE streaming fallback to direct Azure:', err);
   }
 
-  // 2. Fallback attempt: Direct Azure endpoint
-  if (!response || !response.ok) {
-    const key = apiKey || getSavedApiKey();
-    const baseUrl = getSavedBaseUrl();
+  // 2. Direct Azure OpenAI Fallback with SSE Streaming
+  const targetKey = apiKey || getSavedApiKey();
+  const baseUrl = getSavedBaseUrl();
 
-    response = await fetch(`${baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': key
-      },
-      body: JSON.stringify({
-        model: targetModel,
-        messages: apiMessages,
-        temperature: 0.5,
-        stream: true
-      })
-    });
-  }
+  response = await fetch(`${baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': targetKey
+    },
+    body: JSON.stringify({
+      model: targetModel,
+      messages: apiMessages,
+      temperature: 0.5,
+      stream: true
+    })
+  });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error?.message || `GPT request failed (Status ${response.status})`);
+    const errText = await response.text();
+    throw new Error(`Azure OpenAI API error (${response.status}): ${errText}`);
   }
 
-  // Stream reader
   if (response.body) {
     const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
+    const decoder = new TextDecoder();
     let fullText = '';
     let buffer = '';
 
@@ -197,28 +236,31 @@ GUIDELINES FOR YOUR RESPONSES:
 
       for (const line of lines) {
         const trimmed = line.trim();
-        if (trimmed.startsWith('data: ') && trimmed !== 'data: [DONE]') {
-          try {
-            const json = JSON.parse(trimmed.replace('data: ', ''));
-            const chunk = json.choices?.[0]?.delta?.content || '';
-            if (chunk) {
-              fullText += chunk;
-              if (onChunk) {
-                onChunk(fullText, chunk);
-              }
-            }
-          } catch (e) {
-            // ignore partial JSON parse errors
+        if (!trimmed || !trimmed.startsWith('data:')) continue;
+        const dataStr = trimmed.replace(/^data:\s*/, '');
+        if (dataStr === '[DONE]') break;
+
+        try {
+          const parsed = JSON.parse(dataStr);
+          const delta = parsed.choices?.[0]?.delta?.content || '';
+          if (delta) {
+            fullText += delta;
+            if (onChunk) onChunk(fullText);
           }
-        }
+        } catch (e) {}
       }
     }
 
     if (fullText.trim().length > 0) {
-      return fullText;
+      return fullText.trim();
     }
   }
 
-  const data = await response.json().catch(() => ({}));
-  return data.choices?.[0]?.message?.content || 'No response generated.';
+  const fallbackData = await response.json();
+  const answer = fallbackData.choices?.[0]?.message?.content;
+  if (!answer) {
+    throw new Error('Received empty response from OpenAI.');
+  }
+
+  return answer;
 }

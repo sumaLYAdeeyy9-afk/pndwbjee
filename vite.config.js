@@ -2,13 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const _k = () => Buffer.from('RlZiQ2ZuMUNuTG4wWkZpOE5Nb2hnQmxFWVZYRXdwNktIVEZyOFd5d1hKS1dPZXcxVGNVWUpRUUo5OUNGQUNIWUh2NlhKM3czQUFBQUFDT0drZEd3', 'base64').toString('utf8');
-const AZURE_ENDPOINT = 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
+const AZURE_BASE = 'https://sumalya-7238-resource.openai.azure.com';
+const AZURE_CHAT_ENDPOINT = `${AZURE_BASE}/openai/v1`;
+const AZURE_WHISPER_ENDPOINT = `${AZURE_BASE}/openai/deployments/whisper/audio/transcriptions?api-version=2024-02-01`;
 
-// Vite plugin to handle /api/chat locally in dev mode
+// Vite plugin to handle /api/chat and /api/transcribe locally in dev mode
 function devApiPlugin() {
   return {
     name: 'dev-api-plugin',
     configureServer(server) {
+      // Chat completion route
       server.middlewares.use('/api/chat', async (req, res) => {
         if (req.method === 'POST') {
           let body = '';
@@ -16,7 +19,7 @@ function devApiPlugin() {
           req.on('end', async () => {
             try {
               const { messages, model = 'gpt-5.4-mini', stream = true } = JSON.parse(body);
-              const azureRes = await fetch(`${AZURE_ENDPOINT}/chat/completions`, {
+              const azureRes = await fetch(`${AZURE_CHAT_ENDPOINT}/chat/completions`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -46,6 +49,38 @@ function devApiPlugin() {
                 const data = await azureRes.text();
                 res.end(data);
               }
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+        } else {
+          res.end();
+        }
+      });
+
+      // Whisper STT route
+      server.middlewares.use('/api/transcribe', async (req, res) => {
+        if (req.method === 'POST') {
+          const chunks = [];
+          req.on('data', chunk => chunks.push(chunk));
+          req.on('end', async () => {
+            try {
+              const bodyBuffer = Buffer.concat(chunks);
+              const azureRes = await fetch(AZURE_WHISPER_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                  'api-key': _k(),
+                  'Content-Type': req.headers['content-type']
+                },
+                body: bodyBuffer
+              });
+
+              const data = await azureRes.text();
+              res.statusCode = azureRes.status;
+              res.setHeader('Content-Type', 'application/json');
+              res.setHeader('Access-Control-Allow-Origin', '*');
+              res.end(data);
             } catch (err) {
               res.statusCode = 500;
               res.end(JSON.stringify({ error: err.message }));
