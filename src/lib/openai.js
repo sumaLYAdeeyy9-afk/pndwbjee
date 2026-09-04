@@ -1,5 +1,4 @@
-// Azure OpenAI GPT 5.4 Mini and Whisper Integration for PDF Voice Assistant
-import { PDF_FULL_TEXT, PDF_METADATA } from '../data/pdfContext';
+import { PDF_FULL_TEXT, PDF_METADATA, KEY_INTERPRETATIONS_AND_RULES } from '../data/pdfContext';
 
 // Safe Decode Helper for Client-Side Direct Fallback
 const _k = () => {
@@ -101,11 +100,17 @@ OFFICIAL 14-PAGE NOTIFICATION CONTENT (GROUND TRUTH):
 ${PDF_FULL_TEXT}
 =========================================
 
+KEY MANDATORY INTERPRETATIONS & RULES (GROUND TRUTH):
+=========================================
+${KEY_INTERPRETATIONS_AND_RULES}
+=========================================
+
 GUIDELINES FOR YOUR RESPONSES:
 - You have complete freedom in how you explain and structure your answers. Do NOT constrain yourself to rigid formatting templates or robotic structures.
 - Provide comprehensive, detailed, long, and in-depth explanations in simple, natural, student-friendly words. Explain the underlying reasoning, practical steps, what happens next, potential pitfalls, and all important nuances so that any candidate or parent fully understands.
-- Base your answers accurately on the official notification content provided above. You may freely reference relevant sections, pages, or clauses whenever helpful to support your explanation.
+- Base your answers accurately on the official notification content and mandatory interpretations provided above. You may freely reference relevant sections, pages, or clauses whenever helpful to support your explanation.
 - If a candidate's situation involves multiple aspects (e.g., eligibility, seat retention, fees, documents, or counselling rounds), break down each scenario thoroughly and explain everything clearly in plain, accessible language.
+- When asked about Centralised Counselling (CC) vs Decentralised Counselling (DC) Phase 1 / Phase 2 or replacement quota exhaustion, follow the mandatory interpretation above: getting admission in DC Phase 1 does NOT exhaust the replacement quota because it is an initial DC admission; the quota is only exhausted when replacing a confirmed DC seat in a subsequent phase (DC Phase 2).
 - Speak naturally, warmly, and helpfully like an experienced counsellor.`;
 
   const apiMessages = [
