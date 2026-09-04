@@ -21,25 +21,24 @@ export function getSavedModel() {
 
 /**
  * Transcribe recorded audio using Azure Whisper API deployment exclusively
- * Strictly instructs Whisper to output pure Bengali script (বাংলা হরফ) with no Banglish
+ * Accepts 16kHz Mono WAV audio and transcribes into pure Bengali script (বাংলা হরফ)
  */
 export async function transcribeAudio(audioBlob) {
-  const fileExtension = audioBlob.type.includes('mp4') || audioBlob.type.includes('m4a') ? 'm4a' 
-    : audioBlob.type.includes('ogg') ? 'ogg'
-    : audioBlob.type.includes('wav') ? 'wav'
-    : 'webm';
-    
-  const audioFile = new File([audioBlob], `speech.${fileExtension}`, {
-    type: audioBlob.type || 'audio/webm'
+  if (!audioBlob || audioBlob.size < 500) {
+    throw new Error('Recorded audio is too short or empty. Please speak clearly into your mic.');
+  }
+
+  const audioFile = new File([audioBlob], 'speech.wav', {
+    type: 'audio/wav'
   });
 
   const formData = new FormData();
   formData.append('file', audioFile);
   formData.append('model', 'whisper');
-  // Domain-specific prompt instructing Whisper to transcribe in pure Bengali script (বাংলা), avoiding Romanized Banglish
+  formData.append('language', 'bn');
   formData.append(
     'prompt',
-    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা (WBJEE 2026) বিকেন্দ্রীভূত কাউন্সিলিং সংক্রান্ত প্রশ্নাবলী। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে অনুলিপি করুন। কোনো বাংলিশ বা রোমান হরফ ব্যবহার করবেন না। Transcribe Bengali in pure Bengali script.'
+    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা WBJEE বিকেন্দ্রীভূত কাউন্সিলিং সংক্রান্ত প্রশ্ন ও উত্তর। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে লিখুন।'
   );
 
   // 1. Try serverless /api/transcribe first
@@ -85,7 +84,7 @@ export async function transcribeAudio(audioBlob) {
     console.warn('Direct Whisper API call error:', err);
   }
 
-  throw new Error('Whisper AI could not recognize speech from the audio. Please speak clearly into your mic.');
+  throw new Error('Whisper AI could not recognize speech from the audio. Please check your mic and try speaking again.');
 }
 
 /**

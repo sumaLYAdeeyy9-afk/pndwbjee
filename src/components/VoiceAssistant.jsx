@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import { transcribeAudio, askPdfAssistant, getSavedApiKey, getSavedModel } from '../lib/openai';
-import { speakText, stopSpeech } from '../lib/tts';
+import { speakText, stopSpeech, unlockSpeech } from '../lib/tts';
 
 const STARTER_QUESTIONS = [
   'Who is eligible for Common Online Decentralised Counselling?',
@@ -92,6 +92,7 @@ export default function VoiceAssistant({ defaultQuery }) {
 
   // Toggle TTS audio playback for a message
   const handleToggleSpeak = (messageId, text) => {
+    unlockSpeech();
     if (speakingId === messageId) {
       stopSpeech();
       setSpeakingId(null);
@@ -220,6 +221,7 @@ export default function VoiceAssistant({ defaultQuery }) {
 
   // Handle Manual Text Submission
   const handleSendText = (textToSend) => {
+    unlockSpeech();
     const query = typeof textToSend === 'string' ? textToSend : inputQuery;
     if (!query || !query.trim() || statusState) return;
 
@@ -229,6 +231,7 @@ export default function VoiceAssistant({ defaultQuery }) {
 
   // Handle Voice Record Button: 100% Pure Whisper AI STT API Pipeline
   const handleToggleRecord = async () => {
+    unlockSpeech();
     if (isRecording) {
       setStatusState('transcribing');
       stopSpeech();

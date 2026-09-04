@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { WavAudioRecorder } from '../lib/audioRecorder';
 
 /**
- * Clean Voice Audio Recorder Hook (Pure Whisper Audio Capture)
- * Records raw microphone audio stream via MediaRecorder without any local speech engine
+ * Clean Voice Audio Recorder Hook
+ * Generates 16kHz 16-bit Mono WAV audio for pristine Whisper AI transcription
  */
 export function useVoiceRecorder() {
   const [isRecording, setIsRecording] = useState(false);
@@ -10,14 +11,12 @@ export function useVoiceRecorder() {
   const [volumeLevel, setVolumeLevel] = useState(0);
   const [error, setError] = useState(null);
 
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
+  const wavRecorderRef = useRef(null);
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const animFrameRef = useRef(null);
   const timerRef = useRef(null);
-  const resolvePromiseRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -33,6 +32,10 @@ export function useVoiceRecorder() {
     if (animFrameRef.current) {
       cancelAnimationFrame(animFrameRef.current);
       animFrameRef.current = null;
+    }
+    if (wavRecorderRef.current) {
+      wavRecorderRef.current.cancel();
+      wavRecorderRef.current = null;
     }
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
@@ -61,7 +64,6 @@ export function useVoiceRecorder() {
 
   const startRecording = useCallback(async () => {
     setError(null);
-    audioChunksRef.current = [];
     setDuration(0);
     setVolumeLevel(0);
 
@@ -70,70 +72,28 @@ export function useVoiceRecorder() {
         throw new Error('Microphone audio recording is not supported on this browser.');
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          channelCount: 1,
-          sampleRate: 16000
-        }
-      });
-      streamRef.current = stream;
-
-      // Audio analysis for volume wave animation
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioContextClass();
-        audioContextRef.current = audioCtx;
-        const source = audioCtx.createMediaStreamSource(stream);
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 64;
-        source.connect(analyser);
-        analyserRef.current = analyser;
-      } catch (err) {
-        console.warn('AudioContext analysis not available:', err);
-      }
-
-      let mimeType = 'audio/webm';
-      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-        mimeType = 'audio/webm;codecs=opus';
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        mimeType = 'audio/mp4';
-      } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-        mimeType = 'audio/ogg';
-      }
-
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        if (resolvePromiseRef.current) {
-          resolvePromiseRef.current({ audioBlob });
-          resolvePromiseRef.current = null;
-        }
-      };
-
-      mediaRecorder.start(200);
+      // 1. Start Studio 16kHz WAV Recorder
+      const recorder = new WavAudioRecorder();
+      wavRecorderRef.current = recorder;
+      await recorder.start();
       setIsRecording(true);
 
-      // Duration counter
+      // 2. Setup visual volume analyzer
+      if (recorder.audioContext && recorder.sourceNode) {
+        try {
+          const analyser = recorder.audioContext.createAnalyser();
+          analyser.fftSize = 64;
+          recorder.sourceNode.connect(analyser);
+          analyserRef.current = analyser;
+          animFrameRef.current = requestAnimationFrame(updateVolume);
+        } catch (e) {}
+      }
+
+      // 3. Duration timer
       const startTime = Date.now();
       timerRef.current = setInterval(() => {
         setDuration(Math.floor((Date.now() - startTime) / 1000));
       }, 1000);
-
-      // Start volume animation
-      if (analyserRef.current) {
-        animFrameRef.current = requestAnimationFrame(updateVolume);
-      }
     } catch (err) {
       cleanupResources();
       setError(err.message || 'Microphone access was denied or is unavailable.');
@@ -142,32 +102,37 @@ export function useVoiceRecorder() {
     }
   }, []);
 
-  const stopRecording = useCallback(() => {
-    return new Promise((resolve) => {
-      if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
-        cleanupResources();
-        setIsRecording(false);
-        resolve({ audioBlob: null });
-        return;
-      }
-
-      resolvePromiseRef.current = resolve;
-      try {
-        mediaRecorderRef.current.stop();
-      } catch (e) {
-        console.warn('Error during mediaRecorder stop:', e);
-      }
-
+  const stopRecording = useCallback(async () => {
+    if (!wavRecorderRef.current || !isRecording) {
       cleanupResources();
       setIsRecording(false);
-    });
-  }, []);
+      return { audioBlob: null };
+    }
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+
+    try {
+      const audioBlob = await wavRecorderRef.current.stop();
+      wavRecorderRef.current = null;
+      setIsRecording(false);
+      return { audioBlob };
+    } catch (e) {
+      cleanupResources();
+      setIsRecording(false);
+      return { audioBlob: null };
+    }
+  }, [isRecording]);
 
   const cancelRecording = useCallback(() => {
     cleanupResources();
     setIsRecording(false);
-    audioChunksRef.current = [];
-    resolvePromiseRef.current = null;
   }, []);
 
   return {
