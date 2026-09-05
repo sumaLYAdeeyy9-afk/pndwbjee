@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { 
   FileText, ExternalLink, Download, Maximize2, Minimize2, 
-  BookOpen, ChevronRight, Sparkles, Layers, ShieldCheck, HelpCircle
+  BookOpen, ChevronRight, Layers, ShieldCheck, CheckCircle2 
 } from 'lucide-react';
 import { PDF_METADATA } from '../data/pdfContext';
 
 const QUICK_SECTIONS = [
-  { clause: '5', title: '5 Eligible Categories', page: 2, query: 'Explain the 5 candidate categories (Category I to V) under Clause 5' },
-  { clause: '6', title: 'Registration & Rs 250 Fee', page: 3, query: 'What is the registration process and fee under Clause 6?' },
-  { clause: '9', title: 'Merit Priority Hierarchy', page: 4, query: 'How does the merit rank source priority work (WBJEE vs JEE Main vs HMR)?' },
-  { clause: '13', title: '2-Round Phase Structure', page: 6, query: 'How does the 2-Round structure and upgradation work in Clause 13?' },
-  { clause: '14', title: 'Seat Protection Guarantee', page: 7, query: 'How is an existing admission protected under Clause 14?' },
-  { clause: '15', title: 'Document Verification & Rejection', page: 8, query: 'What are the grounds for institutional rejection under Clause 15?' },
-  { clause: '18', title: 'Fee Refund Policy & Rules', page: 11, query: 'What is the exact Fee Refund policy when changing colleges under Clause 18?' }
+  { clause: '5', title: '5 Eligible Categories', page: 2, summary: 'Category I (Admitted), II (Allotted not admitted), III (Unallotted), IV (Not registered), V (All-India JEE)' },
+  { clause: '6', title: 'Registration & ₹250 Fee', page: 3, summary: 'Online registration on participating institute portals with ₹250 non-refundable fee per institute' },
+  { clause: '9', title: 'Merit Priority Hierarchy', page: 4, summary: 'Statutory priority order: WBJEE GMR (Tier 1) > JEE Main (Tier 2) > 10+2 HMR (Tier 3)' },
+  { clause: '13', title: '2-Round Phase Structure', page: 6, summary: 'Phase 1 allotment followed by Phase 2 institutional vacancy upgradation round' },
+  { clause: '14', title: 'Seat Protection Guarantee', page: 7, summary: 'Admitted candidates do NOT surrender seats. Current admission remains 100% safe & protected' },
+  { clause: '15', title: 'Physical Verification & Docs', page: 8, summary: 'Physical reporting within institutional window with original domicile and category certificates' },
+  { clause: '18', title: 'Fee Refund Policy', page: 11, summary: 'Full refund/adjustment of ₹5,000 SAF and college tuition fees when upgrading colleges' }
 ];
 
-export default function PdfViewer({ onAskQuestion }) {
+export default function PdfViewer({ onSelectClause }) {
   const [showSections, setShowSections] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -96,42 +96,36 @@ export default function PdfViewer({ onAskQuestion }) {
       {showSections && (
         <div className="bg-slate-950/95 border-b border-slate-800 p-3.5 space-y-2 animate-fade-in text-xs shrink-0 max-h-56 overflow-y-auto">
           <div className="flex items-center justify-between text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-            <span>Quick Index & 1-Tap AI Explanations:</span>
-            <span className="text-indigo-400">Click any clause to ask AI</span>
+            <span>Official Notification Index:</span>
+            <span className="text-indigo-400">14-Page Ground Truth</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {QUICK_SECTIONS.map((sec) => (
-              <button
-                key={sec.clause}
-                onClick={() => {
-                  if (onAskQuestion) onAskQuestion(sec.query);
-                }}
-                className="flex items-center justify-between p-2 rounded-xl bg-slate-900 hover:bg-indigo-950/50 border border-slate-800 hover:border-indigo-500/50 text-left transition-all group cursor-pointer"
+            {QUICK_SECTIONS.map((sec, idx) => (
+              <div
+                key={idx}
+                className="p-2 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between"
               >
-                <div className="flex items-center space-x-2">
-                  <span className="font-mono text-[11px] font-bold text-indigo-400 bg-indigo-950/80 px-1.5 py-0.5 rounded border border-indigo-500/30">
-                    §{sec.clause}
-                  </span>
-                  <span className="font-semibold text-slate-200 group-hover:text-white text-xs">
-                    {sec.title}
+                <div className="flex items-center justify-between text-slate-200 font-bold text-xs">
+                  <span>Clause {sec.clause}: {sec.title}</span>
+                  <span className="text-[10px] font-mono text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                    Page {sec.page}
                   </span>
                 </div>
-                <div className="flex items-center space-x-1 text-slate-400 group-hover:text-indigo-300 text-[11px]">
-                  <span>P.{sec.page}</span>
-                  <Sparkles className="w-3 h-3 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </button>
+                <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
+                  {sec.summary}
+                </p>
+              </div>
             ))}
           </div>
         </div>
       )}
 
       {/* Embedded PDF Viewer Frame */}
-      <div className="flex-1 w-full h-full bg-slate-950 relative overflow-hidden">
+      <div className="flex-1 w-full bg-slate-950 relative overflow-hidden">
         <iframe
-          src={`${PDF_METADATA.fileUrl}#toolbar=1&navpanes=0&scrollbar=1`}
-          title="WBJEE 2026 Revised Decentralised Counselling Notification PDF"
+          src={`${PDF_METADATA.fileUrl}#view=FitH&toolbar=1&navpanes=1`}
+          title="WBJEE 2026 Decentralised Counselling Notification PDF"
           className="w-full h-full border-0"
         />
       </div>
