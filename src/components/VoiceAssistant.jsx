@@ -32,7 +32,9 @@ const STT_MODES = [
 
 const SARVAM_SPEAKERS = [
   { id: 'shreya', label: 'Sarvam Shreya (বাংলা Female)' },
-  { id: 'soham', label: 'Sarvam Soham (বাংলা Male)' }
+  { id: 'shubh', label: 'Sarvam Shubh (বাংলা / Indian Male)' },
+  { id: 'soham', label: 'Sarvam Soham (বাংলা Male)' },
+  { id: 'roopa', label: 'Sarvam Roopa (বাংলা Female)' }
 ];
 
 const INITIAL_WELCOME = {
