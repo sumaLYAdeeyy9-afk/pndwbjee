@@ -1,4 +1,5 @@
-// Bulletproof Text-to-Speech (TTS) Engine with Bengali & English Sentence-Queueing & User-Gesture Unlocking
+// Bulletproof Text-to-Speech (TTS) Engine with Microsoft Azure Neural Bengali Voice & Browser Fallback
+import { speakAzureNeuralTts, stopAzureNeuralTts } from './azureSpeech';
 
 let cachedVoices = [];
 let keepAliveTimer = null;
@@ -61,86 +62,94 @@ export function findBestVoice(voices, isBengali) {
   if (!voices || voices.length === 0) return null;
 
   if (isBengali) {
-    // 1. Look for native Bengali voices
-    const bengaliVoice = voices.find(v => 
-      (v.lang && (v.lang.toLowerCase().startsWith('bn') || v.lang.toLowerCase().includes('bengali'))) ||
-      (v.name && (
-        v.name.toLowerCase().includes('bangla') || 
-        v.name.toLowerCase().includes('bengali') || 
-        v.name.includes('বাংলা') || 
-        v.name.toLowerCase().includes('bashkar') || 
-        v.name.toLowerCase().includes('tanisha')
-      ))
-    );
+    // 1. Bengali specific voices (bn-IN, bn-BD, bengali, etc.)
+    const bengaliVoice = voices.find(v => {
+      const l = (v.lang || '').toLowerCase();
+      const n = (v.name || '').toLowerCase();
+      return l.includes('bn') || l.includes('ben') || n.includes('bengali') || n.includes('bangla') || n.includes('tanishaa') || n.includes('bashkar');
+    });
     if (bengaliVoice) return bengaliVoice;
+
+    // 2. Indian English / Multilingual accent
+    const indianVoice = voices.find(v => {
+      const l = (v.lang || '').toLowerCase();
+      const n = (v.name || '').toLowerCase();
+      return l.includes('en-in') || n.includes('india') || n.includes('neerja') || n.includes('prabhat');
+    });
+    if (indianVoice) return indianVoice;
   }
 
-  // 2. Fallback: Indian English natural voice
-  const inVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en-in'));
-  if (inVoice) return inVoice;
+  // 3. High quality natural English voices
+  const naturalEn = voices.find(v => {
+    const n = (v.name || '').toLowerCase();
+    const l = (v.lang || '').toLowerCase();
+    return (l.startsWith('en') && (n.includes('natural') || n.includes('online') || n.includes('google') || n.includes('samantha')));
+  });
+  if (naturalEn) return naturalEn;
 
-  // 3. Fallback: Standard English voice
-  const enVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
-  if (enVoice) return enVoice;
-
-  return voices[0] || null;
+  // 4. Default voice
+  return voices.find(v => v.default) || voices[0] || null;
 }
 
 /**
- * Clean markdown, tables, bullets, and emojis for natural human-like speech
+ * Split text into small sentence chunks (<120 characters)
  */
-export function cleanTextForSpeech(text) {
-  if (!text) return '';
-  return text
-    .replace(/```[\s\S]*?```/g, '') // strip code blocks
-    .replace(/`([^`]+)`/g, '$1') // inline code
-    .replace(/\|[^\n]+\|/g, ' ') // strip table rows
-    .replace(/[-*#_~>]/g, ' ') // markdown symbols
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // links
-    .replace(/[🎙️⚡🧠✅📌🚀⚠️🔍🤖🔊💡❌💬]/gu, '') // emojis
-    .replace(/&nbsp;/g, ' ')
+export function splitIntoSentenceChunks(text, maxChunkLen = 120) {
+  if (!text) return [];
+
+  // Strip markdown symbols and URLs for clean speech
+  const cleanText = text
+    .replace(/[#*_`~>\[\]\(\)]/g, ' ')
+    .replace(/https?:\/\/\S+/g, '')
     .replace(/\s+/g, ' ')
     .trim();
-}
 
-/**
- * Split text into small sentence chunks (<120 chars) to prevent Chromium TTS freeze
- */
-function splitIntoSentenceChunks(text) {
-  const cleaned = cleanTextForSpeech(text);
-  if (!cleaned) return [];
+  if (!cleanText) return [];
 
-  // Split on Bengali dāṛi (।), full stops, newlines, question/exclamation marks, colons
-  const rawSegments = cleaned.split(/([|।!?\n:]+)/);
+  const rawSentences = cleanText.split(/([।!?\n]+|\.\s+)/);
+  const sentences = [];
+
+  for (let i = 0; i < rawSentences.length; i += 2) {
+    const textPart = rawSentences[i] || '';
+    const delimiter = rawSentences[i + 1] || '';
+    const combined = (textPart + delimiter).trim();
+    if (combined) sentences.push(combined);
+  }
+
   const chunks = [];
-  let buffer = '';
-
-  for (let i = 0; i < rawSegments.length; i++) {
-    const segment = rawSegments[i];
-    if (!segment) continue;
-
-    if (buffer.length + segment.length < 120) {
-      buffer += segment;
+  for (const s of sentences) {
+    if (s.length <= maxChunkLen) {
+      chunks.push(s);
     } else {
-      if (buffer.trim()) chunks.push(buffer.trim());
-      buffer = segment;
+      const words = s.split(/(\s+|,|;|:|-)/);
+      let curr = '';
+      for (const w of words) {
+        if ((curr + w).length <= maxChunkLen) {
+          curr += w;
+        } else {
+          if (curr.trim()) chunks.push(curr.trim());
+          curr = w;
+        }
+      }
+      if (curr.trim()) chunks.push(curr.trim());
     }
   }
-  if (buffer.trim()) chunks.push(buffer.trim());
 
-  return chunks.filter(c => c.length > 0 && c.length < 300);
+  return chunks.filter(c => c && c.length > 0);
 }
 
 function startKeepAlive() {
-  if (keepAliveTimer) clearInterval(keepAliveTimer);
-  keepAliveTimer = setInterval(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-        window.speechSynthesis.pause();
-        window.speechSynthesis.resume();
-      }
-    }
-  }, 3500);
+  stopKeepAlive();
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    keepAliveTimer = setInterval(() => {
+      try {
+        if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        }
+      } catch (e) {}
+    }, 4500);
+  }
 }
 
 function stopKeepAlive() {
@@ -150,7 +159,7 @@ function stopKeepAlive() {
   }
 }
 
-function processNextQueueItem() {
+function processNextBrowserQueueItem() {
   if (currentQueue.length === 0) {
     isQueuePlaying = false;
     stopKeepAlive();
@@ -168,50 +177,38 @@ function processNextQueueItem() {
     utterance.lang = isBengali ? 'bn-IN' : 'en-US';
   }
 
-  utterance.rate = isBengali ? 0.92 : 1.0;
+  utterance.rate = isBengali ? 0.95 : 1.0;
   utterance.pitch = 1.0;
 
   utterance.onend = () => {
-    processNextQueueItem();
+    processNextBrowserQueueItem();
   };
 
   utterance.onerror = (e) => {
     if (e.error !== 'canceled' && e.error !== 'interrupted') {
       console.warn('Utterance speech warning:', e.error);
     }
-    processNextQueueItem();
+    processNextBrowserQueueItem();
   };
 
   try {
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn('Speech synthesis speak error:', err);
-    processNextQueueItem();
+    processNextBrowserQueueItem();
   }
 }
 
-/**
- * Speak text smoothly using chunked Web Speech Synthesis
- */
-export function speakText(text, options = {}) {
-  const {
-    onStart = () => {},
-    onEnd = () => {},
-    onError = () => {}
-  } = options;
-
+function speakWithBrowserFallback(text, { onStart, onEnd, onError }) {
   if (typeof window === 'undefined' || !window.speechSynthesis) {
-    onError(new Error('SpeechSynthesis is not supported on this device.'));
-    return () => {};
+    if (onError) onError(new Error('SpeechSynthesis is not supported on this device.'));
+    return;
   }
-
-  // Cancel any ongoing speech
-  stopSpeech();
 
   const chunks = splitIntoSentenceChunks(text);
   if (chunks.length === 0) {
-    onEnd();
-    return () => {};
+    if (onEnd) onEnd();
+    return;
   }
 
   const isBengali = isBengaliText(text);
@@ -228,9 +225,41 @@ export function speakText(text, options = {}) {
   currentOnError = onError;
   isQueuePlaying = true;
 
-  onStart();
+  if (onStart) onStart();
   startKeepAlive();
-  processNextQueueItem();
+  processNextBrowserQueueItem();
+}
+
+/**
+ * Speak text smoothly with Microsoft Azure Neural Bengali Voice & Browser Fallback
+ */
+export function speakText(text, options = {}) {
+  const {
+    onStart = () => {},
+    onEnd = () => {},
+    onError = () => {}
+  } = options;
+
+  stopSpeech();
+
+  if (!text || !text.trim()) {
+    onEnd();
+    return () => {};
+  }
+
+  // 1. Try Microsoft Azure Neural Bengali Voice (SwiftKey / Azure Neural TTS)
+  try {
+    speakAzureNeuralTts(text, {
+      onStart,
+      onEnd,
+      onError: (err) => {
+        console.warn('Azure Neural TTS notice, switching to browser TTS:', err);
+        speakWithBrowserFallback(text, { onStart, onEnd, onError });
+      }
+    });
+  } catch (e) {
+    speakWithBrowserFallback(text, { onStart, onEnd, onError });
+  }
 
   return () => stopSpeech();
 }
@@ -239,6 +268,7 @@ export function speakText(text, options = {}) {
  * Stop any active audio speech
  */
 export function stopSpeech() {
+  stopAzureNeuralTts();
   stopKeepAlive();
   currentQueue = [];
   isQueuePlaying = false;

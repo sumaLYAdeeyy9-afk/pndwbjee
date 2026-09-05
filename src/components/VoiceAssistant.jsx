@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { 
   Mic, MicOff, Send, Volume2, VolumeX, Copy, Check, Sparkles, 
-  RotateCcw, Loader2, Bot, User, Radio, Cpu, Settings2, Globe
+  RotateCcw, Loader2, Bot, User, Radio, Cpu, Settings2, Globe, Award
 } from 'lucide-react';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import { transcribeAudio, askPdfAssistant, getSavedApiKey, getSavedModel } from '../lib/openai';
 import { speakText, stopSpeech, unlockSpeech } from '../lib/tts';
+import { startAzureLiveRecognition, stopAzureLiveRecognition } from '../lib/azureSpeech';
 
 const STARTER_QUESTIONS = [
   'Who is eligible for Common Online Decentralised Counselling?',
@@ -19,19 +20,20 @@ const STARTER_QUESTIONS = [
 ];
 
 const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
-const STT_MODE_KEY = 'wbjee_stt_mode_v2';
+const STT_MODE_KEY = 'wbjee_stt_mode_v3';
 
 const STT_MODES = [
-  { id: 'whisper-bn', label: 'Whisper (বাংলা)', desc: 'Whisper Large v3 - Pure Bengali Script' },
-  { id: 'whisper-auto', label: 'Whisper (Auto)', desc: 'Whisper Large v3 - Auto-detect Language' },
-  { id: 'whisper-translate', label: 'Whisper (➔ EN)', desc: 'Whisper Large v3 - Spoken Bengali to English' },
-  { id: 'browser-bn', label: 'Google Bengali', desc: 'Browser Real-Time Bengali Engine' }
+  { id: 'microsoft-swiftkey', label: '🏆 Microsoft SwiftKey STT (বাংলা)', desc: 'Official Microsoft Azure Speech - Highest Bengali Accuracy & Live Streaming' },
+  { id: 'whisper-bn', label: 'Whisper Large v3 (বাংলা)', desc: 'OpenAI Whisper Large v3 - Pure Bengali Script' },
+  { id: 'whisper-auto', label: 'Whisper Large v3 (Auto)', desc: 'OpenAI Whisper Large v3 - Auto-detect Language' },
+  { id: 'whisper-translate', label: 'Whisper Large v3 (➔ EN)', desc: 'OpenAI Whisper Large v3 - Spoken Bengali to English' },
+  { id: 'browser-bn', label: 'Google Bengali Engine', desc: 'Browser Real-Time Bengali Engine' }
 ];
 
 const INITIAL_WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Whisper Large v3** (Multiple modes for Bengali & English).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification context.\n* 🔊 **Voice Speech (TTS)**: High-clarity voice output in Bengali & English.\n* 🧠 **Chat Memory**: Remembers past context and follow-ups across questions.\n\nTap **Speak (Whisper AI)** to talk or type your query below!`,
+  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Microsoft SwiftKey / Azure Speech Engine** (High-precision Indian Bengali \`bn-IN\` with live streaming).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification context.\n* 🔊 **Voice Speech (TTS)**: High-definition **Microsoft Neural Bengali Voice** (\`bn-IN-TanishaaNeural\`).\n* 🧠 **Chat Memory**: Full conversational memory across multiple turns and questions.\n\nTap **Speak (SwiftKey AI)** to talk or type your query below!`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 };
 
@@ -53,20 +55,26 @@ export default function VoiceAssistant({ defaultQuery }) {
   });
 
   const [inputQuery, setInputQuery] = useState('');
+  const [liveStreamingText, setLiveStreamingText] = useState('');
   const [statusState, setStatusState] = useState(null); // 'recording' | 'transcribing' | 'thinking' | null
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
-  const [autoVoiceTts, setAutoVoiceTts] = useState(true); // Auto-read answers with TTS
+  const [autoVoiceTts, setAutoVoiceTts] = useState(true); // Auto-read answers with Neural TTS
   
-  // STT Mode Selection
+  // STT Mode Selection (Default to Microsoft SwiftKey STT)
   const [sttMode, setSttMode] = useState(() => {
     try {
-      return localStorage.getItem(STT_MODE_KEY) || 'whisper-bn';
+      return localStorage.getItem(STT_MODE_KEY) || 'microsoft-swiftkey';
     } catch (e) {
-      return 'whisper-bn';
+      return 'microsoft-swiftkey';
     }
   });
 
+  // Microsoft SwiftKey live session ref
+  const [isAzureListening, setIsAzureListening] = useState(false);
+  const azureSessionRef = useRef(null);
+
+  // Browser Speech Recognition ref
   const [isBrowserListening, setIsBrowserListening] = useState(false);
   const browserRecognitionRef = useRef(null);
 
@@ -98,10 +106,11 @@ export default function VoiceAssistant({ defaultQuery }) {
     } catch (e) {}
   }, [sttMode]);
 
-  // Clean up speech synthesis on unmount
+  // Clean up all speech on unmount
   useEffect(() => {
     return () => {
       stopSpeech();
+      stopAzureLiveRecognition();
       if (browserRecognitionRef.current) {
         try {
           browserRecognitionRef.current.stop();
@@ -113,7 +122,7 @@ export default function VoiceAssistant({ defaultQuery }) {
   // Scroll chat to bottom on new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, statusState]);
+  }, [messages, statusState, liveStreamingText]);
 
   // If defaultQuery is triggered externally
   useEffect(() => {
@@ -160,7 +169,7 @@ export default function VoiceAssistant({ defaultQuery }) {
       {
         id: `welcome-reset-${Date.now()}`,
         role: 'assistant',
-        content: `Chat memory cleared. Tap **Speak (Whisper AI)** or select a topic below to ask another question.`,
+        content: `Chat memory cleared. Tap **Speak (SwiftKey AI)** or select a topic below to ask another question.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -196,6 +205,7 @@ export default function VoiceAssistant({ defaultQuery }) {
 
     setMessages(prev => [...prev, userMessage, initialAssistantMsg]);
     setStatusState('thinking');
+    setLiveStreamingText('');
 
     try {
       let streamed = false;
@@ -225,7 +235,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         )
       );
 
-      // Speak response using TTS if voice query or autoVoiceTts is enabled
+      // Speak response using Neural TTS if voice query or autoVoiceTts is enabled
       if (finalAnswer && (isVoice || autoVoiceTts)) {
         setSpeakingId(assistantMsgId);
         speakText(finalAnswer, {
@@ -258,15 +268,75 @@ export default function VoiceAssistant({ defaultQuery }) {
     if (!query || !query.trim() || statusState) return;
 
     setInputQuery('');
+    setLiveStreamingText('');
     processQuery(query.trim(), false);
   };
 
-  // Browser Google Speech Recognition Handler (Alternative Mode)
+  // 1. Microsoft SwiftKey (Azure Cognitive Services Live Speech Engine)
+  const handleToggleAzureSpeech = () => {
+    if (isAzureListening) {
+      if (azureSessionRef.current) {
+        azureSessionRef.current.stop();
+        azureSessionRef.current = null;
+      }
+      setIsAzureListening(false);
+      setStatusState(null);
+      return;
+    }
+
+    stopSpeech();
+    setIsAzureListening(true);
+    setStatusState('recording');
+    setLiveStreamingText('');
+
+    let latestRecognized = '';
+
+    const session = startAzureLiveRecognition({
+      locale: 'bn-IN',
+      onRecognizing: (interimText) => {
+        setLiveStreamingText(interimText);
+        setInputQuery(interimText);
+      },
+      onRecognized: (finalText) => {
+        if (finalText && finalText.trim()) {
+          latestRecognized = finalText.trim();
+          setLiveStreamingText(latestRecognized);
+          setInputQuery(latestRecognized);
+        }
+      },
+      onError: (errDetails) => {
+        console.warn('Azure Speech error:', errDetails);
+        setIsAzureListening(false);
+        setStatusState(null);
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            role: 'assistant',
+            content: `⚠️ **Microsoft Speech Error:** ${errDetails}. You can also use Whisper or Google engine from the mode selector above.`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+      },
+      onEnd: (completeText) => {
+        setIsAzureListening(false);
+        setStatusState(null);
+        const textToProcess = completeText || latestRecognized;
+        if (textToProcess && textToProcess.trim().length > 0) {
+          processQuery(textToProcess.trim(), true);
+        }
+      }
+    });
+
+    azureSessionRef.current = session;
+  };
+
+  // 2. Google Browser Speech Recognition Engine
   const handleToggleBrowserSpeech = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Browser speech recognition is not supported in this browser. Please use Whisper Large v3.');
-      setSttMode('whisper-bn');
+      alert('Browser speech recognition is not supported in this browser. Switching to Microsoft SwiftKey STT.');
+      setSttMode('microsoft-swiftkey');
       return;
     }
 
@@ -287,7 +357,7 @@ export default function VoiceAssistant({ defaultQuery }) {
       browserRecognitionRef.current = recognition;
       recognition.lang = 'bn-IN';
       recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.interimResults = true;
       recognition.maxAlternatives = 1;
 
       let recognizedText = '';
@@ -298,26 +368,23 @@ export default function VoiceAssistant({ defaultQuery }) {
       };
 
       recognition.onresult = (event) => {
-        if (event.results && event.results.length > 0) {
-          recognizedText = event.results[0][0].transcript;
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            recognizedText += event.results[i][0].transcript;
+          } else {
+            interim += event.results[i][0].transcript;
+          }
         }
+        const combined = (recognizedText + ' ' + interim).trim();
+        setLiveStreamingText(combined);
+        setInputQuery(combined);
       };
 
       recognition.onerror = (event) => {
         console.warn('Browser Speech Recognition error:', event.error);
         setIsBrowserListening(false);
         setStatusState(null);
-        if (event.error !== 'no-speech') {
-          setMessages(prev => [
-            ...prev,
-            {
-              id: `err-${Date.now()}`,
-              role: 'assistant',
-              content: `⚠️ **Browser Speech Error:** ${event.error}. You can switch to Whisper (বাংলা) mode above.`,
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }
-          ]);
-        }
       };
 
       recognition.onend = () => {
@@ -336,15 +403,8 @@ export default function VoiceAssistant({ defaultQuery }) {
     }
   };
 
-  // Handle Voice Record Button
-  const handleToggleRecord = async () => {
-    unlockSpeech();
-
-    if (sttMode === 'browser-bn') {
-      handleToggleBrowserSpeech();
-      return;
-    }
-
+  // 3. OpenAI Whisper Large v3 Recorder Handler
+  const handleToggleWhisperRecord = async () => {
     if (isRecording) {
       setStatusState('transcribing');
       stopSpeech();
@@ -366,7 +426,6 @@ export default function VoiceAssistant({ defaultQuery }) {
           return;
         }
 
-        // Transcribe using Whisper Large v3 with chosen mode
         const whisperTranscript = await transcribeAudio(audioBlob, { mode: sttMode });
 
         if (whisperTranscript && whisperTranscript.trim().length > 0) {
@@ -397,7 +456,6 @@ export default function VoiceAssistant({ defaultQuery }) {
         ]);
       }
     } else {
-      // Start recording raw mic stream
       stopSpeech();
       try {
         await startRecording();
@@ -408,8 +466,23 @@ export default function VoiceAssistant({ defaultQuery }) {
     }
   };
 
+  // Master Voice Trigger Button Dispatcher
+  const handleToggleRecord = () => {
+    unlockSpeech();
+    if (sttMode === 'microsoft-swiftkey') {
+      handleToggleAzureSpeech();
+    } else if (sttMode === 'browser-bn') {
+      handleToggleBrowserSpeech();
+    } else {
+      handleToggleWhisperRecord();
+    }
+  };
+
   const handleCancelRecord = () => {
-    if (sttMode === 'browser-bn') {
+    if (sttMode === 'microsoft-swiftkey') {
+      stopAzureLiveRecognition();
+      setIsAzureListening(false);
+    } else if (sttMode === 'browser-bn') {
       if (browserRecognitionRef.current) {
         try {
           browserRecognitionRef.current.abort();
@@ -419,10 +492,11 @@ export default function VoiceAssistant({ defaultQuery }) {
     } else {
       cancelRecording();
     }
+    setLiveStreamingText('');
     setStatusState(null);
   };
 
-  const isCurrentlyRecording = isRecording || isBrowserListening;
+  const isCurrentlyRecording = isRecording || isAzureListening || isBrowserListening;
 
   return (
     <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
@@ -449,7 +523,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         <div className="flex items-center space-x-2">
           {/* STT Mode Selector Pill */}
           <div className="flex items-center space-x-1 bg-slate-800/90 border border-slate-700/80 rounded-lg p-0.5">
-            <Settings2 className="w-3 h-3 text-slate-400 ml-1.5" />
+            <Award className="w-3.5 h-3.5 text-amber-400 ml-1.5" />
             <select
               value={sttMode}
               onChange={(e) => setSttMode(e.target.value)}
@@ -475,7 +549,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                 ? 'bg-indigo-950/80 border-indigo-500/40 text-indigo-300'
                 : 'bg-slate-800/80 border-slate-700 text-slate-400'
             }`}
-            title="Toggle Auto Text-To-Speech audio readout"
+            title="Toggle Microsoft Neural Bengali Voice readout"
           >
             {autoVoiceTts ? <Volume2 className="w-3 h-3 text-indigo-400" /> : <VolumeX className="w-3 h-3 text-slate-500" />}
             <span className="hidden sm:inline">TTS {autoVoiceTts ? 'ON' : 'OFF'}</span>
@@ -537,7 +611,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                 {msg.isVoice && (
                   <div className="inline-flex items-center space-x-1 text-[10px] text-blue-200 mb-1.5 px-2 py-0.5 rounded-full bg-blue-700/50">
                     <Mic className="w-2.5 h-2.5" />
-                    <span>Voice Query</span>
+                    <span>Voice Input</span>
                   </div>
                 )}
 
@@ -545,7 +619,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                 {isCurrentlySpeaking && (
                   <div className="flex items-center space-x-1.5 text-[10px] font-semibold text-indigo-300 mb-2 px-2 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/30 animate-pulse">
                     <Volume2 className="w-3 h-3 text-indigo-400" />
-                    <span>Reading out loud (TTS)...</span>
+                    <span>Speaking in Neural Bengali Voice...</span>
                   </div>
                 )}
 
@@ -567,7 +641,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                             ? 'bg-indigo-600 text-white font-bold'
                             : 'hover:text-white hover:bg-slate-700/60 text-slate-300'
                         }`}
-                        title={isCurrentlySpeaking ? 'Stop reading' : 'Read aloud with Bengali/English TTS'}
+                        title={isCurrentlySpeaking ? 'Stop reading' : 'Read aloud with Neural Bengali Voice'}
                       >
                         {isCurrentlySpeaking ? (
                           <>
@@ -605,7 +679,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         {statusState === 'transcribing' && (
           <div className="flex items-center justify-center p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-xl space-x-2 text-indigo-300 animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="text-xs font-medium">Whisper AI Large v3 transcribing Bengali speech...</span>
+            <span className="text-xs font-medium">Whisper Large v3 processing Bengali audio...</span>
           </div>
         )}
 
@@ -647,17 +721,17 @@ export default function VoiceAssistant({ defaultQuery }) {
         </div>
       </div>
 
-      {/* Voice Recording Active Bar */}
+      {/* Voice Recording Live Streaming Active Bar */}
       {isCurrentlyRecording && (
         <div className="bg-gradient-to-r from-red-950 via-slate-900 to-red-950 border-t border-red-800/60 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 animate-pulse shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 rounded-full bg-red-500 animate-ping shrink-0" />
             <div>
               <p className="text-xs font-bold text-red-200">
-                🎙️ কথা বলুন ({sttMode === 'browser-bn' ? 'Google Bengali Engine' : 'Whisper Large v3'} Active)...
+                🎙️ কথা বলুন ({sttMode === 'microsoft-swiftkey' ? 'Microsoft SwiftKey Engine' : sttMode === 'browser-bn' ? 'Google Bengali Engine' : 'Whisper Large v3'} Active)...
               </p>
-              <p className="text-[10px] text-red-300">
-                {sttMode === 'browser-bn' ? 'Listening in real-time...' : `Duration: ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')} | Level: ${Math.round(volumeLevel * 100)}%`}
+              <p className="text-[10px] text-red-300 truncate max-w-md">
+                {liveStreamingText ? `"${liveStreamingText}"` : 'Listening live in pure Bengali (bn-IN)...'}
               </p>
             </div>
           </div>
@@ -702,7 +776,9 @@ export default function VoiceAssistant({ defaultQuery }) {
             title="Ask question by Voice"
           >
             {isCurrentlyRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            <span className="hidden sm:inline">{isCurrentlyRecording ? 'Stop & Send' : 'Speak'}</span>
+            <span className="hidden sm:inline">
+              {isCurrentlyRecording ? 'Stop & Send' : 'Speak (SwiftKey AI)'}
+            </span>
           </button>
 
           {/* Text Input */}
@@ -710,7 +786,7 @@ export default function VoiceAssistant({ defaultQuery }) {
             type="text"
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
-            placeholder="বাংলায় বা ইংরেজিতে প্রশ্ন লিখুন (e.g., ডিসি ফেজ ১ এ সিট নিলে কি হবে?)..."
+            placeholder="বাংলায় বা ইংরেজিতে প্রশ্ন লিখুন (e.g., ডিসি ফেজ ১ এ সিট নিলে কি হবে?)..."
             disabled={statusState !== null || isCurrentlyRecording}
             className="flex-1 bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition-all disabled:opacity-50"
           />
