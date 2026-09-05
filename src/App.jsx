@@ -12,9 +12,6 @@ export default function App() {
   
   // Active selected candidate constraints
   const [constraints, setConstraints] = useState(DC_PRESETS[0].constraints);
-  
-  // Selected node ID on flowchart for focused inspection
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
 
   // Compute deterministic simulation result in real-time
   const simulationResult = useMemo(() => {
@@ -31,16 +28,16 @@ export default function App() {
       />
 
       {/* Main Full-Width Workspace Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 lg:p-6 flex flex-col h-[calc(100vh-4rem)] min-h-[640px]">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-2 sm:p-4 lg:p-6 flex flex-col h-[calc(100vh-4rem)] min-h-[640px]">
         
-        {/* Tab 1: Flowchart View */}
+        {/* Tab 1: Front Screen - Interactive Scenario Switcher & Progressive Revealed Flowchart */}
         {activeViewTab === 'flowchart' && (
           <div className="flex-1 h-full min-h-0">
             <FlowchartViewer
               simulationResult={simulationResult}
-              selectedNodeId={selectedNodeId}
-              onSelectNode={setSelectedNodeId}
-              onOpenSimulator={() => setActiveViewTab('simulator')}
+              constraints={constraints}
+              onConstraintsChange={setConstraints}
+              onOpenDossier={() => setActiveViewTab('dossier')}
             />
           </div>
         )}
@@ -66,7 +63,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab 4: Official 14-Page Notification PDF in Separate Section */}
+        {/* Tab 4: Official 14-Page Notification PDF in Dedicated Separate Section */}
         {activeViewTab === 'pdf' && (
           <div className="flex-1 h-full min-h-0">
             <PdfViewer />
