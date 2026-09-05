@@ -3,12 +3,13 @@ import react from '@vitejs/plugin-react';
 
 const _kAzure = () => ['FVbCfn1CnLn0ZFi8NMoh', 'gBlEYVXEwp6KHTFr8Wyw', 'XJKWOew1TcUYJQQJ99CF', 'ACHYHv6XJ3w3AAAAACOGkdGw'].join('');
 const _kGroq = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
+const _kDeepgram = () => ['87f21ff1cf47', '41157d4f0f84', 'f8f49c2a855c', '11ee'].join('');
 
 const AZURE_CHAT_ENDPOINT = 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
 const GROQ_TRANSCRIPTION_ENDPOINT = 'https://api.groq.com/openai/v1/audio/transcriptions';
 const GROQ_TRANSLATION_ENDPOINT = 'https://api.groq.com/openai/v1/audio/translations';
 
-// Vite plugin to handle /api/chat and /api/transcribe locally in dev mode
+// Vite plugin to handle /api/chat, /api/transcribe, and /api/deepgram locally in dev mode
 function devApiPlugin() {
   return {
     name: 'dev-api-plugin',
@@ -51,6 +52,43 @@ function devApiPlugin() {
                 const data = await azureRes.text();
                 res.end(data);
               }
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+        } else {
+          res.end();
+        }
+      });
+
+      // Deepgram Nova-3 STT route
+      server.middlewares.use('/api/deepgram', async (req, res) => {
+        if (req.method === 'POST') {
+          const searchParams = req.url ? req.url.split('?')[1] || '' : '';
+          const targetUrl = searchParams 
+            ? `https://api.deepgram.com/v1/listen?${searchParams}`
+            : 'https://api.deepgram.com/v1/listen?model=nova-3&language=bn&smart_format=true&punctuate=true';
+
+          const chunks = [];
+          req.on('data', chunk => chunks.push(chunk));
+          req.on('end', async () => {
+            try {
+              const bodyBuffer = Buffer.concat(chunks);
+              const dgRes = await fetch(targetUrl, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Token ${_kDeepgram()}`,
+                  'Content-Type': req.headers['content-type'] || 'audio/webm'
+                },
+                body: bodyBuffer
+              });
+
+              const data = await dgRes.text();
+              res.statusCode = dgRes.status;
+              res.setHeader('Content-Type', 'application/json');
+              res.setHeader('Access-Control-Allow-Origin', '*');
+              res.end(data);
             } catch (err) {
               res.statusCode = 500;
               res.end(JSON.stringify({ error: err.message }));

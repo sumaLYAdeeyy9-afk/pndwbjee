@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { 
   Mic, MicOff, Send, Volume2, VolumeX, Copy, Check, Sparkles, 
-  RotateCcw, Loader2, Bot, User, Radio, Cpu, Settings2, Globe, Award
+  RotateCcw, Loader2, Bot, User, Radio, Cpu, Settings2, Globe, Zap
 } from 'lucide-react';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import { transcribeAudio, askPdfAssistant, getSavedApiKey, getSavedModel } from '../lib/openai';
+import { transcribeWithDeepgram } from '../lib/deepgram';
 import { speakText, stopSpeech, unlockSpeech } from '../lib/tts';
-import { startAzureLiveRecognition, stopAzureLiveRecognition } from '../lib/azureSpeech';
 
 const STARTER_QUESTIONS = [
   'Who is eligible for Common Online Decentralised Counselling?',
@@ -20,20 +20,19 @@ const STARTER_QUESTIONS = [
 ];
 
 const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
-const STT_MODE_KEY = 'wbjee_stt_mode_v3';
+const STT_MODE_KEY = 'wbjee_stt_mode_v4';
 
 const STT_MODES = [
-  { id: 'microsoft-swiftkey', label: '🏆 Microsoft SwiftKey STT (বাংলা)', desc: 'Official Microsoft Azure Speech - Highest Bengali Accuracy & Live Streaming' },
-  { id: 'whisper-bn', label: 'Whisper Large v3 (বাংলা)', desc: 'OpenAI Whisper Large v3 - Pure Bengali Script' },
-  { id: 'whisper-auto', label: 'Whisper Large v3 (Auto)', desc: 'OpenAI Whisper Large v3 - Auto-detect Language' },
-  { id: 'whisper-translate', label: 'Whisper Large v3 (➔ EN)', desc: 'OpenAI Whisper Large v3 - Spoken Bengali to English' },
-  { id: 'browser-bn', label: 'Google Bengali Engine', desc: 'Browser Real-Time Bengali Engine' }
+  { id: 'deepgram-bn', label: '🚀 Deepgram Nova-3 (বাংলা)', desc: 'Deepgram Nova-3 Flagship - Ultra Fast & High Precision Bengali STT' },
+  { id: 'deepgram-auto', label: '🌐 Deepgram Nova-3 (Auto/EN)', desc: 'Deepgram Nova-3 - Multilingual / English Detection' },
+  { id: 'whisper-bn', label: '🎙️ Whisper Large v3 (বাংলা)', desc: 'OpenAI Whisper Large v3 - Pure Bengali Script' },
+  { id: 'browser-bn', label: '⚡ Google Bengali Engine', desc: 'Browser Real-Time Bengali Engine' }
 ];
 
 const INITIAL_WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Microsoft SwiftKey / Azure Speech Engine** (High-precision Indian Bengali \`bn-IN\` with live streaming).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification context.\n* 🔊 **Voice Speech (TTS)**: High-definition **Microsoft Neural Bengali Voice** (\`bn-IN-TanishaaNeural\`).\n* 🧠 **Chat Memory**: Full conversational memory across multiple turns and questions.\n\nTap **Speak (SwiftKey AI)** to talk or type your query below!`,
+  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Deepgram Nova-3 AI** (Flagship multilingual Bengali acoustic architecture with ~200ms latency).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification ground truth.\n* 🔊 **Voice Speech (TTS)**: High-definition voice output in pure Bengali & English.\n* 🧠 **Chat Memory**: Full conversational memory across multiple turns and questions.\n\nTap **Speak (Deepgram AI)** to talk or type your query below!`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 };
 
@@ -55,24 +54,19 @@ export default function VoiceAssistant({ defaultQuery }) {
   });
 
   const [inputQuery, setInputQuery] = useState('');
-  const [liveStreamingText, setLiveStreamingText] = useState('');
   const [statusState, setStatusState] = useState(null); // 'recording' | 'transcribing' | 'thinking' | null
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
-  const [autoVoiceTts, setAutoVoiceTts] = useState(true); // Auto-read answers with Neural TTS
+  const [autoVoiceTts, setAutoVoiceTts] = useState(true); // Auto-read answers with TTS
   
-  // STT Mode Selection (Default to Microsoft SwiftKey STT)
+  // STT Mode Selection (Default to Deepgram Nova-3 Bengali)
   const [sttMode, setSttMode] = useState(() => {
     try {
-      return localStorage.getItem(STT_MODE_KEY) || 'microsoft-swiftkey';
+      return localStorage.getItem(STT_MODE_KEY) || 'deepgram-bn';
     } catch (e) {
-      return 'microsoft-swiftkey';
+      return 'deepgram-bn';
     }
   });
-
-  // Microsoft SwiftKey live session ref
-  const [isAzureListening, setIsAzureListening] = useState(false);
-  const azureSessionRef = useRef(null);
 
   // Browser Speech Recognition ref
   const [isBrowserListening, setIsBrowserListening] = useState(false);
@@ -110,7 +104,6 @@ export default function VoiceAssistant({ defaultQuery }) {
   useEffect(() => {
     return () => {
       stopSpeech();
-      stopAzureLiveRecognition();
       if (browserRecognitionRef.current) {
         try {
           browserRecognitionRef.current.stop();
@@ -122,7 +115,7 @@ export default function VoiceAssistant({ defaultQuery }) {
   // Scroll chat to bottom on new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, statusState, liveStreamingText]);
+  }, [messages, statusState]);
 
   // If defaultQuery is triggered externally
   useEffect(() => {
@@ -169,7 +162,7 @@ export default function VoiceAssistant({ defaultQuery }) {
       {
         id: `welcome-reset-${Date.now()}`,
         role: 'assistant',
-        content: `Chat memory cleared. Tap **Speak (SwiftKey AI)** or select a topic below to ask another question.`,
+        content: `Chat memory cleared. Tap **Speak (Deepgram AI)** or select a topic below to ask another question.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -205,7 +198,6 @@ export default function VoiceAssistant({ defaultQuery }) {
 
     setMessages(prev => [...prev, userMessage, initialAssistantMsg]);
     setStatusState('thinking');
-    setLiveStreamingText('');
 
     try {
       let streamed = false;
@@ -235,7 +227,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         )
       );
 
-      // Speak response using Neural TTS if voice query or autoVoiceTts is enabled
+      // Speak response using TTS if voice query or autoVoiceTts is enabled
       if (finalAnswer && (isVoice || autoVoiceTts)) {
         setSpeakingId(assistantMsgId);
         speakText(finalAnswer, {
@@ -268,75 +260,15 @@ export default function VoiceAssistant({ defaultQuery }) {
     if (!query || !query.trim() || statusState) return;
 
     setInputQuery('');
-    setLiveStreamingText('');
     processQuery(query.trim(), false);
   };
 
-  // 1. Microsoft SwiftKey (Azure Cognitive Services Live Speech Engine)
-  const handleToggleAzureSpeech = () => {
-    if (isAzureListening) {
-      if (azureSessionRef.current) {
-        azureSessionRef.current.stop();
-        azureSessionRef.current = null;
-      }
-      setIsAzureListening(false);
-      setStatusState(null);
-      return;
-    }
-
-    stopSpeech();
-    setIsAzureListening(true);
-    setStatusState('recording');
-    setLiveStreamingText('');
-
-    let latestRecognized = '';
-
-    const session = startAzureLiveRecognition({
-      locale: 'bn-IN',
-      onRecognizing: (interimText) => {
-        setLiveStreamingText(interimText);
-        setInputQuery(interimText);
-      },
-      onRecognized: (finalText) => {
-        if (finalText && finalText.trim()) {
-          latestRecognized = finalText.trim();
-          setLiveStreamingText(latestRecognized);
-          setInputQuery(latestRecognized);
-        }
-      },
-      onError: (errDetails) => {
-        console.warn('Azure Speech error:', errDetails);
-        setIsAzureListening(false);
-        setStatusState(null);
-        setMessages(prev => [
-          ...prev,
-          {
-            id: `err-${Date.now()}`,
-            role: 'assistant',
-            content: `⚠️ **Microsoft Speech Error:** ${errDetails}. You can also use Whisper or Google engine from the mode selector above.`,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ]);
-      },
-      onEnd: (completeText) => {
-        setIsAzureListening(false);
-        setStatusState(null);
-        const textToProcess = completeText || latestRecognized;
-        if (textToProcess && textToProcess.trim().length > 0) {
-          processQuery(textToProcess.trim(), true);
-        }
-      }
-    });
-
-    azureSessionRef.current = session;
-  };
-
-  // 2. Google Browser Speech Recognition Engine
+  // 1. Google Browser Speech Recognition Engine
   const handleToggleBrowserSpeech = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Browser speech recognition is not supported in this browser. Switching to Microsoft SwiftKey STT.');
-      setSttMode('microsoft-swiftkey');
+      alert('Browser speech recognition is not supported in this browser. Switching to Deepgram Nova-3.');
+      setSttMode('deepgram-bn');
       return;
     }
 
@@ -357,7 +289,7 @@ export default function VoiceAssistant({ defaultQuery }) {
       browserRecognitionRef.current = recognition;
       recognition.lang = 'bn-IN';
       recognition.continuous = false;
-      recognition.interimResults = true;
+      recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
       let recognizedText = '';
@@ -368,23 +300,26 @@ export default function VoiceAssistant({ defaultQuery }) {
       };
 
       recognition.onresult = (event) => {
-        let interim = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            recognizedText += event.results[i][0].transcript;
-          } else {
-            interim += event.results[i][0].transcript;
-          }
+        if (event.results && event.results.length > 0) {
+          recognizedText = event.results[0][0].transcript;
         }
-        const combined = (recognizedText + ' ' + interim).trim();
-        setLiveStreamingText(combined);
-        setInputQuery(combined);
       };
 
       recognition.onerror = (event) => {
         console.warn('Browser Speech Recognition error:', event.error);
         setIsBrowserListening(false);
         setStatusState(null);
+        if (event.error !== 'no-speech') {
+          setMessages(prev => [
+            ...prev,
+            {
+              id: `err-${Date.now()}`,
+              role: 'assistant',
+              content: `⚠️ **Browser Speech Error:** ${event.error}. You can switch to Deepgram Nova-3 mode above.`,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ]);
+        }
       };
 
       recognition.onend = () => {
@@ -403,8 +338,8 @@ export default function VoiceAssistant({ defaultQuery }) {
     }
   };
 
-  // 3. OpenAI Whisper Large v3 Recorder Handler
-  const handleToggleWhisperRecord = async () => {
+  // 2. Deepgram Nova-3 / Whisper Audio Capture Handler
+  const handleToggleAudioRecord = async () => {
     if (isRecording) {
       setStatusState('transcribing');
       stopSpeech();
@@ -419,17 +354,24 @@ export default function VoiceAssistant({ defaultQuery }) {
             {
               id: `warn-${Date.now()}`,
               role: 'assistant',
-              content: '🎙️ *কোনো অডিও রেকর্ড করা যায়নি। অনুগ্রহ করে আবার বলুন।* (No audio captured. Please speak again.)',
+              content: '🎙️ *কোনো অডিও রেকর্ড করা যায়নি। অনুগ্রহ করে মাইক্রোফোনে কথা বলুন।* (No audio captured. Please speak again.)',
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             }
           ]);
           return;
         }
 
-        const whisperTranscript = await transcribeAudio(audioBlob, { mode: sttMode });
+        let recognizedTranscript = '';
 
-        if (whisperTranscript && whisperTranscript.trim().length > 0) {
-          processQuery(whisperTranscript.trim(), true);
+        if (sttMode.startsWith('deepgram')) {
+          const lang = sttMode === 'deepgram-auto' ? 'multi' : 'bn';
+          recognizedTranscript = await transcribeWithDeepgram(audioBlob, { language: lang });
+        } else {
+          recognizedTranscript = await transcribeAudio(audioBlob, { mode: sttMode });
+        }
+
+        if (recognizedTranscript && recognizedTranscript.trim().length > 0) {
+          processQuery(recognizedTranscript.trim(), true);
           return;
         }
 
@@ -438,7 +380,7 @@ export default function VoiceAssistant({ defaultQuery }) {
           {
             id: `warn-${Date.now()}`,
             role: 'assistant',
-            content: '🎙️ *হুইসপার এআই কোনো স্পষ্ট কথা শনাক্ত করতে পারেনি। অনুগ্রহ করে মাইক্রোফোনের কাছে এসে আবার বলুন।* (Whisper AI could not detect clear speech in the recording. Please speak clearly into your mic.)',
+            content: '🎙️ *কোনো স্পষ্ট কথা শনাক্ত করতে পারেনি। অনুগ্রহ করে মাইক্রোফোনের কাছে এসে আবার বলুন।* (Could not detect clear speech in the audio. Please speak clearly into your mic.)',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
@@ -450,7 +392,7 @@ export default function VoiceAssistant({ defaultQuery }) {
           {
             id: `err-${Date.now()}`,
             role: 'assistant',
-            content: `⚠️ **Whisper AI STT Error:** ${err.message || 'Audio transcription could not be completed.'}`,
+            content: `⚠️ **Speech Recognition Error:** ${err.message || 'Audio transcription could not be completed.'}`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
@@ -469,20 +411,15 @@ export default function VoiceAssistant({ defaultQuery }) {
   // Master Voice Trigger Button Dispatcher
   const handleToggleRecord = () => {
     unlockSpeech();
-    if (sttMode === 'microsoft-swiftkey') {
-      handleToggleAzureSpeech();
-    } else if (sttMode === 'browser-bn') {
+    if (sttMode === 'browser-bn') {
       handleToggleBrowserSpeech();
     } else {
-      handleToggleWhisperRecord();
+      handleToggleAudioRecord();
     }
   };
 
   const handleCancelRecord = () => {
-    if (sttMode === 'microsoft-swiftkey') {
-      stopAzureLiveRecognition();
-      setIsAzureListening(false);
-    } else if (sttMode === 'browser-bn') {
+    if (sttMode === 'browser-bn') {
       if (browserRecognitionRef.current) {
         try {
           browserRecognitionRef.current.abort();
@@ -492,11 +429,10 @@ export default function VoiceAssistant({ defaultQuery }) {
     } else {
       cancelRecording();
     }
-    setLiveStreamingText('');
     setStatusState(null);
   };
 
-  const isCurrentlyRecording = isRecording || isAzureListening || isBrowserListening;
+  const isCurrentlyRecording = isRecording || isBrowserListening;
 
   return (
     <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
@@ -523,7 +459,7 @@ export default function VoiceAssistant({ defaultQuery }) {
         <div className="flex items-center space-x-2">
           {/* STT Mode Selector Pill */}
           <div className="flex items-center space-x-1 bg-slate-800/90 border border-slate-700/80 rounded-lg p-0.5">
-            <Award className="w-3.5 h-3.5 text-amber-400 ml-1.5" />
+            <Zap className="w-3.5 h-3.5 text-emerald-400 ml-1.5" />
             <select
               value={sttMode}
               onChange={(e) => setSttMode(e.target.value)}
@@ -549,7 +485,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                 ? 'bg-indigo-950/80 border-indigo-500/40 text-indigo-300'
                 : 'bg-slate-800/80 border-slate-700 text-slate-400'
             }`}
-            title="Toggle Microsoft Neural Bengali Voice readout"
+            title="Toggle Auto Text-To-Speech audio readout"
           >
             {autoVoiceTts ? <Volume2 className="w-3 h-3 text-indigo-400" /> : <VolumeX className="w-3 h-3 text-slate-500" />}
             <span className="hidden sm:inline">TTS {autoVoiceTts ? 'ON' : 'OFF'}</span>
@@ -611,7 +547,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                 {msg.isVoice && (
                   <div className="inline-flex items-center space-x-1 text-[10px] text-blue-200 mb-1.5 px-2 py-0.5 rounded-full bg-blue-700/50">
                     <Mic className="w-2.5 h-2.5" />
-                    <span>Voice Input</span>
+                    <span>Voice Input (Deepgram AI)</span>
                   </div>
                 )}
 
@@ -619,7 +555,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                 {isCurrentlySpeaking && (
                   <div className="flex items-center space-x-1.5 text-[10px] font-semibold text-indigo-300 mb-2 px-2 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/30 animate-pulse">
                     <Volume2 className="w-3 h-3 text-indigo-400" />
-                    <span>Speaking in Neural Bengali Voice...</span>
+                    <span>Reading out loud (TTS)...</span>
                   </div>
                 )}
 
@@ -641,7 +577,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                             ? 'bg-indigo-600 text-white font-bold'
                             : 'hover:text-white hover:bg-slate-700/60 text-slate-300'
                         }`}
-                        title={isCurrentlySpeaking ? 'Stop reading' : 'Read aloud with Neural Bengali Voice'}
+                        title={isCurrentlySpeaking ? 'Stop reading' : 'Read aloud with Bengali/English TTS'}
                       >
                         {isCurrentlySpeaking ? (
                           <>
@@ -677,9 +613,9 @@ export default function VoiceAssistant({ defaultQuery }) {
 
         {/* Dynamic Status Badges */}
         {statusState === 'transcribing' && (
-          <div className="flex items-center justify-center p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-xl space-x-2 text-indigo-300 animate-pulse">
+          <div className="flex items-center justify-center p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl space-x-2 text-emerald-300 animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="text-xs font-medium">Whisper Large v3 processing Bengali audio...</span>
+            <span className="text-xs font-medium">Deepgram Nova-3 transcribing Bengali speech (~200ms)...</span>
           </div>
         )}
 
@@ -721,17 +657,17 @@ export default function VoiceAssistant({ defaultQuery }) {
         </div>
       </div>
 
-      {/* Voice Recording Live Streaming Active Bar */}
+      {/* Voice Recording Active Bar */}
       {isCurrentlyRecording && (
-        <div className="bg-gradient-to-r from-red-950 via-slate-900 to-red-950 border-t border-red-800/60 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 animate-pulse shrink-0">
+        <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-950 border-t border-emerald-800/60 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 animate-pulse shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-red-500 animate-ping shrink-0" />
+            <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping shrink-0" />
             <div>
-              <p className="text-xs font-bold text-red-200">
-                🎙️ কথা বলুন ({sttMode === 'microsoft-swiftkey' ? 'Microsoft SwiftKey Engine' : sttMode === 'browser-bn' ? 'Google Bengali Engine' : 'Whisper Large v3'} Active)...
+              <p className="text-xs font-bold text-emerald-200">
+                🎙️ কথা বলুন ({sttMode.startsWith('deepgram') ? 'Deepgram Nova-3' : sttMode === 'browser-bn' ? 'Google Bengali Engine' : 'Whisper Large v3'} Active)...
               </p>
-              <p className="text-[10px] text-red-300 truncate max-w-md">
-                {liveStreamingText ? `"${liveStreamingText}"` : 'Listening live in pure Bengali (bn-IN)...'}
+              <p className="text-[10px] text-emerald-300">
+                {sttMode === 'browser-bn' ? 'Listening live in Bengali...' : `Duration: ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')} | Level: ${Math.round(volumeLevel * 100)}%`}
               </p>
             </div>
           </div>
@@ -745,10 +681,10 @@ export default function VoiceAssistant({ defaultQuery }) {
             </button>
             <button
               onClick={handleToggleRecord}
-              className="px-3 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg flex items-center space-x-1 cursor-pointer"
+              className="px-3 py-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg flex items-center space-x-1 cursor-pointer"
             >
               <Check className="w-3.5 h-3.5" />
-              <span>Finish & Send</span>
+              <span>Transcribe & Send</span>
             </button>
           </div>
         </div>
@@ -770,14 +706,14 @@ export default function VoiceAssistant({ defaultQuery }) {
             disabled={statusState === 'transcribing' || statusState === 'thinking'}
             className={`px-3.5 py-2.5 rounded-xl font-medium text-xs flex items-center space-x-1.5 transition-all shadow-md cursor-pointer shrink-0 disabled:opacity-50 ${
               isCurrentlyRecording
-                ? 'bg-red-600 text-white animate-pulse shadow-red-600/30'
+                ? 'bg-emerald-600 text-white animate-pulse shadow-emerald-600/30'
                 : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
             }`}
-            title="Ask question by Voice"
+            title="Ask question by Voice (Deepgram AI)"
           >
             {isCurrentlyRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             <span className="hidden sm:inline">
-              {isCurrentlyRecording ? 'Stop & Send' : 'Speak (SwiftKey AI)'}
+              {isCurrentlyRecording ? 'Stop & Send' : 'Speak (Deepgram AI)'}
             </span>
           </button>
 

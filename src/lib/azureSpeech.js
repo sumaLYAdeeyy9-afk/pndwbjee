@@ -1,6 +1,6 @@
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 
-// Safe Key Assembly for Azure Speech Services (Microsoft SwiftKey Speech Engine)
+// Safe Key Assembly for Azure Speech Services (Neural TTS)
 const _kAzureSpeech = () => [
   '9URjvAKOYeS49W4pbWHd',
   'GWvOZIstHybTo18IDfYN',
@@ -9,139 +9,13 @@ const _kAzureSpeech = () => [
 ].join('');
 
 export const AZURE_SPEECH_REGION = 'southeastasia';
-export const DEFAULT_BENGALI_LOCALE = 'bn-IN';
-export const DEFAULT_BENGALI_VOICE = 'bn-IN-TanishaaNeural'; // Neural high-clarity Bengali voice
+export const DEFAULT_BENGALI_VOICE = 'bn-IN-TanishaaNeural'; // High-clarity Bengali neural voice
 
-let activeRecognizer = null;
 let activeAudioPlayer = null;
 
 /**
- * Start Real-Time Live Speech Recognition using Microsoft SwiftKey / Azure Speech Engine
- * Emits word-by-word streaming transcriptions in real time as the candidate speaks
- */
-export function startAzureLiveRecognition({
-  onRecognizing,
-  onRecognized,
-  onError,
-  onEnd,
-  locale = DEFAULT_BENGALI_LOCALE
-}) {
-  try {
-    // Stop any existing session
-    stopAzureLiveRecognition();
-
-    const speechConfig = sdk.SpeechConfig.fromSubscription(_kAzureSpeech(), AZURE_SPEECH_REGION);
-    speechConfig.speechRecognitionLanguage = locale; // 'bn-IN' (Bengali - India)
-
-    // Enable detailed punctuation and formatting
-    speechConfig.outputFormat = sdk.OutputFormat.Detailed;
-    speechConfig.enableDictation();
-
-    // Browser Default Microphone Input with Acoustic Echo Cancellation
-    const audioConfig = sdk.AudioConfig.fromDefaultMicrophoneInput();
-    const recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-    activeRecognizer = recognizer;
-
-    let accumulatedFinalText = '';
-
-    // Real-time intermediate recognition event (streaming while talking)
-    recognizer.recognizing = (s, e) => {
-      if (e.result.reason === sdk.ResultReason.RecognizingSpeech) {
-        const liveText = accumulatedFinalText 
-          ? `${accumulatedFinalText} ${e.result.text}` 
-          : e.result.text;
-        if (onRecognizing) onRecognizing(liveText);
-      }
-    };
-
-    // Final phrase recognized event
-    recognizer.recognized = (s, e) => {
-      if (e.result.reason === sdk.ResultReason.RecognizedSpeech && e.result.text) {
-        const cleanText = e.result.text.trim();
-        if (cleanText) {
-          accumulatedFinalText = accumulatedFinalText 
-            ? `${accumulatedFinalText} ${cleanText}` 
-            : cleanText;
-          if (onRecognized) onRecognized(accumulatedFinalText);
-        }
-      }
-    };
-
-    // Canceled / Error handler
-    recognizer.canceled = (s, e) => {
-      console.warn('Azure Speech Recognizer canceled:', e.errorDetails, e.reason);
-      if (e.reason === sdk.CancellationReason.Error && onError) {
-        onError(e.errorDetails || 'Speech recognition session interrupted');
-      }
-    };
-
-    // Session stopped
-    recognizer.sessionStopped = () => {
-      if (onEnd) onEnd(accumulatedFinalText);
-      cleanupRecognizer();
-    };
-
-    recognizer.startContinuousRecognitionAsync(
-      () => {
-        console.log('Azure Live Bengali Speech Recognition started successfully.');
-      },
-      (err) => {
-        console.error('Failed to start Azure Speech Recognition:', err);
-        if (onError) onError(err);
-        cleanupRecognizer();
-      }
-    );
-
-    return {
-      stop: () => {
-        if (recognizer) {
-          recognizer.stopContinuousRecognitionAsync(
-            () => {
-              if (onEnd) onEnd(accumulatedFinalText);
-              cleanupRecognizer();
-            },
-            () => {
-              cleanupRecognizer();
-            }
-          );
-        }
-      }
-    };
-  } catch (err) {
-    console.error('startAzureLiveRecognition error:', err);
-    if (onError) onError(err.message || 'Could not start microphone');
-    return { stop: () => {} };
-  }
-}
-
-/**
- * Stop active Azure Speech Recognition session
- */
-export function stopAzureLiveRecognition() {
-  if (activeRecognizer) {
-    try {
-      activeRecognizer.stopContinuousRecognitionAsync(
-        () => cleanupRecognizer(),
-        () => cleanupRecognizer()
-      );
-    } catch (e) {
-      cleanupRecognizer();
-    }
-  }
-}
-
-function cleanupRecognizer() {
-  if (activeRecognizer) {
-    try {
-      activeRecognizer.close();
-    } catch (e) {}
-    activeRecognizer = null;
-  }
-}
-
-/**
  * High-definition Microsoft Neural Bengali Text-to-Speech (TTS)
- * Speaks pure human-sounding Bengali using Azure Neural Voice (bn-IN-TanishaaNeural / bn-IN-BashkarNeural)
+ * Speaks pure human-sounding Bengali using Azure Neural Voice (bn-IN-TanishaaNeural)
  */
 export function speakAzureNeuralTts(text, {
   voice = DEFAULT_BENGALI_VOICE,
@@ -187,9 +61,9 @@ export function speakAzureNeuralTts(text, {
       cleanText,
       result => {
         if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
-          // Playback is being handled by SpeakerAudioDestination
+          // Playback handled by player
         } else {
-          console.warn('Azure Neural TTS synthesis status:', result.errorDetails);
+          console.warn('Azure Neural TTS synthesis notice:', result.errorDetails);
           if (onError) onError(result.errorDetails);
         }
         synthesizer.close();
