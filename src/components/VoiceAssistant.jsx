@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { 
   Mic, MicOff, Send, Volume2, VolumeX, Copy, Check, Sparkles, 
-  RotateCcw, Loader2, Bot, User, Radio, Cpu, Settings2, Globe, Zap
+  RotateCcw, Loader2, Bot, User, Radio, Cpu, Settings2, Globe, Zap, Music
 } from 'lucide-react';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import { transcribeAudio, askPdfAssistant, getSavedApiKey, getSavedModel } from '../lib/openai';
@@ -21,6 +21,7 @@ const STARTER_QUESTIONS = [
 
 const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
 const STT_MODE_KEY = 'wbjee_stt_mode_v4';
+const SARVAM_SPEAKER_KEY = 'wbjee_sarvam_speaker_v1';
 
 const STT_MODES = [
   { id: 'deepgram-bn', label: '🚀 Deepgram Nova-3 (বাংলা)', desc: 'Deepgram Nova-3 Flagship - Ultra Fast & High Precision Bengali STT' },
@@ -29,10 +30,15 @@ const STT_MODES = [
   { id: 'browser-bn', label: '⚡ Google Bengali Engine', desc: 'Browser Real-Time Bengali Engine' }
 ];
 
+const SARVAM_SPEAKERS = [
+  { id: 'shreya', label: 'Sarvam Shreya (বাংলা Female)' },
+  { id: 'soham', label: 'Sarvam Soham (বাংলা Male)' }
+];
+
 const INITIAL_WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Deepgram Nova-3 AI** (Flagship multilingual Bengali acoustic architecture with ~200ms latency).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification ground truth.\n* 🔊 **Voice Speech (TTS)**: High-definition **Sarvam AI (Bulbul:v3)** natural Bengali & English neural voice synthesis.\n* 🧠 **Chat Memory**: Full conversational memory across multiple turns and questions.\n\nTap **Speak (Deepgram AI)** to talk or type your query below!`,
+  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Deepgram Nova-3 AI** (Ultra-fast multilingual acoustic engine with ~200ms latency).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification ground truth.\n* 🔊 **Voice Speech (TTS)**: Exclusive **Sarvam AI (Bulbul:v3)** pure Bengali & English neural voice synthesis.\n* 🧠 **Chat Memory**: Full conversational memory across multiple turns and questions.\n\nTap **Speak (Deepgram AI)** to talk or type your query below!`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 };
 
@@ -57,8 +63,17 @@ export default function VoiceAssistant({ defaultQuery }) {
   const [statusState, setStatusState] = useState(null); // 'recording' | 'transcribing' | 'thinking' | null
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
-  const [autoVoiceTts, setAutoVoiceTts] = useState(true); // Auto-read answers with TTS
+  const [autoVoiceTts, setAutoVoiceTts] = useState(true); // Auto-read answers with Sarvam AI TTS
   
+  // Sarvam Speaker Voice
+  const [speakerVoice, setSpeakerVoice] = useState(() => {
+    try {
+      return localStorage.getItem(SARVAM_SPEAKER_KEY) || 'shreya';
+    } catch (e) {
+      return 'shreya';
+    }
+  });
+
   // STT Mode Selection (Default to Deepgram Nova-3 Bengali)
   const [sttMode, setSttMode] = useState(() => {
     try {
@@ -100,6 +115,13 @@ export default function VoiceAssistant({ defaultQuery }) {
     } catch (e) {}
   }, [sttMode]);
 
+  // Persist Sarvam speaker choice
+  useEffect(() => {
+    try {
+      localStorage.setItem(SARVAM_SPEAKER_KEY, speakerVoice);
+    } catch (e) {}
+  }, [speakerVoice]);
+
   // Clean up all speech on unmount
   useEffect(() => {
     return () => {
@@ -124,7 +146,7 @@ export default function VoiceAssistant({ defaultQuery }) {
     }
   }, [defaultQuery]);
 
-  // Toggle TTS audio playback for a message
+  // Toggle Sarvam AI TTS audio playback for a message
   const handleToggleSpeak = (messageId, text) => {
     unlockSpeech();
     if (speakingId === messageId) {
@@ -136,9 +158,13 @@ export default function VoiceAssistant({ defaultQuery }) {
     stopSpeech();
     setSpeakingId(messageId);
     speakText(text, {
+      speaker: speakerVoice,
       onStart: () => setSpeakingId(messageId),
       onEnd: () => setSpeakingId(null),
-      onError: () => setSpeakingId(null)
+      onError: (err) => {
+        console.error('Sarvam AI Playback error:', err);
+        setSpeakingId(null);
+      }
     });
   };
 
@@ -168,7 +194,7 @@ export default function VoiceAssistant({ defaultQuery }) {
     ]);
   };
 
-  // Main dispatch query logic with conversational memory, SSE streaming and TTS
+  // Main dispatch query logic with conversational memory, SSE streaming and Sarvam AI TTS
   const processQuery = async (queryText, isVoice = false) => {
     const userMsgId = `user-${Date.now()}`;
     const userMessage = {
@@ -227,13 +253,17 @@ export default function VoiceAssistant({ defaultQuery }) {
         )
       );
 
-      // Speak response using TTS if voice query or autoVoiceTts is enabled
+      // Speak response using Sarvam AI Bulbul:v3 if voice query or autoVoiceTts is enabled
       if (finalAnswer && (isVoice || autoVoiceTts)) {
         setSpeakingId(assistantMsgId);
         speakText(finalAnswer, {
+          speaker: speakerVoice,
           onStart: () => setSpeakingId(assistantMsgId),
           onEnd: () => setSpeakingId(null),
-          onError: () => setSpeakingId(null)
+          onError: (err) => {
+            console.error('Sarvam AI Error:', err);
+            setSpeakingId(null);
+          }
         });
       }
     } catch (err) {
@@ -457,18 +487,35 @@ export default function VoiceAssistant({ defaultQuery }) {
 
         {/* Controls Bar */}
         <div className="flex items-center space-x-2">
-          {/* STT Mode Selector Pill */}
+          {/* STT Mode Selector */}
           <div className="flex items-center space-x-1 bg-slate-800/90 border border-slate-700/80 rounded-lg p-0.5">
             <Zap className="w-3.5 h-3.5 text-emerald-400 ml-1.5" />
             <select
               value={sttMode}
               onChange={(e) => setSttMode(e.target.value)}
               className="bg-transparent text-[11px] text-slate-200 font-medium py-1 px-1.5 outline-none cursor-pointer"
-              title="Select Speech Recognition Engine Mode"
+              title="Select Speech Recognition (STT) Mode"
             >
               {STT_MODES.map(m => (
                 <option key={m.id} value={m.id} className="bg-slate-900 text-slate-200">
                   {m.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sarvam AI Speaker Voice Selector */}
+          <div className="hidden sm:flex items-center space-x-1 bg-slate-800/90 border border-slate-700/80 rounded-lg p-0.5">
+            <Music className="w-3.5 h-3.5 text-violet-400 ml-1.5" />
+            <select
+              value={speakerVoice}
+              onChange={(e) => setSpeakerVoice(e.target.value)}
+              className="bg-transparent text-[11px] text-slate-200 font-medium py-1 px-1.5 outline-none cursor-pointer"
+              title="Select Sarvam AI Voice Model Speaker"
+            >
+              {SARVAM_SPEAKERS.map(s => (
+                <option key={s.id} value={s.id} className="bg-slate-900 text-slate-200">
+                  {s.label}
                 </option>
               ))}
             </select>
@@ -482,13 +529,13 @@ export default function VoiceAssistant({ defaultQuery }) {
             }}
             className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[11px] font-medium border transition-all cursor-pointer ${
               autoVoiceTts
-                ? 'bg-indigo-950/80 border-indigo-500/40 text-indigo-300'
+                ? 'bg-violet-950/80 border-violet-500/40 text-violet-300'
                 : 'bg-slate-800/80 border-slate-700 text-slate-400'
             }`}
-            title="Toggle Auto Text-To-Speech audio readout"
+            title="Toggle Sarvam AI Text-To-Speech readout"
           >
-            {autoVoiceTts ? <Volume2 className="w-3 h-3 text-indigo-400" /> : <VolumeX className="w-3 h-3 text-slate-500" />}
-            <span className="hidden sm:inline">TTS {autoVoiceTts ? 'ON' : 'OFF'}</span>
+            {autoVoiceTts ? <Volume2 className="w-3 h-3 text-violet-400" /> : <VolumeX className="w-3 h-3 text-slate-500" />}
+            <span className="hidden sm:inline">Sarvam TTS {autoVoiceTts ? 'ON' : 'OFF'}</span>
           </button>
 
           {/* Clear Memory */}
@@ -539,7 +586,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                     : msg.isError
                     ? 'bg-red-950/50 border border-red-800/50 text-red-200 rounded-tl-none'
                     : isCurrentlySpeaking
-                    ? 'bg-slate-800 border-2 border-indigo-500/70 rounded-tl-none shadow-lg shadow-indigo-500/10'
+                    ? 'bg-slate-800 border-2 border-violet-500/70 rounded-tl-none shadow-lg shadow-violet-500/10'
                     : 'bg-slate-800/90 border border-slate-700/60 rounded-tl-none shadow-sm'
                 }`}
               >
@@ -553,9 +600,9 @@ export default function VoiceAssistant({ defaultQuery }) {
 
                 {/* Speaking Audio Banner */}
                 {isCurrentlySpeaking && (
-                  <div className="flex items-center space-x-1.5 text-[10px] font-semibold text-indigo-300 mb-2 px-2 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/30 animate-pulse">
-                    <Volume2 className="w-3 h-3 text-indigo-400" />
-                    <span>Reading out loud (TTS)...</span>
+                  <div className="flex items-center space-x-2 text-[10px] font-semibold text-violet-300 mb-2 px-2.5 py-1.5 rounded-lg bg-violet-950/80 border border-violet-500/40 animate-pulse shadow-md">
+                    <Volume2 className="w-3.5 h-3.5 text-violet-400 animate-bounce" />
+                    <span>🔊 Playing exclusive audio via <strong>Sarvam AI (Bulbul:v3 - {speakerVoice})</strong></span>
                   </div>
                 )}
 
@@ -574,10 +621,10 @@ export default function VoiceAssistant({ defaultQuery }) {
                         onClick={() => handleToggleSpeak(msg.id, msg.content)}
                         className={`p-1.5 rounded transition-colors cursor-pointer flex items-center space-x-1 ${
                           isCurrentlySpeaking
-                            ? 'bg-indigo-600 text-white font-bold'
+                            ? 'bg-violet-600 text-white font-bold'
                             : 'hover:text-white hover:bg-slate-700/60 text-slate-300'
                         }`}
-                        title={isCurrentlySpeaking ? 'Stop reading' : 'Read aloud with Bengali/English TTS'}
+                        title={isCurrentlySpeaking ? 'Stop playback' : 'Read aloud with Sarvam AI (Bulbul:v3)'}
                       >
                         {isCurrentlySpeaking ? (
                           <>
@@ -587,7 +634,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                         ) : (
                           <>
                             <Volume2 className="w-3.5 h-3.5" />
-                            <span className="text-[10px] hidden sm:inline">Listen</span>
+                            <span className="text-[10px] hidden sm:inline">Listen (Sarvam AI)</span>
                           </>
                         )}
                       </button>

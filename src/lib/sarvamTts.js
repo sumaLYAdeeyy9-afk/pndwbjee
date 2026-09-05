@@ -1,4 +1,4 @@
-// Sarvam AI Bulbul:v3 High-Fidelity Text-to-Speech (TTS) Engine for Bengali & English
+// Sarvam AI Bulbul:v3 Exclusive High-Fidelity Text-to-Speech (TTS) Engine for Bengali (বাংলা) & English
 
 const _kSarvam = () => [
   'sk_zzld5vcu_',
@@ -9,6 +9,7 @@ const _kSarvam = () => [
 export const SARVAM_TTS_ENDPOINT = 'https://api.sarvam.ai/text-to-speech';
 
 let currentAudio = null;
+let currentAbortController = null;
 
 export function isBengaliText(text) {
   if (!text) return false;
@@ -66,10 +67,10 @@ export function prepareTtsChunks(text, maxChunkLen = 350) {
 }
 
 /**
- * Synthesize and stream speech using Sarvam AI Bulbul:v3
+ * Synthesize and play audio exclusively via Sarvam AI Bulbul:v3
  */
 export async function speakWithSarvamAI(text, {
-  speaker = 'shreya', // 'shreya' (natural Bengali/English female voice) or 'soham' / 'roopa'
+  speaker = 'shreya', // 'shreya' (natural Bengali female voice) or 'soham' (Bengali male voice)
   pace = 1.0,
   onStart = () => {},
   onEnd = () => {},
@@ -87,7 +88,7 @@ export async function speakWithSarvamAI(text, {
   const langCode = isBengali ? 'bn-IN' : 'en-IN';
 
   const payload = {
-    inputs: chunks.slice(0, 15), // Synthesize up to 15 key sentence chunks
+    inputs: chunks.slice(0, 12), // Synthesize key sentence chunks
     target_language_code: langCode,
     speaker: speaker,
     pitch: 0,
@@ -98,6 +99,14 @@ export async function speakWithSarvamAI(text, {
     model: 'bulbul:v3'
   };
 
+  console.log(`%c[Sarvam AI TTS]%c Requesting Bulbul:v3 for ${langCode} (${speaker})...`, 'color: #8b5cf6; font-weight: bold;', 'color: #94a3b8;', {
+    sentenceCount: payload.inputs.length,
+    inputs: payload.inputs
+  });
+
+  const abortController = new AbortController();
+  currentAbortController = abortController;
+
   let base64Audio = null;
 
   // 1. Try serverless proxy /api/sarvam-tts first
@@ -107,21 +116,27 @@ export async function speakWithSarvamAI(text, {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: abortController.signal
     });
 
     if (proxyRes.ok) {
       const data = await proxyRes.json();
       if (data.audios && data.audios[0]) {
         base64Audio = data.audios[0];
+        console.log(`%c[Sarvam AI TTS]%c Synthesis SUCCESS via serverless route! Audio base64 size: ${base64Audio.length} bytes`, 'color: #10b981; font-weight: bold;', 'color: #94a3b8;');
       }
+    } else {
+      const errText = await proxyRes.text();
+      console.warn('[Sarvam AI TTS] /api/sarvam-tts proxy status:', proxyRes.status, errText);
     }
   } catch (err) {
-    console.warn('/api/sarvam-tts proxy call warning:', err);
+    if (err.name === 'AbortError') return () => {};
+    console.warn('[Sarvam AI TTS] /api/sarvam-tts error, attempting direct endpoint fallback:', err.message);
   }
 
-  // 2. Direct Cloud Fallback if proxy was bypassed
-  if (!base64Audio) {
+  // 2. Direct Cloud Fallback to Sarvam AI if proxy was bypassed
+  if (!base64Audio && !abortController.signal.aborted) {
     try {
       const directRes = await fetch(SARVAM_TTS_ENDPOINT, {
         method: 'POST',
@@ -129,25 +144,32 @@ export async function speakWithSarvamAI(text, {
           'api-subscription-key': _kSarvam(),
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: abortController.signal
       });
 
       if (directRes.ok) {
         const data = await directRes.json();
         if (data.audios && data.audios[0]) {
           base64Audio = data.audios[0];
+          console.log(`%c[Sarvam AI TTS]%c Synthesis SUCCESS via direct cloud endpoint! Audio size: ${base64Audio.length} bytes`, 'color: #10b981; font-weight: bold;', 'color: #94a3b8;');
         }
       } else {
         const errText = await directRes.text();
-        console.warn('Direct Sarvam TTS notice:', directRes.status, errText);
+        throw new Error(`Sarvam AI API Error (${directRes.status}): ${errText}`);
       }
     } catch (err) {
-      console.warn('Direct Sarvam TTS fetch notice:', err);
+      if (err.name === 'AbortError') return () => {};
+      console.error('[Sarvam AI TTS] Direct cloud fetch failed:', err);
+      onError(err);
+      return () => {};
     }
   }
 
   if (!base64Audio) {
-    onError(new Error('Could not retrieve Sarvam AI audio'));
+    const errorMsg = 'Could not retrieve Sarvam AI Bulbul audio.';
+    console.error(`[Sarvam AI TTS] ${errorMsg}`);
+    onError(new Error(errorMsg));
     return () => {};
   }
 
@@ -157,24 +179,26 @@ export async function speakWithSarvamAI(text, {
     currentAudio = audio;
 
     audio.onplay = () => {
+      console.log('%c[Sarvam AI TTS]%c 🔊 Audio PLAYBACK STARTED.', 'color: #3b82f6; font-weight: bold;', 'color: #94a3b8;');
       onStart();
     };
 
     audio.onended = () => {
+      console.log('%c[Sarvam AI TTS]%c ⏹️ Audio PLAYBACK COMPLETED.', 'color: #3b82f6; font-weight: bold;', 'color: #94a3b8;');
       currentAudio = null;
       onEnd();
     };
 
     audio.onerror = (e) => {
-      console.warn('Sarvam Audio playback error:', e);
+      console.error('[Sarvam AI TTS] Audio Element Playback Error:', e);
       currentAudio = null;
-      onError(e);
+      onError(new Error('Audio playback failed in browser'));
     };
 
     await audio.play();
     return () => stopSarvamSpeech();
   } catch (playErr) {
-    console.warn('HTML5 Audio play error:', playErr);
+    console.error('[Sarvam AI TTS] HTML5 Audio play() rejected:', playErr);
     currentAudio = null;
     onError(playErr);
     return () => {};
@@ -185,6 +209,13 @@ export async function speakWithSarvamAI(text, {
  * Stop active Sarvam Audio playback immediately
  */
 export function stopSarvamSpeech() {
+  if (currentAbortController) {
+    try {
+      currentAbortController.abort();
+    } catch (e) {}
+    currentAbortController = null;
+  }
+
   if (currentAudio) {
     try {
       currentAudio.pause();
