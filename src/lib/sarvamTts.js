@@ -55,9 +55,12 @@ export function prepareTtsBatches(text, maxChunkChars = 450) {
   const clean = text
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/`([^`]+)`/g, '$1')
-    .replace(/[*#_~>\[\]\(\)\{\}\|=]/g, ' ')
     .replace(/https?:\/\/\S+/g, '')
-    .replace(/[-•*+]\s+/g, '')
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, ' ') // Strip emojis from audio stream
+    .replace(/^[#\s]+/gm, '') // Remove markdown heading hashes
+    .replace(/[-•*+]\s+/g, ', ') // Convert list bullets to pleasant spoken pauses
+    .replace(/[*_~>\[\]\(\)\{\}\|=]/g, ' ') // Remove markdown format symbols
+    .replace(/([।,!?\.])+/g, '$1 ') // Ensure space after punctuation
     .replace(/[ \t]+/g, ' ')
     .trim();
 
