@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { 
   Mic, MicOff, Send, Volume2, VolumeX, Copy, Check, Sparkles, 
-  RotateCcw, Loader2, Bot, User, Radio, Cpu
+  RotateCcw, Loader2, Bot, User, Radio, Cpu, Settings2, Globe
 } from 'lucide-react';
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder';
 import { transcribeAudio, askPdfAssistant, getSavedApiKey, getSavedModel } from '../lib/openai';
@@ -19,11 +19,19 @@ const STARTER_QUESTIONS = [
 ];
 
 const STORAGE_KEY = 'wbjee_voice_chat_memory_v1';
+const STT_MODE_KEY = 'wbjee_stt_mode_v2';
+
+const STT_MODES = [
+  { id: 'whisper-bn', label: 'Whisper (বাংলা)', desc: 'Whisper Large v3 - Pure Bengali Script' },
+  { id: 'whisper-auto', label: 'Whisper (Auto)', desc: 'Whisper Large v3 - Auto-detect Language' },
+  { id: 'whisper-translate', label: 'Whisper (➔ EN)', desc: 'Whisper Large v3 - Spoken Bengali to English' },
+  { id: 'browser-bn', label: 'Google Bengali', desc: 'Browser Real-Time Bengali Engine' }
+];
 
 const INITIAL_WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: 100% powered by **OpenAI Whisper AI API** (Bengali & English audio).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification.\n* 🔊 **Voice Speech (TTS)**: Automatic high-clarity voice output in Bengali & English.\n* 🧠 **Chat Memory**: Remembers past context and follow-ups across questions.\n\nTap **Speak (Whisper AI)** to talk or type your query below!`,
+  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Whisper Large v3** (Multiple modes for Bengali & English).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification context.\n* 🔊 **Voice Speech (TTS)**: High-clarity voice output in Bengali & English.\n* 🧠 **Chat Memory**: Remembers past context and follow-ups across questions.\n\nTap **Speak (Whisper AI)** to talk or type your query below!`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 };
 
@@ -49,6 +57,18 @@ export default function VoiceAssistant({ defaultQuery }) {
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
   const [autoVoiceTts, setAutoVoiceTts] = useState(true); // Auto-read answers with TTS
+  
+  // STT Mode Selection
+  const [sttMode, setSttMode] = useState(() => {
+    try {
+      return localStorage.getItem(STT_MODE_KEY) || 'whisper-bn';
+    } catch (e) {
+      return 'whisper-bn';
+    }
+  });
+
+  const [isBrowserListening, setIsBrowserListening] = useState(false);
+  const browserRecognitionRef = useRef(null);
 
   const messagesEndRef = useRef(null);
   const { 
@@ -71,10 +91,22 @@ export default function VoiceAssistant({ defaultQuery }) {
     }
   }, [messages]);
 
+  // Persist STT mode choice
+  useEffect(() => {
+    try {
+      localStorage.setItem(STT_MODE_KEY, sttMode);
+    } catch (e) {}
+  }, [sttMode]);
+
   // Clean up speech synthesis on unmount
   useEffect(() => {
     return () => {
       stopSpeech();
+      if (browserRecognitionRef.current) {
+        try {
+          browserRecognitionRef.current.stop();
+        } catch (e) {}
+      }
     };
   }, []);
 
@@ -229,9 +261,90 @@ export default function VoiceAssistant({ defaultQuery }) {
     processQuery(query.trim(), false);
   };
 
-  // Handle Voice Record Button: 100% Pure Whisper AI STT API Pipeline
+  // Browser Google Speech Recognition Handler (Alternative Mode)
+  const handleToggleBrowserSpeech = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Browser speech recognition is not supported in this browser. Please use Whisper Large v3.');
+      setSttMode('whisper-bn');
+      return;
+    }
+
+    if (isBrowserListening) {
+      if (browserRecognitionRef.current) {
+        try {
+          browserRecognitionRef.current.stop();
+        } catch (e) {}
+      }
+      setIsBrowserListening(false);
+      setStatusState(null);
+      return;
+    }
+
+    try {
+      stopSpeech();
+      const recognition = new SpeechRecognition();
+      browserRecognitionRef.current = recognition;
+      recognition.lang = 'bn-IN';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      let recognizedText = '';
+
+      recognition.onstart = () => {
+        setIsBrowserListening(true);
+        setStatusState('recording');
+      };
+
+      recognition.onresult = (event) => {
+        if (event.results && event.results.length > 0) {
+          recognizedText = event.results[0][0].transcript;
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('Browser Speech Recognition error:', event.error);
+        setIsBrowserListening(false);
+        setStatusState(null);
+        if (event.error !== 'no-speech') {
+          setMessages(prev => [
+            ...prev,
+            {
+              id: `err-${Date.now()}`,
+              role: 'assistant',
+              content: `⚠️ **Browser Speech Error:** ${event.error}. You can switch to Whisper (বাংলা) mode above.`,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ]);
+        }
+      };
+
+      recognition.onend = () => {
+        setIsBrowserListening(false);
+        setStatusState(null);
+        if (recognizedText && recognizedText.trim().length > 0) {
+          processQuery(recognizedText.trim(), true);
+        }
+      };
+
+      recognition.start();
+    } catch (e) {
+      console.error('Browser speech recognition start error:', e);
+      setIsBrowserListening(false);
+      setStatusState(null);
+    }
+  };
+
+  // Handle Voice Record Button
   const handleToggleRecord = async () => {
     unlockSpeech();
+
+    if (sttMode === 'browser-bn') {
+      handleToggleBrowserSpeech();
+      return;
+    }
+
     if (isRecording) {
       setStatusState('transcribing');
       stopSpeech();
@@ -253,8 +366,8 @@ export default function VoiceAssistant({ defaultQuery }) {
           return;
         }
 
-        // Exclusively transcribe using OpenAI Whisper API
-        const whisperTranscript = await transcribeAudio(audioBlob);
+        // Transcribe using Whisper Large v3 with chosen mode
+        const whisperTranscript = await transcribeAudio(audioBlob, { mode: sttMode });
 
         if (whisperTranscript && whisperTranscript.trim().length > 0) {
           processQuery(whisperTranscript.trim(), true);
@@ -296,33 +409,59 @@ export default function VoiceAssistant({ defaultQuery }) {
   };
 
   const handleCancelRecord = () => {
-    cancelRecording();
+    if (sttMode === 'browser-bn') {
+      if (browserRecognitionRef.current) {
+        try {
+          browserRecognitionRef.current.abort();
+        } catch (e) {}
+      }
+      setIsBrowserListening(false);
+    } else {
+      cancelRecording();
+    }
     setStatusState(null);
   };
 
+  const isCurrentlyRecording = isRecording || isBrowserListening;
+
   return (
-    <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
-      
-      {/* Header Bar */}
-      <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between shrink-0">
+    <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl relative">
+      {/* Top Header */}
+      <div className="bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-2 shrink-0">
         <div className="flex items-center space-x-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white shadow-sm">
-            <Bot className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+            <Radio className="w-4 h-4 animate-pulse" />
           </div>
           <div>
-            <h3 className="text-xs sm:text-sm font-bold text-white flex items-center space-x-1.5">
-              <span>Voice & Chat Document AI</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <h3 className="text-sm font-bold text-white flex items-center space-x-1.5">
+              <span>WBJEE 2026 AI Counsellor</span>
+              <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-mono">
+                GPT 5.4 Mini
+              </span>
             </h3>
+            <p className="text-[11px] text-slate-400">
+              14-Page Official Notification Knowledgebase
+            </p>
           </div>
         </div>
 
         {/* Controls Bar */}
         <div className="flex items-center space-x-2">
-          {/* Whisper AI Tag */}
-          <div className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 border border-emerald-500/40 text-emerald-300">
-            <Cpu className="w-3 h-3 text-emerald-400" />
-            <span>Whisper AI STT</span>
+          {/* STT Mode Selector Pill */}
+          <div className="flex items-center space-x-1 bg-slate-800/90 border border-slate-700/80 rounded-lg p-0.5">
+            <Settings2 className="w-3 h-3 text-slate-400 ml-1.5" />
+            <select
+              value={sttMode}
+              onChange={(e) => setSttMode(e.target.value)}
+              className="bg-transparent text-[11px] text-slate-200 font-medium py-1 px-1.5 outline-none cursor-pointer"
+              title="Select Speech Recognition Engine Mode"
+            >
+              {STT_MODES.map(m => (
+                <option key={m.id} value={m.id} className="bg-slate-900 text-slate-200">
+                  {m.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Auto-TTS Toggle */}
@@ -331,7 +470,7 @@ export default function VoiceAssistant({ defaultQuery }) {
               if (speakingId) stopSpeech();
               setAutoVoiceTts(prev => !prev);
             }}
-            className={`flex items-center space-x-1 px-2 py-0.5 rounded-full text-[11px] font-medium border transition-all cursor-pointer ${
+            className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[11px] font-medium border transition-all cursor-pointer ${
               autoVoiceTts
                 ? 'bg-indigo-950/80 border-indigo-500/40 text-indigo-300'
                 : 'bg-slate-800/80 border-slate-700 text-slate-400'
@@ -398,7 +537,7 @@ export default function VoiceAssistant({ defaultQuery }) {
                 {msg.isVoice && (
                   <div className="inline-flex items-center space-x-1 text-[10px] text-blue-200 mb-1.5 px-2 py-0.5 rounded-full bg-blue-700/50">
                     <Mic className="w-2.5 h-2.5" />
-                    <span>Whisper Audio Query</span>
+                    <span>Voice Query</span>
                   </div>
                 )}
 
@@ -462,24 +601,24 @@ export default function VoiceAssistant({ defaultQuery }) {
           );
         })}
 
-        {/* Live Status Indicators */}
+        {/* Dynamic Status Badges */}
         {statusState === 'transcribing' && (
-          <div className="flex items-center justify-center p-3 text-amber-300 bg-amber-950/40 border border-amber-800/40 rounded-xl space-x-2 animate-pulse">
-            <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-            <span className="text-xs font-semibold">OpenAI Whisper AI transcribing audio in pure Bengali (বাংলা অনুলিপি)...</span>
+          <div className="flex items-center justify-center p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-xl space-x-2 text-indigo-300 animate-pulse">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-xs font-medium">Whisper AI Large v3 transcribing Bengali speech...</span>
           </div>
         )}
 
         {statusState === 'thinking' && (
           <div className="flex items-start space-x-2.5">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 text-white animate-pulse">
-              <Bot className="w-3.5 h-3.5" />
+            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0 text-white shadow-md">
+              <Bot className="w-3.5 h-3.5 animate-spin" />
             </div>
-            <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-none p-3.5 flex items-center space-x-3 text-slate-300">
-              <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+            <div className="p-3.5 rounded-2xl rounded-tl-none bg-slate-800/80 border border-slate-700/60 flex items-center space-x-2">
+              <Loader2 className="w-4 h-4 text-indigo-400 animate-spin" />
               <div className="space-y-0.5">
                 <p className="text-xs font-semibold text-slate-200">Analyzing 14-page notification & memory...</p>
-                <p className="text-[10px] text-slate-400">GPT 5.4 Mini reasoning in pure Bengali / English</p>
+                <p className="text-[10px] text-slate-400">Azure GPT-5.4 Mini reasoning in pure Bengali / English</p>
               </div>
             </div>
           </div>
@@ -499,7 +638,7 @@ export default function VoiceAssistant({ defaultQuery }) {
             <button
               key={idx}
               onClick={() => handleSendText(q)}
-              disabled={statusState !== null || isRecording}
+              disabled={statusState !== null || isCurrentlyRecording}
               className="shrink-0 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 hover:border-slate-600 transition-all cursor-pointer whitespace-nowrap disabled:opacity-50"
             >
               {q}
@@ -509,16 +648,16 @@ export default function VoiceAssistant({ defaultQuery }) {
       </div>
 
       {/* Voice Recording Active Bar */}
-      {isRecording && (
+      {isCurrentlyRecording && (
         <div className="bg-gradient-to-r from-red-950 via-slate-900 to-red-950 border-t border-red-800/60 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 animate-pulse shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 rounded-full bg-red-500 animate-ping shrink-0" />
             <div>
               <p className="text-xs font-bold text-red-200">
-                🎙️ মাইক্রোফোনে কথা বলুন (Recording for Whisper AI)...
+                🎙️ কথা বলুন ({sttMode === 'browser-bn' ? 'Google Bengali Engine' : 'Whisper Large v3'} Active)...
               </p>
               <p className="text-[10px] text-red-300">
-                Duration: {Math.floor(duration / 60)}:{(duration % 60).toString().padStart(2, '0')} | Level: {Math.round(volumeLevel * 100)}%
+                {sttMode === 'browser-bn' ? 'Listening in real-time...' : `Duration: ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')} | Level: ${Math.round(volumeLevel * 100)}%`}
               </p>
             </div>
           </div>
@@ -535,7 +674,7 @@ export default function VoiceAssistant({ defaultQuery }) {
               className="px-3 py-1 text-xs font-bold text-white bg-red-600 hover:bg-red-500 rounded-lg flex items-center space-x-1 cursor-pointer"
             >
               <Check className="w-3.5 h-3.5" />
-              <span>Transcribe with Whisper AI</span>
+              <span>Finish & Send</span>
             </button>
           </div>
         </div>
@@ -556,14 +695,14 @@ export default function VoiceAssistant({ defaultQuery }) {
             onClick={handleToggleRecord}
             disabled={statusState === 'transcribing' || statusState === 'thinking'}
             className={`px-3.5 py-2.5 rounded-xl font-medium text-xs flex items-center space-x-1.5 transition-all shadow-md cursor-pointer shrink-0 disabled:opacity-50 ${
-              isRecording
+              isCurrentlyRecording
                 ? 'bg-red-600 text-white animate-pulse shadow-red-600/30'
                 : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
             }`}
-            title="Ask question by Whisper AI Voice"
+            title="Ask question by Voice"
           >
-            {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-            <span className="hidden sm:inline">{isRecording ? 'Stop & Send' : 'Speak (Whisper AI)'}</span>
+            {isCurrentlyRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            <span className="hidden sm:inline">{isCurrentlyRecording ? 'Stop & Send' : 'Speak'}</span>
           </button>
 
           {/* Text Input */}
@@ -572,14 +711,14 @@ export default function VoiceAssistant({ defaultQuery }) {
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             placeholder="বাংলায় বা ইংরেজিতে প্রশ্ন লিখুন (e.g., ডিসি ফেজ ১ এ সিট নিলে কি হবে?)..."
-            disabled={statusState !== null || isRecording}
+            disabled={statusState !== null || isCurrentlyRecording}
             className="flex-1 bg-slate-900 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition-all disabled:opacity-50"
           />
 
           {/* Send Button */}
           <button
             type="submit"
-            disabled={!inputQuery.trim() || statusState !== null || isRecording}
+            disabled={!inputQuery.trim() || statusState !== null || isCurrentlyRecording}
             className="p-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
             title="Send query"
           >

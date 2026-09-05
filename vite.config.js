@@ -5,7 +5,8 @@ const _kAzure = () => ['FVbCfn1CnLn0ZFi8NMoh', 'gBlEYVXEwp6KHTFr8Wyw', 'XJKWOew1
 const _kGroq = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
 
 const AZURE_CHAT_ENDPOINT = 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
-const GROQ_WHISPER_ENDPOINT = 'https://api.groq.com/openai/v1/audio/transcriptions';
+const GROQ_TRANSCRIPTION_ENDPOINT = 'https://api.groq.com/openai/v1/audio/transcriptions';
+const GROQ_TRANSLATION_ENDPOINT = 'https://api.groq.com/openai/v1/audio/translations';
 
 // Vite plugin to handle /api/chat and /api/transcribe locally in dev mode
 function devApiPlugin() {
@@ -63,12 +64,15 @@ function devApiPlugin() {
       // Whisper STT route with Groq Whisper Large v3
       server.middlewares.use('/api/transcribe', async (req, res) => {
         if (req.method === 'POST') {
+          const isTranslation = req.url && req.url.includes('mode=translations');
+          const targetEndpoint = isTranslation ? GROQ_TRANSLATION_ENDPOINT : GROQ_TRANSCRIPTION_ENDPOINT;
+
           const chunks = [];
           req.on('data', chunk => chunks.push(chunk));
           req.on('end', async () => {
             try {
               const bodyBuffer = Buffer.concat(chunks);
-              const whisperRes = await fetch(GROQ_WHISPER_ENDPOINT, {
+              const whisperRes = await fetch(targetEndpoint, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${_kGroq()}`,

@@ -23,10 +23,15 @@ export function getSavedModel() {
 }
 
 /**
- * Transcribe recorded audio using Groq Whisper Large v3 STT
- * Accepts WebM, MP4, WAV, or OGG audio and transcribes directly into pure Bengali script (বাংলা হরফ)
+ * Transcribe recorded audio using Whisper Large v3 STT
+ * Supports different modes:
+ * - 'whisper-bn': Whisper Large v3 locked to Bengali language ('bn')
+ * - 'whisper-auto': Whisper Large v3 with automatic multilingual detection
+ * - 'whisper-translate': Whisper Large v3 translating spoken Bengali directly to English
  */
-export async function transcribeAudio(audioBlob) {
+export async function transcribeAudio(audioBlob, options = {}) {
+  const { mode = 'whisper-bn' } = typeof options === 'string' ? { mode: options } : options;
+
   if (!audioBlob || audioBlob.size < 100) {
     throw new Error('Recorded audio is too short. Please speak clearly into your mic.');
   }
@@ -41,18 +46,28 @@ export async function transcribeAudio(audioBlob) {
     type: fileType
   });
 
+  const isTranslation = mode === 'whisper-translate';
+  const endpoint = isTranslation 
+    ? 'https://api.groq.com/openai/v1/audio/translations'
+    : 'https://api.groq.com/openai/v1/audio/transcriptions';
+
   const formData = new FormData();
   formData.append('file', audioFile);
-  formData.append('model', 'whisper-large-v3-turbo');
-  formData.append('language', 'bn');
-  formData.append(
-    'prompt',
-    'পশ্চিমবঙ্গ জয়েন্ট এন্ট্রান্স পরীক্ষা WBJEE বিকেন্দ্রীভূত কাউন্সিলিং সংক্রান্ত প্রশ্ন। বিশুদ্ধ বাংলা হরফে নিখুঁতভাবে লিখুন।'
-  );
+  // Full, high-fidelity 1.55B Whisper Large v3 model
+  formData.append('model', 'whisper-large-v3');
+  formData.append('temperature', '0');
 
-  // 1. Try serverless /api/transcribe first
+  if (!isTranslation) {
+    if (mode === 'whisper-bn') {
+      formData.append('language', 'bn');
+    }
+  }
+
+  const serverlessUrl = isTranslation ? '/api/transcribe?mode=translations' : '/api/transcribe';
+
+  // 1. Try serverless proxy first
   try {
-    const res = await fetch('/api/transcribe', {
+    const res = await fetch(serverlessUrl, {
       method: 'POST',
       body: formData
     });
@@ -72,7 +87,7 @@ export async function transcribeAudio(audioBlob) {
   // 2. Direct Whisper API fallback (Groq Whisper Large v3)
   try {
     const groqKey = _kGroq();
-    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${groqKey}`
@@ -185,9 +200,7 @@ GUIDELINES FOR YOUR RESPONSES:
               fullText += delta;
               if (onChunk) onChunk(fullText);
             }
-          } catch (e) {
-            // keep collecting
-          }
+          } catch (e) {}
         }
       }
 

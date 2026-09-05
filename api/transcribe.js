@@ -1,7 +1,8 @@
-// Serverless API route for Whisper Audio Transcription (Powered by Groq Whisper Large v3)
+// Serverless API route for Whisper Audio Transcription & Translation (Groq Whisper Large v3)
 const _g = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
 
-const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/audio/transcriptions';
+const GROQ_TRANSCRIPTION_ENDPOINT = 'https://api.groq.com/openai/v1/audio/transcriptions';
+const GROQ_TRANSLATION_ENDPOINT = 'https://api.groq.com/openai/v1/audio/translations';
 const GROQ_KEY = process.env.VITE_GROQ_API_KEY || _g();
 
 export const config = {
@@ -24,13 +25,16 @@ export default async function handler(req, res) {
   }
 
   try {
+    const isTranslation = req.url && req.url.includes('mode=translations');
+    const targetEndpoint = isTranslation ? GROQ_TRANSLATION_ENDPOINT : GROQ_TRANSCRIPTION_ENDPOINT;
+
     const chunks = [];
     for await (const chunk of req) {
       chunks.push(chunk);
     }
     const bodyBuffer = Buffer.concat(chunks);
 
-    const whisperRes = await fetch(GROQ_ENDPOINT, {
+    const whisperRes = await fetch(targetEndpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${GROQ_KEY}`,
