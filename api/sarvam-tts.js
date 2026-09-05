@@ -1,4 +1,12 @@
 // Serverless API route for Sarvam AI Bulbul:v3 Text-to-Speech (TTS)
+import dns from 'dns';
+
+if (dns && typeof dns.setDefaultResultOrder === 'function') {
+  try {
+    dns.setDefaultResultOrder('ipv4first');
+  } catch (e) {}
+}
+
 const _s = () => [
   'sk_zzld5vcu_',
   'xVKx5KWEq8Og',
@@ -29,9 +37,14 @@ export default async function handler(req, res) {
       } catch (e) {}
     }
 
-    // Ensure model is bulbul:v3 and inputs is an array of strings
+    // Ensure model is bulbul:v3 and inputs is an array of max 3 items
+    let inputs = Array.isArray(payload.inputs) ? payload.inputs : [payload.text || 'নমস্কার'];
+    if (inputs.length > 3) {
+      inputs = inputs.slice(0, 3);
+    }
+
     const requestBody = {
-      inputs: Array.isArray(payload.inputs) ? payload.inputs : [payload.text || 'নমস্কার'],
+      inputs: inputs,
       target_language_code: payload.target_language_code || 'bn-IN',
       speaker: payload.speaker || 'shreya',
       model: 'bulbul:v3',
@@ -45,7 +58,7 @@ export default async function handler(req, res) {
       headers: {
         'api-subscription-key': SARVAM_KEY,
         'Content-Type': 'application/json',
-        'User-Agent': 'SarvamAI/1.0.0 (Node/Serverless)',
+        'User-Agent': 'SarvamAI/1.0.0 (Serverless)',
         'Accept': 'application/json',
         'Connection': 'close'
       },
