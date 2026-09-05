@@ -1,12 +1,12 @@
 // Exclusive Sarvam AI (Bulbul:v3) Text-to-Speech (TTS) Engine
 // ALL OTHER TTS ENGINES HAVE BEEN REMOVED PER EXPLICIT DIRECTIVE.
-import { speakWithSarvamAI, stopSarvamSpeech } from './sarvamTts';
+import { speakWithSarvamAI, stopSarvamSpeech, primeAudio } from './sarvamTts';
 
 /**
  * Unlock / Prime audio playback on user gesture
  */
 export function unlockSpeech() {
-  // Primed for HTML5 Audio playback on iOS/Chrome/Safari
+  primeAudio();
 }
 
 /**
@@ -14,7 +14,7 @@ export function unlockSpeech() {
  */
 export function speakText(text, options = {}) {
   const {
-    speaker = 'shreya', // 'shreya' (natural Bengali female voice) or 'soham' (Bengali male voice)
+    speaker = 'shreya', // 'shreya' (Female) | 'shubh' (Male) | 'soham' (Male) | 'roopa' (Female)
     onStart = () => {},
     onEnd = () => {},
     onError = () => {}

@@ -22,15 +22,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    const payload = req.body;
+    let payload = req.body;
+    if (typeof payload === 'string') {
+      try {
+        payload = JSON.parse(payload);
+      } catch (e) {}
+    }
+
+    // Ensure model is bulbul:v3 and inputs is an array of strings
+    const requestBody = {
+      inputs: Array.isArray(payload.inputs) ? payload.inputs : [payload.text || 'নমস্কার'],
+      target_language_code: payload.target_language_code || 'bn-IN',
+      speaker: payload.speaker || 'shreya',
+      model: 'bulbul:v3',
+      pace: payload.pace || 1.0,
+      speech_sample_rate: 22050,
+      enable_preprocessing: true
+    };
 
     const sarvamRes = await fetch(SARVAM_ENDPOINT, {
       method: 'POST',
       headers: {
         'api-subscription-key': SARVAM_KEY,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'User-Agent': 'SarvamAI/1.0.0 (Node/Serverless)',
+        'Accept': 'application/json',
+        'Connection': 'close'
       },
-      body: typeof payload === 'string' ? payload : JSON.stringify(payload)
+      body: JSON.stringify(requestBody)
     });
 
     const data = await sarvamRes.text();

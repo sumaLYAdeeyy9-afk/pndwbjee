@@ -75,7 +75,10 @@ function devApiPlugin() {
                 method: 'POST',
                 headers: {
                   'api-subscription-key': _kSarvam(),
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
+                  'User-Agent': 'SarvamAI/1.0.0 (ViteDev)',
+                  'Accept': 'application/json',
+                  'Connection': 'close'
                 },
                 body
               });
