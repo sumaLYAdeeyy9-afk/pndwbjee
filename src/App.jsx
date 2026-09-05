@@ -22,7 +22,7 @@ export default function App() {
   }, [constraints]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col selection:bg-indigo-600 selection:text-white font-sans antialiased">
       
       {/* Top Navigation Bar */}
       <Navbar
@@ -30,55 +30,48 @@ export default function App() {
         onViewTabChange={setActiveViewTab}
       />
 
-      {/* Main Split-Screen Workspace */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-[calc(100vh-4.25rem)] min-h-[620px]">
+      {/* Main Full-Width Workspace Container */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 lg:p-6 flex flex-col h-[calc(100vh-4rem)] min-h-[640px]">
         
-        {/* Left Pane: PDF Container (5 cols on desktop, full height) */}
-        <div className={`h-full ${
-          activeViewTab === 'pdf' ? 'block' : 'hidden lg:block'
-        } lg:col-span-5 xl:col-span-5 min-h-0`}>
-          <PdfViewer />
-        </div>
-
-        {/* Right Pane: Flowchart, Simulator & Strategy Dossier (7 cols on desktop) */}
-        <div className={`h-full ${
-          activeViewTab !== 'pdf' ? 'block' : 'hidden lg:block'
-        } lg:col-span-7 xl:col-span-7 min-h-0 flex flex-col`}>
-          
-          {/* Active View Component Rendering */}
-          {activeViewTab === 'flowchart' && (
+        {/* Tab 1: Flowchart View */}
+        {activeViewTab === 'flowchart' && (
+          <div className="flex-1 h-full min-h-0">
             <FlowchartViewer
               simulationResult={simulationResult}
               selectedNodeId={selectedNodeId}
               onSelectNode={setSelectedNodeId}
+              onOpenSimulator={() => setActiveViewTab('simulator')}
             />
-          )}
+          </div>
+        )}
 
-          {activeViewTab === 'simulator' && (
+        {/* Tab 2: Candidate Constraint Simulator */}
+        {activeViewTab === 'simulator' && (
+          <div className="flex-1 h-full min-h-0">
             <SimulationEngine
               constraints={constraints}
               onConstraintsChange={setConstraints}
+              onViewFlowchart={() => setActiveViewTab('flowchart')}
             />
-          )}
+          </div>
+        )}
 
-          {activeViewTab === 'dossier' && (
+        {/* Tab 3: Personalized Strategy Dossier */}
+        {activeViewTab === 'dossier' && (
+          <div className="flex-1 h-full min-h-0">
             <SimulationSummary
               simulationResult={simulationResult}
+              onViewFlowchart={() => setActiveViewTab('flowchart')}
             />
-          )}
+          </div>
+        )}
 
-          {/* Desktop Fallback if mobile tab was set to pdf */}
-          {activeViewTab === 'pdf' && (
-            <div className="hidden lg:block h-full">
-              <FlowchartViewer
-                simulationResult={simulationResult}
-                selectedNodeId={selectedNodeId}
-                onSelectNode={setSelectedNodeId}
-              />
-            </div>
-          )}
-
-        </div>
+        {/* Tab 4: Official 14-Page Notification PDF in Separate Section */}
+        {activeViewTab === 'pdf' && (
+          <div className="flex-1 h-full min-h-0">
+            <PdfViewer />
+          </div>
+        )}
 
       </main>
 

@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { 
-  FLOWCHART_NODES, 
-  FLOWCHART_EDGES 
+  FLOWCHART_TREE_NODES 
 } from '../data/flowchartData';
 import { 
   ZoomIn, ZoomOut, RotateCcw, Maximize2, Minimize2, 
-  ShieldCheck, ArrowRight, CheckCircle2, AlertTriangle, 
-  Layers, Info, FileText, Sparkles, BookOpen, ExternalLink 
+  ShieldCheck, AlertTriangle, CheckCircle2, Info, 
+  Layers, Sparkles, BookOpen, ExternalLink, Sliders 
 } from 'lucide-react';
 
 export default function FlowchartViewer({
   simulationResult,
   selectedNodeId,
-  onSelectNode
+  onSelectNode,
+  onOpenSimulator
 }) {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -20,78 +20,62 @@ export default function FlowchartViewer({
 
   const activeNodesSet = new Set(simulationResult?.activeNodes || []);
 
-  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.15, 1.6));
-  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.15, 0.65));
+  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.15, 1.5));
+  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.15, 0.7));
   const handleResetZoom = () => setZoomLevel(1);
 
-  const openNodeDetails = (node) => {
-    setActiveModalNode(node);
-    if (onSelectNode) onSelectNode(node.id);
-  };
-
-  const getNodeColorClasses = (node, isActive) => {
-    if (!isActive) {
-      return 'bg-slate-900/60 border-slate-800/80 text-slate-400 opacity-60 hover:opacity-100 hover:border-slate-700';
-    }
-
-    switch (node.category) {
-      case 'protection':
-        return 'bg-emerald-950/40 border-emerald-500/80 text-emerald-200 shadow-lg shadow-emerald-900/20 ring-1 ring-emerald-400/50';
-      case 'success':
-        return 'bg-teal-950/40 border-teal-500/80 text-teal-200 shadow-lg shadow-teal-900/20 ring-1 ring-teal-400/50';
-      case 'financial':
-        return 'bg-amber-950/40 border-amber-500/80 text-amber-200 shadow-lg shadow-amber-900/20 ring-1 ring-amber-400/50';
-      case 'decision':
-        return 'bg-indigo-950/40 border-indigo-500/80 text-indigo-200 shadow-lg shadow-indigo-900/20 ring-1 ring-indigo-400/50';
-      case 'safe':
-        return 'bg-sky-950/40 border-sky-500/80 text-sky-200 shadow-lg shadow-sky-900/20 ring-1 ring-sky-400/50';
-      case 'final':
-        return 'bg-violet-950/40 border-violet-500/80 text-violet-200 shadow-lg shadow-violet-900/20 ring-1 ring-violet-400/50';
-      default:
-        return 'bg-slate-800/80 border-indigo-500/60 text-slate-200 shadow-md ring-1 ring-indigo-400/30';
+  const openNode = (nodeKey) => {
+    const node = FLOWCHART_TREE_NODES[nodeKey];
+    if (node) {
+      setActiveModalNode(node);
+      if (onSelectNode) onSelectNode(node.id);
     }
   };
+
+  const isNodeActive = (nodeKey) => activeNodesSet.has(nodeKey);
 
   return (
-    <div className={`flex flex-col h-full bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden relative ${
-      isExpanded ? 'fixed inset-3 z-50 bg-slate-950' : 'relative'
+    <div className={`flex flex-col h-full bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden ${
+      isExpanded ? 'fixed inset-3 z-50 bg-slate-950 text-white' : 'relative'
     }`}>
       
-      {/* Top Header & Toolbar */}
-      <div className="bg-slate-900/95 px-4 py-3 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0 backdrop-blur-md">
-        
-        <div className="flex items-center space-x-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-            <Layers className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center space-x-2">
-              <h2 className="text-xs sm:text-sm font-bold text-white tracking-tight truncate">
-                WBJEE 2026 DC Master Flowchart
-              </h2>
-              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-                Live Mapped Path
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 truncate">
-              {activeNodesSet.size} active stages illuminated for your selected constraints
-            </p>
-          </div>
+      {/* Top Header */}
+      <div className="bg-slate-900 text-white px-5 py-4 border-b border-slate-800 flex items-center justify-between gap-4 shrink-0">
+        <div>
+          <h2 className="text-base sm:text-lg font-bold tracking-tight text-white flex items-center space-x-2">
+            <span>WBJEE Counselling Decision Tree</span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              Interactive Flow
+            </span>
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Trace your pathway & inspect rule clause triggers
+          </p>
         </div>
 
-        {/* Controls */}
-        <div className="flex items-center space-x-1.5 shrink-0">
+        {/* Action Controls */}
+        <div className="flex items-center space-x-2 shrink-0">
+          {onOpenSimulator && (
+            <button
+              onClick={onOpenSimulator}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>Configure My Scenario</span>
+            </button>
+          )}
+
           <button
             onClick={handleZoomOut}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer"
             title="Zoom Out"
           >
-            <ZoomOut className="w-3.5 h-3.5" />
+            <ZoomOut className="w-4 h-4" />
           </button>
           
           <button
             onClick={handleResetZoom}
-            className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-mono font-semibold border border-slate-700 transition-all cursor-pointer"
+            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono font-semibold border border-slate-700 transition-all cursor-pointer"
             title="Reset Zoom"
           >
             {Math.round(zoomLevel * 100)}%
@@ -102,224 +86,467 @@ export default function FlowchartViewer({
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer"
             title="Zoom In"
           >
-            <ZoomIn className="w-3.5 h-3.5" />
+            <ZoomIn className="w-4 h-4" />
           </button>
 
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer"
-            title={isExpanded ? 'Exit Fullscreen' : 'Fullscreen Flowchart'}
+            title={isExpanded ? 'Exit Fullscreen' : 'Fullscreen'}
           >
-            {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
-
       </div>
 
-      {/* Main Flowchart Canvas Area */}
-      <div className="flex-1 overflow-auto p-4 sm:p-6 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:18px_18px] relative">
+      {/* Decision Tree Diagram Canvas Container */}
+      <div className="flex-1 overflow-auto bg-[#0b0f17] p-6 sm:p-10 relative select-none">
         
         <div 
-          className="min-w-[850px] max-w-5xl mx-auto space-y-6 transition-transform duration-200 origin-top"
+          className="min-w-[820px] max-w-4xl mx-auto flex flex-col items-center space-y-6 transition-transform duration-200 origin-top text-slate-200"
           style={{ transform: `scale(${zoomLevel})` }}
         >
 
-          {/* Phase Section 1: Ingestion & Protection */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-indigo-500" />
-                <span>Stage 1: Eligibility, Registration & Seat Protection</span>
-              </span>
-              <span className="text-[11px] font-mono text-slate-500">Clauses 5, 6, 14</span>
+          {/* ========================================================================= */}
+          {/* STAGE 1: Centralised Counselling Decision Tree (Phase 1 & Round 1/2)     */}
+          {/* ========================================================================= */}
+
+          {/* Root Pill: Start Phase 1 (Choices) */}
+          <div 
+            onClick={() => openNode('node_start_phase1')}
+            className={`cursor-pointer px-8 py-3 rounded-full text-sm font-bold tracking-wide transition-all duration-300 border-2 ${
+              isNodeActive('node_start_phase1')
+                ? 'bg-blue-950/80 border-blue-400 text-blue-100 shadow-[0_0_25px_rgba(59,130,246,0.7)] ring-2 ring-blue-400/40'
+                : 'bg-slate-900 border-blue-600/50 text-blue-200 hover:border-blue-400'
+            }`}
+          >
+            Start Phase 1 (Choices)
+          </div>
+
+          {/* Dotted Arrow Down */}
+          <div className="w-px h-8 border-r-2 border-dotted border-slate-600 flex items-center justify-center -my-2">
+            <span className="text-[10px] text-slate-400 mt-2">▼</span>
+          </div>
+
+          {/* Diamond: Phase 1 Round 1 Allotment */}
+          <div className="relative my-2 flex items-center justify-center">
+            <div 
+              onClick={() => openNode('node_round1_decision')}
+              className={`cursor-pointer w-48 h-20 rounded-full border-2 flex items-center justify-center p-3 text-center transition-all ${
+                isNodeActive('node_round1_decision')
+                  ? 'bg-slate-900/90 border-blue-400 text-white font-bold shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+                  : 'bg-slate-900/80 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+              style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+            >
+              <span className="text-xs font-semibold px-4">Phase 1 Round 1 Allotment</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-              {FLOWCHART_NODES.slice(0, 4).map((node) => {
-                const isActive = activeNodesSet.has(node.id);
-                return (
-                  <div
-                    key={node.id}
-                    onClick={() => openNodeDetails(node)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer relative group ${getNodeColorClasses(node, isActive)}`}
-                  >
-                    {isActive && (
-                      <span className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px] uppercase tracking-wider shadow-sm flex items-center space-x-0.5">
-                        <CheckCircle2 className="w-2.5 h-2.5 inline" />
-                        <span>Active Path</span>
-                      </span>
-                    )}
-                    <div className="text-[10px] font-mono text-indigo-400/90 font-semibold mb-1 flex items-center justify-between">
-                      <span>{node.clause}</span>
-                      <Info className="w-3 h-3 opacity-60 group-hover:opacity-100" />
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-bold leading-snug mb-1">
-                      {node.label}
-                    </h3>
-                    <p className="text-[11px] text-slate-400 leading-normal">
-                      {node.sublabel}
-                    </p>
+            {/* Branch Label Left: No */}
+            <span className="absolute -left-12 text-xs italic font-mono text-slate-400 font-semibold">
+              No
+            </span>
+
+            {/* Branch Label Right: Yes */}
+            <span className="absolute -right-12 text-xs italic font-mono text-slate-400 font-semibold">
+              Yes
+            </span>
+          </div>
+
+          {/* Level 3: Left (No Seat Allotted) & Right (Seat Allotted) */}
+          <div className="w-full grid grid-cols-2 gap-16 relative pt-2">
+            
+            {/* SVG Connecting Paths */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none -top-10" style={{ zIndex: 0 }}>
+              {/* Left Branch */}
+              <path d="M 370 0 H 220 V 50" fill="none" stroke="#475569" strokeWidth="1.5" strokeDasharray="4 4" />
+              {/* Right Branch */}
+              <path d="M 450 0 H 600 V 50" fill="none" stroke="#475569" strokeWidth="1.5" strokeDasharray="4 4" />
+            </svg>
+
+            {/* Left Box: No Seat Allotted */}
+            <div className="flex flex-col items-center space-y-6 z-10">
+              <div 
+                onClick={() => openNode('node_no_seat_allotted')}
+                className={`cursor-pointer w-52 py-3 px-4 rounded-2xl border text-center transition-all ${
+                  isNodeActive('node_no_seat_allotted')
+                    ? 'bg-slate-900 border-blue-400 text-blue-100 shadow-[0_0_15px_rgba(59,130,246,0.4)]'
+                    : 'bg-slate-900/90 border-slate-700 text-slate-300 hover:border-slate-500'
+                }`}
+              >
+                <div className="text-xs font-bold">No Seat Allotted</div>
+              </div>
+
+              {/* Path connector with "Wait" text */}
+              <div className="flex flex-col items-center space-y-1">
+                <span className="text-xs font-mono text-slate-400 italic">Wait</span>
+                <div className="w-px h-32 border-r-2 border-dotted border-slate-600" />
+                <span className="text-[10px] text-slate-400">▼</span>
+              </div>
+            </div>
+
+            {/* Right Box: Seat Allotted & Actions */}
+            <div className="flex flex-col items-center space-y-4 z-10">
+              <div 
+                onClick={() => openNode('node_seat_allotted')}
+                className={`cursor-pointer w-52 py-3 px-4 rounded-2xl border text-center transition-all ${
+                  isNodeActive('node_seat_allotted')
+                    ? 'bg-slate-900 border-blue-400 text-blue-100 shadow-[0_0_15px_rgba(59,130,246,0.4)]'
+                    : 'bg-slate-900/90 border-slate-700 text-slate-300 hover:border-slate-500'
+                }`}
+              >
+                <div className="text-xs font-bold">Seat Allotted</div>
+              </div>
+
+              {/* Action Branches */}
+              <div className="w-full grid grid-cols-2 gap-4 pt-2">
+                
+                {/* Action: Pay SAF but Skip Verification */}
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="text-[11px] font-mono text-slate-400 text-center">
+                    Pay SAF but Skip Verification
                   </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Connector Down */}
-          <div className="flex justify-center -my-2">
-            <div className="flex flex-col items-center">
-              <div className="w-0.5 h-6 bg-gradient-to-b from-indigo-500 to-teal-500" />
-              <ArrowRight className="w-4 h-4 text-teal-400 rotate-90 -mt-1" />
-            </div>
-          </div>
-
-          {/* Phase Section 2: Merit & DC Phase 1 */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-teal-400 flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-teal-500" />
-                <span>Stage 2: DC Phase 1 (Fresh Admission — Quota Intact)</span>
-              </span>
-              <span className="text-[11px] font-mono text-slate-500">Clauses 9, 13, 15</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5">
-              {FLOWCHART_NODES.slice(4, 8).map((node) => {
-                const isActive = activeNodesSet.has(node.id);
-                return (
-                  <div
-                    key={node.id}
-                    onClick={() => openNodeDetails(node)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer relative group ${getNodeColorClasses(node, isActive)}`}
+                  <span className="text-[10px] font-mono text-rose-400 font-bold">Clause 17.5 Penalty</span>
+                  
+                  {/* Red Penalty Pill */}
+                  <div 
+                    onClick={() => openNode('node_penalty_debarred')}
+                    className="cursor-pointer w-full py-2 px-2.5 rounded-full border-2 border-rose-500/80 bg-rose-950/40 text-rose-400 text-[11px] font-bold text-center hover:bg-rose-900/50 shadow-sm"
                   >
-                    {isActive && (
-                      <span className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px] uppercase tracking-wider shadow-sm flex items-center space-x-0.5">
-                        <CheckCircle2 className="w-2.5 h-2.5 inline" />
-                        <span>Active Path</span>
-                      </span>
-                    )}
-                    <div className="text-[10px] font-mono text-teal-400/90 font-semibold mb-1 flex items-center justify-between">
-                      <span>{node.clause}</span>
-                      <Info className="w-3 h-3 opacity-60 group-hover:opacity-100" />
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-bold leading-snug mb-1">
-                      {node.label}
-                    </h3>
-                    <p className="text-[11px] text-slate-400 leading-normal">
-                      {node.sublabel}
-                    </p>
+                    Permanently Debarred<br/>(Clause 17.5 Penalty)
                   </div>
-                );
-              })}
-            </div>
-          </div>
+                </div>
 
-          {/* Connector Down */}
-          <div className="flex justify-center -my-2">
-            <div className="flex flex-col items-center">
-              <div className="w-0.5 h-6 bg-gradient-to-b from-teal-500 to-sky-500" />
-              <ArrowRight className="w-4 h-4 text-sky-400 rotate-90 -mt-1" />
-            </div>
-          </div>
-
-          {/* Phase Section 3: DC Phase 2 & Upgradation */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-sky-500" />
-                <span>Stage 3: DC Phase 2 (Upgradation & Replacement Quota)</span>
-              </span>
-              <span className="text-[11px] font-mono text-slate-500">Clauses 13.2, 14.2</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-              {FLOWCHART_NODES.slice(8, 11).map((node) => {
-                const isActive = activeNodesSet.has(node.id);
-                return (
-                  <div
-                    key={node.id}
-                    onClick={() => openNodeDetails(node)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer relative group ${getNodeColorClasses(node, isActive)}`}
+                {/* Action: Accept or Ignore */}
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="text-[11px] font-mono text-slate-400 text-center">
+                    Action: Accept
+                  </div>
+                  <div 
+                    onClick={() => openNode('node_pay_saf_verified')}
+                    className={`cursor-pointer w-full py-2.5 px-3 rounded-xl border text-center text-[11px] font-semibold transition-all ${
+                      isNodeActive('node_pay_saf_verified')
+                        ? 'bg-slate-900 border-emerald-400 text-emerald-200 shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+                        : 'bg-slate-900/80 border-slate-700 text-slate-300 hover:border-slate-500'
+                    }`}
                   >
-                    {isActive && (
-                      <span className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px] uppercase tracking-wider shadow-sm flex items-center space-x-0.5">
-                        <CheckCircle2 className="w-2.5 h-2.5 inline" />
-                        <span>Active Path</span>
-                      </span>
-                    )}
-                    <div className="text-[10px] font-mono text-sky-400/90 font-semibold mb-1 flex items-center justify-between">
-                      <span>{node.clause}</span>
-                      <Info className="w-3 h-3 opacity-60 group-hover:opacity-100" />
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-bold leading-snug mb-1">
-                      {node.label}
-                    </h3>
-                    <p className="text-[11px] text-slate-400 leading-normal">
-                      {node.sublabel}
-                    </p>
+                    Pay SAF & Complete Verification
                   </div>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Connector Down */}
-          <div className="flex justify-center -my-2">
-            <div className="flex flex-col items-center">
-              <div className="w-0.5 h-6 bg-gradient-to-b from-sky-500 to-amber-500" />
-              <ArrowRight className="w-4 h-4 text-amber-400 rotate-90 -mt-1" />
-            </div>
-          </div>
-
-          {/* Phase Section 4: Fee Refund & Final Enrollment */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span>Stage 4: Fee Refund Policy (Clause 18) & Final Enrollment</span>
-              </span>
-              <span className="text-[11px] font-mono text-slate-500">Clauses 18, 19</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-              {FLOWCHART_NODES.slice(11, 13).map((node) => {
-                const isActive = activeNodesSet.has(node.id);
-                return (
-                  <div
-                    key={node.id}
-                    onClick={() => openNodeDetails(node)}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer relative group ${getNodeColorClasses(node, isActive)}`}
+                  {/* Red Ignore Pill */}
+                  <div 
+                    onClick={() => openNode('node_penalty_ignored')}
+                    className="cursor-pointer w-full py-1.5 px-2.5 rounded-full border border-rose-500/70 bg-rose-950/30 text-rose-400 text-[10px] font-semibold text-center hover:bg-rose-900/40"
                   >
-                    {isActive && (
-                      <span className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[9px] uppercase tracking-wider shadow-sm flex items-center space-x-0.5">
-                        <CheckCircle2 className="w-2.5 h-2.5 inline" />
-                        <span>Active Path</span>
-                      </span>
-                    )}
-                    <div className="text-[10px] font-mono text-amber-400/90 font-semibold mb-1 flex items-center justify-between">
-                      <span>{node.clause}</span>
-                      <Info className="w-3 h-3 opacity-60 group-hover:opacity-100" />
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-bold leading-snug mb-1">
-                      {node.label}
-                    </h3>
-                    <p className="text-[11px] text-slate-400 leading-normal">
-                      {node.sublabel}
-                    </p>
+                    Ignore Portal (Non-Response)
                   </div>
-                );
-              })}
+                </div>
+
+              </div>
+
+              {/* Warning tag */}
+              <div className="text-[10px] font-mono text-rose-400 pt-1">
+                Clause 17.4: Combo Blocked
+              </div>
             </div>
+
+          </div>
+
+          {/* Level 5: Diamond: Phase 1 Round 2 (Auto-Upgradation) */}
+          <div className="relative my-4 flex items-center justify-center pt-2">
+            <div 
+              onClick={() => openNode('node_round2_decision')}
+              className={`cursor-pointer w-56 h-20 rounded-full border-2 flex items-center justify-center p-3 text-center transition-all ${
+                isNodeActive('node_round2_decision')
+                  ? 'bg-slate-900/90 border-blue-400 text-white font-bold shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+                  : 'bg-slate-900/80 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+              style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+            >
+              <span className="text-xs font-semibold px-4">Phase 1 Round 2<br/>(Auto-Upgradation)</span>
+            </div>
+          </div>
+
+          {/* Transition to Phase 2 Banner */}
+          <div className="w-full flex flex-col items-center space-y-2 pt-2">
+            <div className="text-xs font-mono text-slate-400 italic">Want Better Seat / Vacancies</div>
+            <div className="w-px h-8 border-r-2 border-dotted border-slate-600" />
+            <span className="text-[10px] text-slate-400">▼</span>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* STAGE 2: Decentralised Counselling (DC Phase 1 & 2 Full Lifecycle)       */}
+          {/* ========================================================================= */}
+
+          {/* Stage 2 Section Header Card */}
+          <div 
+            onClick={() => openNode('node_start_phase2_dc')}
+            className={`w-full p-4 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+              isNodeActive('node_start_phase2_dc')
+                ? 'bg-slate-900/95 border-indigo-500 text-white shadow-[0_0_25px_rgba(99,102,241,0.5)]'
+                : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+            }`}
+          >
+            <div className="text-sm font-bold flex items-center justify-center space-x-2">
+              <Sparkles className="w-4 h-4 text-indigo-400" />
+              <span>Start Phase 2 / Decentralised Counselling (DC)</span>
+            </div>
+            <div className="text-[11px] text-slate-400 mt-0.5">
+              Institutional-Level Vacancy Rounds (Clause 5 & 14)
+            </div>
+          </div>
+
+          {/* Dotted Arrow */}
+          <div className="w-px h-6 border-r-2 border-dotted border-slate-600 -my-2"></div>
+
+          {/* Seat Protection & Registration Grid */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Seat Protection Guarantee */}
+            <div 
+              onClick={() => openNode('node_seat_protection_guarantee')}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_seat_protection_guarantee')
+                  ? 'bg-emerald-950/40 border-emerald-400 text-emerald-200 shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-emerald-400 font-bold mb-1">
+                Clause 14 (Page 7)
+              </div>
+              <div className="text-xs font-bold text-white flex items-center space-x-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Seat Protection Guarantee</span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                CC Admitted seat remains 100% safe & protected during DC
+              </p>
+            </div>
+
+            {/* DC Portal Registration */}
+            <div 
+              onClick={() => openNode('node_dc_portal_registration')}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_dc_portal_registration')
+                  ? 'bg-indigo-950/40 border-indigo-400 text-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.4)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-indigo-400 font-bold mb-1">
+                Clause 6 (Page 3)
+              </div>
+              <div className="text-xs font-bold text-white">
+                DC Portal Registration & Fee
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                Apply on institute portals with ₹250 application fee
+              </p>
+            </div>
+
+            {/* Merit Priority Hierarchy */}
+            <div 
+              onClick={() => openNode('node_dc_merit_hierarchy')}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_dc_merit_hierarchy')
+                  ? 'bg-sky-950/40 border-sky-400 text-sky-200 shadow-[0_0_15px_rgba(56,189,248,0.4)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-sky-400 font-bold mb-1">
+                Clause 9 (Page 4)
+              </div>
+              <div className="text-xs font-bold text-white">
+                Merit Priority Hierarchy
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                GMR (Tier 1) &gt; JEE Main (Tier 2) &gt; HMR (Tier 3)
+              </p>
+            </div>
+
+          </div>
+
+          {/* Dotted Arrow */}
+          <div className="w-px h-6 border-r-2 border-dotted border-slate-600 -my-2"></div>
+
+          {/* Diamond: DC Phase 1 Seat Allotment */}
+          <div className="relative my-2 flex items-center justify-center">
+            <div 
+              onClick={() => openNode('node_dc_phase1_decision')}
+              className={`cursor-pointer w-56 h-20 rounded-full border-2 flex items-center justify-center p-3 text-center transition-all ${
+                isNodeActive('node_dc_phase1_decision')
+                  ? 'bg-slate-900/90 border-blue-400 text-white font-bold shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+                  : 'bg-slate-900/80 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+              style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+            >
+              <span className="text-xs font-semibold px-4">DC Phase 1 Seat Allotment</span>
+            </div>
+          </div>
+
+          {/* Phase 1 Outcome Grid */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* DC Phase 1 Fresh Admission */}
+            <div 
+              onClick={() => openNode('node_dc_phase1_admission')}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_dc_phase1_admission')
+                  ? 'bg-teal-950/40 border-teal-400 text-teal-200 shadow-[0_0_15px_rgba(45,212,191,0.4)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-teal-400 font-bold mb-1">
+                Mandatory Legal Ruling
+              </div>
+              <div className="text-xs font-bold text-white">
+                DC Phase 1 Fresh Admission
+              </div>
+              <p className="text-[11px] text-slate-300 mt-1">
+                Counted as FRESH ADMISSION. Replacement Quota: <span className="text-teal-300 font-bold">0/1 Used (Intact!)</span>
+              </p>
+            </div>
+
+            {/* DC Phase 1 Safe Retain */}
+            <div 
+              onClick={() => openNode('node_dc_phase1_safe_retain')}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_dc_phase1_safe_retain')
+                  ? 'bg-slate-900/90 border-sky-400 text-sky-200 shadow-[0_0_15px_rgba(56,189,248,0.4)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-sky-400 font-bold mb-1">
+                Clause 14 (Page 7)
+              </div>
+              <div className="text-xs font-bold text-white">
+                No DC Allotment (Safe Holding)
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                Original CC admission remains 100% active and untouched
+              </p>
+            </div>
+
+          </div>
+
+          {/* Dotted Arrow */}
+          <div className="w-px h-6 border-r-2 border-dotted border-slate-600 -my-2"></div>
+
+          {/* Diamond: DC Phase 2 Upgradation Round */}
+          <div className="relative my-2 flex items-center justify-center">
+            <div 
+              onClick={() => openNode('node_dc_phase2_decision')}
+              className={`cursor-pointer w-60 h-20 rounded-full border-2 flex items-center justify-center p-3 text-center transition-all ${
+                isNodeActive('node_dc_phase2_decision')
+                  ? 'bg-slate-900/90 border-blue-400 text-white font-bold shadow-[0_0_20px_rgba(59,130,246,0.5)]'
+                  : 'bg-slate-900/80 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+              style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+            >
+              <span className="text-xs font-semibold px-4">DC Phase 2 (Vacancy & Upgradation Round)</span>
+            </div>
+          </div>
+
+          {/* Phase 2 Outlets */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* Phase 2 Upgraded */}
+            <div 
+              onClick={() => openNode('node_dc_phase2_upgraded')}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_dc_phase2_upgraded')
+                  ? 'bg-violet-950/40 border-violet-400 text-violet-200 shadow-[0_0_15px_rgba(167,139,250,0.4)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-violet-400 font-bold mb-1">
+                Clause 14.2 & Mandatory Ruling
+              </div>
+              <div className="text-xs font-bold text-white">
+                DC Phase 2 Seat Replaced & Upgraded
+              </div>
+              <p className="text-[11px] text-slate-300 mt-1">
+                Replaces DC Phase 1 seat. Replacement Quota: <span className="text-violet-300 font-bold">1/1 Consumed (Exhausted)</span>
+              </p>
+            </div>
+
+            {/* Phase 2 Retain */}
+            <div 
+              onClick={() => openNode('node_dc_phase2_retain')}
+              className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_dc_phase2_retain')
+                  ? 'bg-slate-900/90 border-emerald-400 text-emerald-200 shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-emerald-400 font-bold mb-1">
+                Clause 14 (Page 7)
+              </div>
+              <div className="text-xs font-bold text-white">
+                DC Phase 2 Retain Confirmed Seat
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                No upgrade in Phase 2; comfortably retain confirmed seat
+              </p>
+            </div>
+
+          </div>
+
+          {/* Dotted Arrow */}
+          <div className="w-px h-6 border-r-2 border-dotted border-slate-600 -my-2"></div>
+
+          {/* Level 14 & 15: Fee Refund & Final Enrollment */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            {/* Fee Refund Policy (Clause 18) */}
+            <div 
+              onClick={() => openNode('node_fee_refund_clause18')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_fee_refund_clause18')
+                  ? 'bg-amber-950/40 border-amber-400 text-amber-200 shadow-[0_0_15px_rgba(251,191,36,0.4)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-amber-400 font-bold mb-1">
+                Clause 18 (Page 11-12)
+              </div>
+              <div className="text-xs font-bold text-white">
+                Fee Refund & Adjustment Policy
+              </div>
+              <p className="text-[11px] text-slate-300 mt-1">
+                Submit DC admission letter to claim refund of ₹5,000 SAF and paid tuition fees
+              </p>
+            </div>
+
+            {/* Final Enrolled State */}
+            <div 
+              onClick={() => openNode('node_final_enrolled_state')}
+              className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                isNodeActive('node_final_enrolled_state')
+                  ? 'bg-emerald-950/50 border-emerald-400 text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.5)]'
+                  : 'bg-slate-900/70 border-slate-700 text-slate-300 hover:border-slate-500'
+              }`}
+            >
+              <div className="text-[10px] font-mono text-emerald-400 font-bold mb-1">
+                Clause 19 (Page 13)
+              </div>
+              <div className="text-xs font-bold text-white">
+                Final Enrolled B.Tech Status 2026
+              </div>
+              <p className="text-[11px] text-slate-300 mt-1">
+                Official university registration completed. Academic session begins!
+              </p>
+            </div>
+
           </div>
 
         </div>
 
       </div>
 
-      {/* Node Details Modal / Drawer */}
+      {/* Node Details Inspection Modal */}
       {activeModalNode && (
-        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-40 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4 text-white">
             
             <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
               <div>
@@ -348,17 +575,9 @@ export default function FlowchartViewer({
 
               <div className="bg-indigo-950/30 border border-indigo-500/30 p-3 rounded-xl text-indigo-200">
                 <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider block mb-1">
-                  Candidate Action Guidance:
+                  Candidate Practical Guidance:
                 </span>
-                <p>
-                  {activeModalNode.category === 'protection'
-                    ? 'Your Centralised Counselling admission is 100% protected under Clause 14. Do NOT withdraw or cancel your seat.'
-                    : activeModalNode.category === 'success'
-                    ? 'DC Phase 1 admission counts as a Fresh Admission. Your replacement quota remains untouched (0/1).'
-                    : activeModalNode.category === 'financial'
-                    ? 'Submit your DC provisional allotment slip to your previous institute to initiate fee refund under Clause 18.'
-                    : 'Verify all original certificates at the reporting centre during the stipulated institutional reporting window.'}
-                </p>
+                <p>{activeModalNode.guidance}</p>
               </div>
             </div>
 
@@ -367,7 +586,7 @@ export default function FlowchartViewer({
                 onClick={() => setActiveModalNode(null)}
                 className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all cursor-pointer shadow-md shadow-indigo-600/20"
               >
-                Close & Return to Flowchart
+                Close Inspector
               </button>
             </div>
 
