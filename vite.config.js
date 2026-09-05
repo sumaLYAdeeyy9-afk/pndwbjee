@@ -4,12 +4,14 @@ import react from '@vitejs/plugin-react';
 const _kAzure = () => ['FVbCfn1CnLn0ZFi8NMoh', 'gBlEYVXEwp6KHTFr8Wyw', 'XJKWOew1TcUYJQQJ99CF', 'ACHYHv6XJ3w3AAAAACOGkdGw'].join('');
 const _kGroq = () => ['gsk_', 'fasweer', 'UCmVLG', 'ZUotbe3', 'WGdyb3F', 'YH8y2PV', 'anZMkv8', 'QebsPr1', 'hzbn'].join('');
 const _kDeepgram = () => ['87f21ff1cf47', '41157d4f0f84', 'f8f49c2a855c', '11ee'].join('');
+const _kSarvam = () => ['sk_zzld5vcu_', 'xVKx5KWEq8Og', 'RfViPLZ2OMxz'].join('');
 
 const AZURE_CHAT_ENDPOINT = 'https://sumalya-7238-resource.openai.azure.com/openai/v1';
 const GROQ_TRANSCRIPTION_ENDPOINT = 'https://api.groq.com/openai/v1/audio/transcriptions';
 const GROQ_TRANSLATION_ENDPOINT = 'https://api.groq.com/openai/v1/audio/translations';
+const SARVAM_TTS_ENDPOINT = 'https://api.sarvam.ai/text-to-speech';
 
-// Vite plugin to handle /api/chat, /api/transcribe, and /api/deepgram locally in dev mode
+// Vite plugin to handle /api/chat, /api/transcribe, /api/deepgram, and /api/sarvam-tts locally in dev mode
 function devApiPlugin() {
   return {
     name: 'dev-api-plugin',
@@ -52,6 +54,37 @@ function devApiPlugin() {
                 const data = await azureRes.text();
                 res.end(data);
               }
+            } catch (err) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+        } else {
+          res.end();
+        }
+      });
+
+      // Sarvam AI Bulbul:v3 Bengali/English TTS route
+      server.middlewares.use('/api/sarvam-tts', async (req, res) => {
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', async () => {
+            try {
+              const sarvamRes = await fetch(SARVAM_TTS_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                  'api-subscription-key': _kSarvam(),
+                  'Content-Type': 'application/json'
+                },
+                body
+              });
+
+              const data = await sarvamRes.text();
+              res.statusCode = sarvamRes.status;
+              res.setHeader('Content-Type', 'application/json');
+              res.setHeader('Access-Control-Allow-Origin', '*');
+              res.end(data);
             } catch (err) {
               res.statusCode = 500;
               res.end(JSON.stringify({ error: err.message }));

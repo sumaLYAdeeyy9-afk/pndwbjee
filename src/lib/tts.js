@@ -1,5 +1,5 @@
-// Bulletproof Text-to-Speech (TTS) Engine with Microsoft Azure Neural Bengali Voice & Browser Fallback
-import { speakAzureNeuralTts, stopAzureNeuralTts } from './azureSpeech';
+// Bulletproof Text-to-Speech (TTS) Engine powered by Sarvam AI (Bulbul:v3) & Browser Fallback
+import { speakWithSarvamAI, stopSarvamSpeech } from './sarvamTts';
 
 let cachedVoices = [];
 let keepAliveTimer = null;
@@ -66,7 +66,7 @@ export function findBestVoice(voices, isBengali) {
     const bengaliVoice = voices.find(v => {
       const l = (v.lang || '').toLowerCase();
       const n = (v.name || '').toLowerCase();
-      return l.includes('bn') || l.includes('ben') || n.includes('bengali') || n.includes('bangla') || n.includes('tanishaa') || n.includes('bashkar');
+      return l.includes('bn') || l.includes('ben') || n.includes('bengali') || n.includes('bangla') || n.includes('tanishaa') || n.includes('bashkar') || n.includes('shreya');
     });
     if (bengaliVoice) return bengaliVoice;
 
@@ -231,7 +231,7 @@ function speakWithBrowserFallback(text, { onStart, onEnd, onError }) {
 }
 
 /**
- * Speak text smoothly with Microsoft Azure Neural Bengali Voice & Browser Fallback
+ * Speak text smoothly with Sarvam AI Bulbul:v3 Indian Voice & Browser Fallback
  */
 export function speakText(text, options = {}) {
   const {
@@ -247,13 +247,14 @@ export function speakText(text, options = {}) {
     return () => {};
   }
 
-  // 1. Try Microsoft Azure Neural Bengali Voice (SwiftKey / Azure Neural TTS)
+  // 1. Try Sarvam AI Bulbul:v3 Indian Bengali Voice
   try {
-    speakAzureNeuralTts(text, {
+    speakWithSarvamAI(text, {
+      speaker: 'shreya',
       onStart,
       onEnd,
       onError: (err) => {
-        console.warn('Azure Neural TTS notice, switching to browser TTS:', err);
+        console.warn('Sarvam AI TTS notice, switching to browser TTS:', err);
         speakWithBrowserFallback(text, { onStart, onEnd, onError });
       }
     });
@@ -268,7 +269,7 @@ export function speakText(text, options = {}) {
  * Stop any active audio speech
  */
 export function stopSpeech() {
-  stopAzureNeuralTts();
+  stopSarvamSpeech();
   stopKeepAlive();
   currentQueue = [];
   isQueuePlaying = false;

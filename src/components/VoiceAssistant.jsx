@@ -32,7 +32,7 @@ const STT_MODES = [
 const INITIAL_WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Deepgram Nova-3 AI** (Flagship multilingual Bengali acoustic architecture with ~200ms latency).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification ground truth.\n* 🔊 **Voice Speech (TTS)**: High-definition voice output in pure Bengali & English.\n* 🧠 **Chat Memory**: Full conversational memory across multiple turns and questions.\n\nTap **Speak (Deepgram AI)** to talk or type your query below!`,
+  content: `### Official WBJEE 2026 Counselling Assistant 🎙️\n\n* 🎙️ **Speech-to-Text (STT)**: Powered by **Deepgram Nova-3 AI** (Flagship multilingual Bengali acoustic architecture with ~200ms latency).\n* 🤖 **Reasoning Intelligence**: Powered by **Azure GPT-5.4 Mini** with the full 14-page official notification ground truth.\n* 🔊 **Voice Speech (TTS)**: High-definition **Sarvam AI (Bulbul:v3)** natural Bengali & English neural voice synthesis.\n* 🧠 **Chat Memory**: Full conversational memory across multiple turns and questions.\n\nTap **Speak (Deepgram AI)** to talk or type your query below!`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 };
 
