@@ -9,14 +9,11 @@ import {
 import { 
   PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, 
   generateUniqueEmail, buildMailtoUrl, buildGmailComposeUrl, 
-  buildOutlookComposeUrl, buildYahooComposeUrl, TOTAL_PRESET_VARIATIONS 
+  buildOutlookComposeUrl, buildYahooComposeUrl 
 } from '../data/emailTemplates';
 import { saveStudentSubmission } from '../lib/submissionStore';
 
 export default function EmailTool({ onActionCompleted }) {
-  // Selected Template Type: 'offline_dc' | 'phase2_rules'
-  const [templateType, setTemplateType] = useState('offline_dc');
-
   // Candidate info state
   const [formData, setFormData] = useState({
     studentName: '',
@@ -28,18 +25,18 @@ export default function EmailTool({ onActionCompleted }) {
 
   const nameInputRef = useRef(null);
 
-  // Dynamic variation seed (starts on a random variation between 1 and 30)
+  // Dynamic variation seed (starts on a random variation)
   const [variationSeed, setVariationSeed] = useState(() => {
-    return Math.floor(Math.random() * 25) + 1;
+    return Math.floor(Math.random() * 10) + 1;
   });
 
   // Editable Subject & Body State initialized with dynamic variation
   const [subject, setSubject] = useState(() => {
-    const initial = generateUniqueEmail({ templateType: 'offline_dc', seed: 1 });
+    const initial = generateUniqueEmail({ seed: 1 });
     return initial.subject;
   });
   const [body, setBody] = useState(() => {
-    const initial = generateUniqueEmail({ templateType: 'offline_dc', seed: 1 });
+    const initial = generateUniqueEmail({ seed: 1 });
     return initial.body;
   });
   const [isManuallyEdited, setIsManuallyEdited] = useState(false);
@@ -51,18 +48,17 @@ export default function EmailTool({ onActionCompleted }) {
   const [copiedType, setCopiedType] = useState(null); // 'all' | 'subject' | 'body'
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // Synchronize draft dynamically with formData, templateType, and variationSeed unless manually edited
+  // Synchronize draft dynamically with formData and variationSeed unless manually edited
   useEffect(() => {
     if (!isManuallyEdited) {
       const generated = generateUniqueEmail({ 
-        templateType, 
         ...formData, 
         seed: variationSeed 
       });
       setSubject(generated.subject);
       setBody(generated.body);
     }
-  }, [formData, templateType, variationSeed, isManuallyEdited]);
+  }, [formData, variationSeed, isManuallyEdited]);
 
   // Form input handler
   const handleInputChange = (e) => {
@@ -76,25 +72,11 @@ export default function EmailTool({ onActionCompleted }) {
     setIsManuallyEdited(true);
   };
 
-  // Switch template handler
-  const handleTemplateSwitch = (newType) => {
-    setTemplateType(newType);
-    const generated = generateUniqueEmail({ 
-      templateType: newType, 
-      ...formData, 
-      seed: variationSeed 
-    });
-    setSubject(generated.subject);
-    setBody(generated.body);
-    setIsManuallyEdited(false);
-  };
-
-  // Shuffle to next unique draft format & subject
+  // Shuffle to next unique subject line
   const handleShuffleDraft = () => {
-    const nextSeed = (variationSeed % 30) + 1;
+    const nextSeed = (variationSeed % 10) + 1;
     setVariationSeed(nextSeed);
     const generated = generateUniqueEmail({ 
-      templateType, 
       ...formData, 
       seed: nextSeed 
     });
@@ -103,10 +85,9 @@ export default function EmailTool({ onActionCompleted }) {
     setIsManuallyEdited(false);
   };
 
-  // Reset body to default template with current form data and current seed
+  // Reset body to default template
   const handleResetDraft = () => {
     const generated = generateUniqueEmail({ 
-      templateType, 
       ...formData, 
       seed: variationSeed 
     });
@@ -128,7 +109,7 @@ export default function EmailTool({ onActionCompleted }) {
   const webOutlookUrl = buildOutlookComposeUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, subject, body);
   const webYahooUrl = buildYahooComposeUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, subject, body);
 
-  // Copy handler without incrementing counters
+  // Copy handler
   const handleCopy = (type) => {
     let textToCopy = '';
     if (type === 'all') {
@@ -153,7 +134,7 @@ export default function EmailTool({ onActionCompleted }) {
       currentInstitute: formData.currentInstitute || 'N/A',
       contactInfo: formData.contactInfo || 'N/A',
       subject: subject,
-      templateType: templateType,
+      templateType: 'offline_dc',
       isAnonymous: !isFormComplete
     });
 
@@ -173,7 +154,7 @@ export default function EmailTool({ onActionCompleted }) {
     setTimeout(() => setShowSuccessToast(false), 5000);
   };
 
-  // Direct dispatch action after validation
+  // Direct dispatch action
   const executeDispatch = (mode) => {
     recordSubmissionAndCelebrate();
 
@@ -219,35 +200,6 @@ export default function EmailTool({ onActionCompleted }) {
           </p>
         </div>
 
-        {/* Template Selector Tabs */}
-        <div className="max-w-4xl mx-auto mb-6 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 flex flex-col sm:flex-row gap-1.5">
-          <button
-            type="button"
-            onClick={() => handleTemplateSwitch('offline_dc')}
-            className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center space-x-2 transition-all ${
-              templateType === 'offline_dc'
-                ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30 border border-rose-500'
-                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <Building2 className="w-4 h-4 shrink-0" />
-            <span>1. Demand for Genuine Offline DC (Physical Campus Spot Rounds)</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTemplateSwitch('phase2_rules')}
-            className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center space-x-2 transition-all ${
-              templateType === 'phase2_rules'
-                ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30 border border-rose-500'
-                : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
-            }`}
-          >
-            <FileText className="w-4 h-4 shrink-0" />
-            <span>2. Request for Revision of DCAP Phase 2 Eligibility Rules</span>
-          </button>
-        </div>
-
         {/* Top 1-Click Action Card */}
         <div className="max-w-4xl mx-auto mb-8 bg-gradient-to-r from-rose-950/40 via-slate-900 to-amber-950/30 border-2 border-rose-500/50 rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -257,14 +209,14 @@ export default function EmailTool({ onActionCompleted }) {
               <div className="flex items-center space-x-2">
                 <span className="flex h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping" />
                 <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">
-                  Step 1: Choose Your Preferred Dispatch Mode
+                  Choose Your Preferred Dispatch Mode
                 </span>
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-white">
-                Dispatch Representation Directly to 7 Official Desks
+                Dispatch Representation to Official Desks
               </h3>
               <p className="text-xs text-slate-300 max-w-xl">
-                Click below to launch your email client with verified recipients, tailored subject line, and full arguments pre-loaded.
+                Click below to launch your email client with verified recipients, tailored subject line, and the official appeal pre-loaded.
               </p>
             </div>
 
@@ -341,7 +293,7 @@ export default function EmailTool({ onActionCompleted }) {
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
-              Adding your details adds official merit weightage to your appeal. If left blank, it will automatically be sent as a collective representation on behalf of <span className="text-slate-200 font-semibold">Concerned WBJEE 2026 Candidates</span>.
+              Adding your details adds official merit weightage to your appeal. If left blank, it will automatically be signed on behalf of <span className="text-slate-200 font-semibold">Concerned WBJEE 2026 Candidates & Bonafide Aspirants</span>.
             </p>
 
             <div className="space-y-3 pt-1">
@@ -367,7 +319,7 @@ export default function EmailTool({ onActionCompleted }) {
               {/* Application / Roll Number */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  WBJEE 2026 Application / Roll Number
+                  WBJEE 2026 Application Number
                 </label>
                 <div className="relative">
                   <Hash className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -403,7 +355,7 @@ export default function EmailTool({ onActionCompleted }) {
               {/* Interested / Allotted Institute */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Interested / Allotted College & Branch
+                  Interested / Allotted College (Optional)
                 </label>
                 <div className="relative">
                   <School className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -457,7 +409,7 @@ export default function EmailTool({ onActionCompleted }) {
 
           </div>
 
-          {/* Right Column: Dynamic Live Representation Draft & Editor */}
+          {/* Right Column: Live Representation Draft & Editor */}
           <div className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl flex flex-col justify-between">
             
             <div>
@@ -465,7 +417,7 @@ export default function EmailTool({ onActionCompleted }) {
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3 mb-3">
                 <div className="flex items-center space-x-2">
                   <Edit3 className="w-4 h-4 text-rose-400" />
-                  <span className="text-sm font-bold text-white">Editable Representation Preview</span>
+                  <span className="text-sm font-bold text-white">Representation Draft Preview</span>
                   {isManuallyEdited && (
                     <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">
                       Customized
@@ -478,7 +430,7 @@ export default function EmailTool({ onActionCompleted }) {
                     type="button"
                     onClick={handleShuffleDraft}
                     className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-400 text-xs font-semibold flex items-center space-x-1.5 transition-colors border border-slate-700"
-                    title="Shuffle Subject Line & Variation"
+                    title="Shuffle Subject Line"
                   >
                     <Shuffle className="w-3.5 h-3.5" />
                     <span>Shuffle Subject</span>
@@ -536,7 +488,7 @@ export default function EmailTool({ onActionCompleted }) {
                   </button>
                 </div>
                 <textarea
-                  rows={14}
+                  rows={15}
                   value={body}
                   onChange={handleBodyChange}
                   className="w-full p-3.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-200 font-sans leading-relaxed focus:outline-none focus:border-rose-500 resize-y"
