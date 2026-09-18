@@ -201,85 +201,8 @@ export default function EmailTool({ onActionCompleted }) {
           </p>
         </div>
 
-        {/* Top 1-Click Action Card */}
-        <div className="max-w-4xl mx-auto mb-8 bg-gradient-to-r from-rose-950/40 via-slate-900 to-amber-950/30 border-2 border-rose-500/50 rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-          <div className="flex flex-col md:flex-row items-center justify-between gap-5 relative z-10">
-            <div className="text-left space-y-1.5">
-              <div className="flex items-center space-x-2">
-                <span className="flex h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping" />
-                <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">
-                  Choose Your Preferred Dispatch Mode
-                </span>
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                Dispatch Representation to Official Desks
-              </h3>
-              <p className="text-xs text-slate-300 max-w-xl">
-                Click below to launch your email client with verified recipients, tailored subject line, and the official appeal pre-loaded.
-              </p>
-            </div>
-
-            {/* Action Buttons Group */}
-            <div className="flex flex-wrap items-center justify-center md:justify-end gap-2.5 w-full md:w-auto">
-              
-              {/* Primary: Native Mail App */}
-              <button
-                type="button"
-                onClick={() => handleSendAction('app')}
-                className="px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-rose-600/30 flex items-center space-x-2 transition-all active:scale-95"
-              >
-                <Send className="w-4 h-4 shrink-0" />
-                <span>Send via Mail App</span>
-              </button>
-
-              {/* Web Gmail */}
-              <button
-                type="button"
-                onClick={() => handleSendAction('gmail')}
-                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95"
-              >
-                <Globe className="w-4 h-4 text-rose-400 shrink-0" />
-                <span>Gmail Web</span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              </button>
-
-              {/* Web Outlook */}
-              <button
-                type="button"
-                onClick={() => handleSendAction('outlook')}
-                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95 hidden sm:flex"
-              >
-                <span>Outlook Web</span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              </button>
-
-              {/* Copy Full Representation */}
-              <button
-                type="button"
-                onClick={() => handleCopy('all')}
-                className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95"
-              >
-                {copiedType === 'all' ? (
-                  <>
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span className="text-emerald-400 font-bold">Draft Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>Copy Full Draft</span>
-                  </>
-                )}
-              </button>
-
-            </div>
-          </div>
-        </div>
-
-        {/* Candidate Customization & Live Draft Editor Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-5xl mx-auto">
+        {/* 1. Candidate Customization & Live Draft Editor Grid (FIRST) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-5xl mx-auto mb-8">
           
           {/* Left Column: Candidate Info Customizer */}
           <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
@@ -498,25 +421,93 @@ export default function EmailTool({ onActionCompleted }) {
               </div>
             </div>
 
-            {/* Bottom Quick-Dispatch Bar */}
-            <div className="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
-              <span className="text-[11px] text-slate-400 flex items-center space-x-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Respectful, formal, and legally sound student representation</span>
+            {/* Bottom Note */}
+            <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+              <span className="flex items-center space-x-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Formal, respectful representation addressed to WBJEEB & DTE</span>
               </span>
-
-              <button
-                type="button"
-                onClick={() => handleSendAction('app')}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-lg shadow-rose-600/30 flex items-center space-x-1.5 transition-all active:scale-95 ml-auto"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Dispatch Email Now</span>
-              </button>
             </div>
 
           </div>
 
+        </div>
+
+        {/* 2. 1-Click Action Dispatch Card (MOVED LOWER DOWN, RIGHT BELOW THE DRAFT) */}
+        <div className="max-w-5xl mx-auto bg-gradient-to-r from-rose-950/40 via-slate-900 to-amber-950/30 border-2 border-rose-500/50 rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="flex flex-col md:flex-row items-center justify-between gap-5 relative z-10">
+            <div className="text-left space-y-1.5">
+              <div className="flex items-center space-x-2">
+                <span className="flex h-2.5 w-2.5 rounded-full bg-rose-500 animate-ping" />
+                <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">
+                  Choose Your Preferred Dispatch Mode
+                </span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-white">
+                Dispatch Representation to Official Desks
+              </h3>
+              <p className="text-xs text-slate-300 max-w-xl">
+                Click below to launch your email client with verified recipients, tailored subject line, and the official appeal pre-loaded.
+              </p>
+            </div>
+
+            {/* Action Buttons Group */}
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-2.5 w-full md:w-auto">
+              
+              {/* Primary: Native Mail App */}
+              <button
+                type="button"
+                onClick={() => handleSendAction('app')}
+                className="px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-rose-600/30 flex items-center space-x-2 transition-all active:scale-95"
+              >
+                <Send className="w-4 h-4 shrink-0" />
+                <span>Send via Mail App</span>
+              </button>
+
+              {/* Web Gmail */}
+              <button
+                type="button"
+                onClick={() => handleSendAction('gmail')}
+                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95"
+              >
+                <Globe className="w-4 h-4 text-rose-400 shrink-0" />
+                <span>Gmail Web</span>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {/* Web Outlook */}
+              <button
+                type="button"
+                onClick={() => handleSendAction('outlook')}
+                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95 hidden sm:flex"
+              >
+                <span>Outlook Web</span>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {/* Copy Full Representation */}
+              <button
+                type="button"
+                onClick={() => handleCopy('all')}
+                className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95"
+              >
+                {copiedType === 'all' ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="text-emerald-400 font-bold">Draft Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-slate-400 shrink-0" />
+                    <span>Copy Full Draft</span>
+                  </>
+                )}
+              </button>
+
+            </div>
+          </div>
         </div>
 
       </div>
