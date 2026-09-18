@@ -3,8 +3,7 @@ import confetti from 'canvas-confetti';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
   User, Hash, Award, School, Phone, CheckCircle2, Globe,
-  RotateCcw, Edit3, AlertCircle, AlertTriangle, ArrowRight, X, Shuffle, Sparkles,
-  Building2, Users, FileText
+  RotateCcw, Edit3, AlertCircle, Shuffle
 } from 'lucide-react';
 import { 
   PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, 
@@ -14,7 +13,7 @@ import {
 import { saveStudentSubmission } from '../lib/submissionStore';
 
 export default function EmailTool({ onActionCompleted }) {
-  // Candidate info state
+  // Mandatory candidate info state
   const [formData, setFormData] = useState({
     studentName: '',
     rollNumber: '',
@@ -23,7 +22,14 @@ export default function EmailTool({ onActionCompleted }) {
     contactInfo: ''
   });
 
+  const [formErrors, setFormErrors] = useState({});
+  const [showValidationAlert, setShowValidationAlert] = useState(false);
+
   const nameInputRef = useRef(null);
+  const rollInputRef = useRef(null);
+  const rankInputRef = useRef(null);
+  const collegeInputRef = useRef(null);
+  const phoneInputRef = useRef(null);
 
   // Dynamic variation seed (starts on a random variation)
   const [variationSeed, setVariationSeed] = useState(() => {
@@ -40,10 +46,6 @@ export default function EmailTool({ onActionCompleted }) {
     return initial.body;
   });
   const [isManuallyEdited, setIsManuallyEdited] = useState(false);
-
-  // Missing credentials prompt modal state
-  const [showAnonymousPrompt, setShowAnonymousPrompt] = useState(false);
-  const [pendingDispatchMode, setPendingDispatchMode] = useState('app'); // 'app' | 'gmail' | 'outlook' | 'yahoo'
 
   const [copiedType, setCopiedType] = useState(null); // 'all' | 'subject' | 'body'
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -64,6 +66,15 @@ export default function EmailTool({ onActionCompleted }) {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear field error on change
+    if (formErrors[name]) {
+      setFormErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
 
   // Body text change handler
@@ -96,12 +107,41 @@ export default function EmailTool({ onActionCompleted }) {
     setIsManuallyEdited(false);
   };
 
-  // Check if candidate credentials are provided
-  const isFormComplete = Boolean(
-    formData.studentName.trim().length >= 2 ||
-    formData.rollNumber.trim().length >= 3 ||
-    formData.rankGmr.trim().length >= 1
-  );
+  // Validate that all required candidate fields are filled
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.studentName.trim() || formData.studentName.trim().length < 2) {
+      errors.studentName = 'Full Name is mandatory';
+    }
+    if (!formData.rollNumber.trim() || formData.rollNumber.trim().length < 3) {
+      errors.rollNumber = 'WBJEE Application Number is mandatory';
+    }
+    if (!formData.rankGmr.trim()) {
+      errors.rankGmr = 'WBJEE Rank / GMR is mandatory';
+    }
+    if (!formData.currentInstitute.trim()) {
+      errors.currentInstitute = 'Interested or Allotted College is mandatory';
+    }
+    if (!formData.contactInfo.trim() || formData.contactInfo.trim().length < 6) {
+      errors.contactInfo = 'Valid Contact Number is mandatory';
+    }
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setShowValidationAlert(true);
+      // Focus first error field
+      if (errors.studentName && nameInputRef.current) nameInputRef.current.focus();
+      else if (errors.rollNumber && rollInputRef.current) rollInputRef.current.focus();
+      else if (errors.rankGmr && rankInputRef.current) rankInputRef.current.focus();
+      else if (errors.currentInstitute && collegeInputRef.current) collegeInputRef.current.focus();
+      else if (errors.contactInfo && phoneInputRef.current) phoneInputRef.current.focus();
+      return false;
+    }
+
+    setShowValidationAlert(false);
+    return true;
+  };
 
   // Real-time mailto and web urls using current editable subject and body
   const mailtoUrl = buildMailtoUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, subject, body);
@@ -112,14 +152,14 @@ export default function EmailTool({ onActionCompleted }) {
   // Record submission in database, notify parent counter & trigger UI celebration
   const recordSubmissionAndCelebrate = () => {
     saveStudentSubmission({
-      studentName: formData.studentName || 'Concerned Candidate (Anonymous)',
-      rollNumber: formData.rollNumber || 'N/A',
-      rankGmr: formData.rankGmr || 'N/A',
-      currentInstitute: formData.currentInstitute || 'N/A',
-      contactInfo: formData.contactInfo || 'N/A',
+      studentName: formData.studentName.trim(),
+      rollNumber: formData.rollNumber.trim(),
+      rankGmr: formData.rankGmr.trim(),
+      currentInstitute: formData.currentInstitute.trim(),
+      contactInfo: formData.contactInfo.trim(),
       subject: subject,
       templateType: 'offline_dc',
-      isAnonymous: !isFormComplete
+      isAnonymous: false
     });
 
     try {
@@ -142,6 +182,7 @@ export default function EmailTool({ onActionCompleted }) {
   const handleCopy = (type) => {
     let textToCopy = '';
     if (type === 'all') {
+      if (!validateForm()) return;
       textToCopy = `TO: ${PRIMARY_TO_RECIPIENTS.join(', ')}\nCC: ${CC_RECIPIENTS.join(', ')}\nSUBJECT: ${subject}\n\n${body}`;
       recordSubmissionAndCelebrate();
     } else if (type === 'subject') {
@@ -155,8 +196,10 @@ export default function EmailTool({ onActionCompleted }) {
     setTimeout(() => setCopiedType(null), 2500);
   };
 
-  // Direct dispatch action
+  // Direct dispatch action strictly requiring validation
   const executeDispatch = (mode) => {
+    if (!validateForm()) return;
+
     recordSubmissionAndCelebrate();
 
     if (mode === 'app') {
@@ -167,16 +210,6 @@ export default function EmailTool({ onActionCompleted }) {
       window.open(webOutlookUrl, '_blank');
     } else if (mode === 'yahoo') {
       window.open(webYahooUrl, '_blank');
-    }
-  };
-
-  // Main button trigger with gentle reminder if form is blank
-  const handleSendAction = (mode) => {
-    if (!isFormComplete) {
-      setPendingDispatchMode(mode);
-      setShowAnonymousPrompt(true);
-    } else {
-      executeDispatch(mode);
     }
   };
 
@@ -197,34 +230,45 @@ export default function EmailTool({ onActionCompleted }) {
             Send Official Email Representation to <span className="text-rose-500">WBJEEB & Govt</span>
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm">
-            Dispatches directly to WBJEEB Official Desk with official carbon-copies (CC) to DTE, Higher Education Department, DPI, and CMO.
+            Fill your mandatory candidate credentials to generate your bonafide representation and dispatch directly to WBJEEB, DTE & Higher Education Department.
           </p>
         </div>
 
-        {/* 1. Candidate Customization & Live Draft Editor Grid (FIRST) */}
+        {/* Validation Error Banner */}
+        {showValidationAlert && (
+          <div className="max-w-5xl mx-auto mb-6 p-4 rounded-2xl bg-rose-500/15 border border-rose-500/50 text-rose-300 flex items-center space-x-3 text-xs sm:text-sm shadow-xl animate-shake">
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+            <div>
+              <strong className="font-bold text-white block">Mandatory Candidate Information Required:</strong>
+              <span>Please fill in all candidate details below (Name, WBJEE Application Number, Rank/GMR, College & Contact Number) before dispatching.</span>
+            </div>
+          </div>
+        )}
+
+        {/* 1. Candidate Details & Live Draft Editor Grid (FIRST) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-5xl mx-auto mb-8">
           
-          {/* Left Column: Candidate Info Customizer */}
+          {/* Left Column: Mandatory Candidate Info Form */}
           <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center space-x-2 text-rose-400 font-bold text-sm">
                 <User className="w-4 h-4" />
-                <span>Candidate Information (Optional)</span>
+                <span>Candidate Information (Mandatory)</span>
               </div>
-              <span className="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-300">
-                Auto-Fills Signature
+              <span className="text-[10px] px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold">
+                Required *
               </span>
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
-              Adding your details adds official merit weightage to your appeal. If left blank, it will automatically be signed on behalf of <span className="text-slate-200 font-semibold">Concerned WBJEE 2026 Candidates & Bonafide Aspirants</span>.
+              All representations must carry verified candidate credentials to maintain official legal validity and merit standing.
             </p>
 
             <div className="space-y-3 pt-1">
               {/* Name */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Candidate Full Name
+                  Candidate Full Name <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -235,81 +279,130 @@ export default function EmailTool({ onActionCompleted }) {
                     value={formData.studentName}
                     onChange={handleInputChange}
                     placeholder="e.g. Rahul Sen"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                      formErrors.studentName 
+                        ? 'border-rose-500 ring-1 ring-rose-500' 
+                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    }`}
                   />
                 </div>
+                {formErrors.studentName && (
+                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                    {formErrors.studentName}
+                  </span>
+                )}
               </div>
 
               {/* Application / Roll Number */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  WBJEE 2026 Application Number
+                  WBJEE 2026 Application Number <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <Hash className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
+                    ref={rollInputRef}
                     type="text"
                     name="rollNumber"
                     value={formData.rollNumber}
                     onChange={handleInputChange}
                     placeholder="e.g. 26010045892"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                      formErrors.rollNumber 
+                        ? 'border-rose-500 ring-1 ring-rose-500' 
+                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    }`}
                   />
                 </div>
+                {formErrors.rollNumber && (
+                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                    {formErrors.rollNumber}
+                  </span>
+                )}
               </div>
 
               {/* WBJEE Rank / GMR */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  WBJEE 2026 Rank / GMR
+                  WBJEE 2026 Rank / GMR <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <Award className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
+                    ref={rankInputRef}
                     type="text"
                     name="rankGmr"
                     value={formData.rankGmr}
                     onChange={handleInputChange}
                     placeholder="e.g. GMR 12450"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                      formErrors.rankGmr 
+                        ? 'border-rose-500 ring-1 ring-rose-500' 
+                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    }`}
                   />
                 </div>
+                {formErrors.rankGmr && (
+                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                    {formErrors.rankGmr}
+                  </span>
+                )}
               </div>
 
               {/* Interested / Allotted Institute */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Interested / Allotted College (Optional)
+                  Interested / Allotted College <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <School className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
+                    ref={collegeInputRef}
                     type="text"
                     name="currentInstitute"
                     value={formData.currentInstitute}
                     onChange={handleInputChange}
                     placeholder="e.g. Jadavpur Univ / KGEC / Unallotted"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                      formErrors.currentInstitute 
+                        ? 'border-rose-500 ring-1 ring-rose-500' 
+                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    }`}
                   />
                 </div>
+                {formErrors.currentInstitute && (
+                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                    {formErrors.currentInstitute}
+                  </span>
+                )}
               </div>
 
               {/* Contact Number */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Contact Number (Optional)
+                  Contact Number <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
+                    ref={phoneInputRef}
                     type="text"
                     name="contactInfo"
                     value={formData.contactInfo}
                     onChange={handleInputChange}
                     placeholder="e.g. 9830XXXXXX"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                      formErrors.contactInfo 
+                        ? 'border-rose-500 ring-1 ring-rose-500' 
+                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                    }`}
                   />
                 </div>
+                {formErrors.contactInfo && (
+                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                    {formErrors.contactInfo}
+                  </span>
+                )}
               </div>
 
             </div>
@@ -401,7 +494,7 @@ export default function EmailTool({ onActionCompleted }) {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-semibold text-slate-400">
-                    Representation Body:
+                    Representation Body (Auto-Signed with Your Mandatory Details):
                   </label>
                   <button
                     type="button"
@@ -425,7 +518,7 @@ export default function EmailTool({ onActionCompleted }) {
             <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
               <span className="flex items-center space-x-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Formal, respectful representation addressed to WBJEEB & DTE</span>
+                <span>Formal, verified representation addressed to WBJEEB & DTE</span>
               </span>
             </div>
 
@@ -433,7 +526,7 @@ export default function EmailTool({ onActionCompleted }) {
 
         </div>
 
-        {/* 2. 1-Click Action Dispatch Card (MOVED LOWER DOWN, RIGHT BELOW THE DRAFT) */}
+        {/* 2. 1-Click Action Dispatch Card (LOWER DOWN) */}
         <div className="max-w-5xl mx-auto bg-gradient-to-r from-rose-950/40 via-slate-900 to-amber-950/30 border-2 border-rose-500/50 rounded-2xl p-5 sm:p-6 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -449,7 +542,7 @@ export default function EmailTool({ onActionCompleted }) {
                 Dispatch Representation to Official Desks
               </h3>
               <p className="text-xs text-slate-300 max-w-xl">
-                Click below to launch your email client with verified recipients, tailored subject line, and the official appeal pre-loaded.
+                Click below to launch your email client with verified recipients, tailored subject line, and your signed appeal pre-loaded.
               </p>
             </div>
 
@@ -459,8 +552,8 @@ export default function EmailTool({ onActionCompleted }) {
               {/* Primary: Native Mail App */}
               <button
                 type="button"
-                onClick={() => handleSendAction('app')}
-                className="px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-rose-600/30 flex items-center space-x-2 transition-all active:scale-95"
+                onClick={() => executeDispatch('app')}
+                className="px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-rose-600/30 flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
               >
                 <Send className="w-4 h-4 shrink-0" />
                 <span>Send via Mail App</span>
@@ -469,8 +562,8 @@ export default function EmailTool({ onActionCompleted }) {
               {/* Web Gmail */}
               <button
                 type="button"
-                onClick={() => handleSendAction('gmail')}
-                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95"
+                onClick={() => executeDispatch('gmail')}
+                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
               >
                 <Globe className="w-4 h-4 text-rose-400 shrink-0" />
                 <span>Gmail Web</span>
@@ -480,8 +573,8 @@ export default function EmailTool({ onActionCompleted }) {
               {/* Web Outlook */}
               <button
                 type="button"
-                onClick={() => handleSendAction('outlook')}
-                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95 hidden sm:flex"
+                onClick={() => executeDispatch('outlook')}
+                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95 hidden sm:flex cursor-pointer"
               >
                 <span>Outlook Web</span>
                 <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
@@ -491,7 +584,7 @@ export default function EmailTool({ onActionCompleted }) {
               <button
                 type="button"
                 onClick={() => handleCopy('all')}
-                className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95"
+                className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 flex items-center space-x-2 transition-all active:scale-95 cursor-pointer"
               >
                 {copiedType === 'all' ? (
                   <>
@@ -512,72 +605,13 @@ export default function EmailTool({ onActionCompleted }) {
 
       </div>
 
-      {/* Missing Details Anonymous Dispatch Prompt Modal */}
-      {showAnonymousPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-slate-900 border border-rose-500/40 rounded-2xl max-w-md w-full p-6 text-slate-200 shadow-2xl space-y-4">
-            
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center space-x-2 text-amber-400 font-bold text-sm">
-                <AlertTriangle className="w-5 h-5 shrink-0" />
-                <span>Send as Collective Representation?</span>
-              </div>
-              <button
-                onClick={() => setShowAnonymousPrompt(false)}
-                className="text-slate-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              You haven't filled in your candidate name or roll number. Your representation will be signed automatically on behalf of:
-            </p>
-
-            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs font-mono text-emerald-400 text-center font-bold">
-              "Concerned WBJEE 2026 Candidates & Bonafide Aspirants"
-            </div>
-
-            <p className="text-[11px] text-slate-400">
-              Both collective appeals and individual candidate representations are completely valid. Would you like to proceed now or add your details first?
-            </p>
-
-            <div className="flex items-center justify-end space-x-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAnonymousPrompt(false);
-                  if (nameInputRef.current) nameInputRef.current.focus();
-                }}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
-              >
-                Fill My Details
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAnonymousPrompt(false);
-                  executeDispatch(pendingDispatchMode);
-                }}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 flex items-center space-x-1.5"
-              >
-                <span>Send Representation</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
       {/* Success Notification Toast */}
       {showSuccessToast && (
         <div className="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 animate-in slide-in-from-bottom duration-300">
           <CheckCircle2 className="w-5 h-5 shrink-0" />
           <div className="text-xs">
             <span className="font-bold block">Representation Recorded!</span>
-            <span>Thank you for adding your voice to the WBJEE Offline DC demand.</span>
+            <span>Thank you for adding your verified voice to the WBJEE Offline DC demand.</span>
           </div>
         </div>
       )}
