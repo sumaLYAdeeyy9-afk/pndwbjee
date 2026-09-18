@@ -146,7 +146,7 @@ We therefore request WBJEEB, the Directorate of Technical Education, and the Hig
 2. Publishing college-wise, branch-wise and category-wise vacancy data beforehand;
 3. Following a transparent process based on merit, eligibility and applicable reservation rules;
 4. Providing adequate advance notice for candidates to arrange travel;
-5. Publishing the seats filled and remaining vacant after each phase; and
+5. Enabling all eligible WBJEE candidates to participate in offline Decentralised Counselling if conducted; and
 6. Providing an official schedule at the earliest possible opportunity.
 
 Many students cannot afford expensive private alternatives or another academic year. We therefore respectfully request the competent authorities to examine the present counselling mechanism and provide eligible candidates with a transparent opportunity to fill genuinely vacant seats.

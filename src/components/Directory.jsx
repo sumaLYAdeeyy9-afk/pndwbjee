@@ -59,8 +59,8 @@ export default function Directory() {
       a: 'Yes. Students across West Bengal are ready to take full responsibility and travel hundreds of kilometres to physically report at college campuses (JU, CU, KGEC, JGEC, GCECT, GCELT, GCETTS, etc.) to secure vacant seats rather than lose an academic year.'
     },
     {
-      q: 'What is the demand regarding Phase 2 DCAP eligibility?',
-      a: 'We appeal to the Board to exclude candidates who have already confirmed admission in Centralised Counselling or DC Phase 1 from competing again in Phase 2, so that remaining vacancies can reach candidates who are still without admission.'
+      q: 'Who should be eligible to participate in Offline Decentralised Counselling?',
+      a: 'We appeal to the authorities to allow all eligible WBJEE candidates to freely participate in offline Decentralised Counselling and campus spot rounds, giving every deserving candidate a fair opportunity based on merit and available vacancies.'
     },
     {
       q: 'Is participating in this grievance representation campaign safe?',
