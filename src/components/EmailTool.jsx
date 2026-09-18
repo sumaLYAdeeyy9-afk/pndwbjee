@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
   User, Hash, School, Phone, CheckCircle2, Globe,
-  RotateCcw, Edit3, AlertCircle, Shuffle
+  RotateCcw, Edit3, AlertCircle, Shuffle, Ban
 } from 'lucide-react';
 import { 
   PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, 
@@ -13,7 +13,7 @@ import {
 import { saveStudentSubmission } from '../lib/submissionStore';
 
 export default function EmailTool({ onActionCompleted }) {
-  // Mandatory candidate info state with unified Roll/Rank field
+  // Mandatory candidate info state
   const [formData, setFormData] = useState({
     studentName: '',
     rollOrRank: '',
@@ -75,6 +75,18 @@ export default function EmailTool({ onActionCompleted }) {
     }
   };
 
+  // Quick select None handler
+  const handleSelectNone = () => {
+    setFormData(prev => ({ ...prev, currentInstitute: 'None' }));
+    if (formErrors.currentInstitute) {
+      setFormErrors(prev => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
   // Body text change handler
   const handleBodyChange = (e) => {
     setBody(e.target.value);
@@ -115,7 +127,7 @@ export default function EmailTool({ onActionCompleted }) {
       errors.rollOrRank = 'WBJEE Roll Number or Rank (GMR) is mandatory';
     }
     if (!formData.currentInstitute.trim()) {
-      errors.currentInstitute = 'Interested or Allotted College is mandatory';
+      errors.currentInstitute = 'Please enter your allotted college or select "None"';
     }
     if (!formData.contactInfo.trim() || formData.contactInfo.trim().length < 6) {
       errors.contactInfo = 'Valid Contact Number is mandatory';
@@ -234,7 +246,7 @@ export default function EmailTool({ onActionCompleted }) {
             <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
             <div>
               <strong className="font-bold text-white block">Mandatory Candidate Information Required:</strong>
-              <span>Please fill in all candidate details below (Name, WBJEE Roll Number / Rank, College & Contact Number) before dispatching.</span>
+              <span>Please fill in all candidate details below (Name, WBJEE Roll Number / Rank, Allotted College & Contact Number) before dispatching.</span>
             </div>
           </div>
         )}
@@ -315,11 +327,24 @@ export default function EmailTool({ onActionCompleted }) {
                 )}
               </div>
 
-              {/* Interested / Allotted Institute */}
+              {/* Allotted College with quick "None" selection */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Interested / Allotted College <span className="text-rose-400">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-slate-300">
+                    Allotted College <span className="text-rose-400">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleSelectNone}
+                    className={`text-[11px] px-2 py-0.5 rounded-md font-bold transition-colors cursor-pointer ${
+                      formData.currentInstitute.trim().toLowerCase() === 'none'
+                        ? 'bg-rose-600 text-white shadow-sm'
+                        : 'bg-slate-800 text-rose-400 hover:bg-slate-700 border border-slate-700'
+                    }`}
+                  >
+                    Select "None" (Unallotted)
+                  </button>
+                </div>
                 <div className="relative">
                   <School className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
@@ -328,7 +353,7 @@ export default function EmailTool({ onActionCompleted }) {
                     name="currentInstitute"
                     value={formData.currentInstitute}
                     onChange={handleInputChange}
-                    placeholder="e.g. Jadavpur Univ / KGEC / Unallotted"
+                    placeholder="e.g. KGEC / HIT / or click None above"
                     className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
                       formErrors.currentInstitute 
                         ? 'border-rose-500 ring-1 ring-rose-500' 

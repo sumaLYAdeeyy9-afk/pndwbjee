@@ -109,7 +109,7 @@ export function generateOfflineDcBody({
     else lines.push('Concerned WBJEE 2026 Candidate');
 
     if (unifiedRollRank) lines.push(`WBJEE 2026 Roll No. / Rank (GMR): ${unifiedRollRank}`);
-    if (currentInstitute.trim()) lines.push(`Interested / Allotted College: ${currentInstitute.trim()}`);
+    if (currentInstitute.trim()) lines.push(`Allotted College: ${currentInstitute.trim()}`);
     if (contactInfo.trim()) lines.push(`Contact Number: ${contactInfo.trim()}`);
 
     signature = lines.join('\n');
