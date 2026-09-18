@@ -92,12 +92,14 @@ export const SUBJECT_VARIANTS = [
  */
 export function generateOfflineDcBody({
   studentName = '',
+  rollOrRank = '',
   rollNumber = '',
   rankGmr = '',
   currentInstitute = '',
   contactInfo = ''
 }) {
-  const hasDetails = Boolean(studentName.trim() || rollNumber.trim() || rankGmr.trim());
+  const unifiedRollRank = (rollOrRank || '').trim() || (rollNumber.trim() && rankGmr.trim() ? `${rollNumber.trim()} (GMR: ${rankGmr.trim()})` : (rollNumber.trim() || rankGmr.trim()));
+  const hasDetails = Boolean(studentName.trim() || unifiedRollRank);
 
   let signature = 'Concerned WBJEE 2026 Candidates & Bonafide Aspirants';
 
@@ -106,8 +108,7 @@ export function generateOfflineDcBody({
     if (studentName.trim()) lines.push(studentName.trim());
     else lines.push('Concerned WBJEE 2026 Candidate');
 
-    if (rollNumber.trim()) lines.push(`WBJEE 2026 Roll Number: ${rollNumber.trim()}`);
-    if (rankGmr.trim()) lines.push(`WBJEE 2026 Rank / GMR: ${rankGmr.trim()}`);
+    if (unifiedRollRank) lines.push(`WBJEE 2026 Roll No. / Rank (GMR): ${unifiedRollRank}`);
     if (currentInstitute.trim()) lines.push(`Interested / Allotted College: ${currentInstitute.trim()}`);
     if (contactInfo.trim()) lines.push(`Contact Number: ${contactInfo.trim()}`);
 
@@ -159,6 +160,7 @@ ${signature}`;
  */
 export function generateUniqueEmail({
   studentName = '',
+  rollOrRank = '',
   rollNumber = '',
   rankGmr = '',
   currentInstitute = '',
@@ -170,6 +172,7 @@ export function generateUniqueEmail({
   const subject = SUBJECT_VARIANTS[subjectIndex];
   const body = generateOfflineDcBody({
     studentName,
+    rollOrRank,
     rollNumber,
     rankGmr,
     currentInstitute,

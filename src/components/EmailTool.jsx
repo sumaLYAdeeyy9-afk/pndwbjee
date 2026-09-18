@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
-  User, Hash, Award, School, Phone, CheckCircle2, Globe,
+  User, Hash, School, Phone, CheckCircle2, Globe,
   RotateCcw, Edit3, AlertCircle, Shuffle
 } from 'lucide-react';
 import { 
@@ -13,11 +13,10 @@ import {
 import { saveStudentSubmission } from '../lib/submissionStore';
 
 export default function EmailTool({ onActionCompleted }) {
-  // Mandatory candidate info state
+  // Mandatory candidate info state with unified Roll/Rank field
   const [formData, setFormData] = useState({
     studentName: '',
-    rollNumber: '',
-    rankGmr: '',
+    rollOrRank: '',
     currentInstitute: '',
     contactInfo: ''
   });
@@ -26,8 +25,7 @@ export default function EmailTool({ onActionCompleted }) {
   const [showValidationAlert, setShowValidationAlert] = useState(false);
 
   const nameInputRef = useRef(null);
-  const rollInputRef = useRef(null);
-  const rankInputRef = useRef(null);
+  const rollRankInputRef = useRef(null);
   const collegeInputRef = useRef(null);
   const phoneInputRef = useRef(null);
 
@@ -113,11 +111,8 @@ export default function EmailTool({ onActionCompleted }) {
     if (!formData.studentName.trim() || formData.studentName.trim().length < 2) {
       errors.studentName = 'Full Name is mandatory';
     }
-    if (!formData.rollNumber.trim() || formData.rollNumber.trim().length < 3) {
-      errors.rollNumber = 'WBJEE Roll Number is mandatory';
-    }
-    if (!formData.rankGmr.trim()) {
-      errors.rankGmr = 'WBJEE Rank / GMR is mandatory';
+    if (!formData.rollOrRank.trim() || formData.rollOrRank.trim().length < 2) {
+      errors.rollOrRank = 'WBJEE Roll Number or Rank (GMR) is mandatory';
     }
     if (!formData.currentInstitute.trim()) {
       errors.currentInstitute = 'Interested or Allotted College is mandatory';
@@ -132,8 +127,7 @@ export default function EmailTool({ onActionCompleted }) {
       setShowValidationAlert(true);
       // Focus first error field
       if (errors.studentName && nameInputRef.current) nameInputRef.current.focus();
-      else if (errors.rollNumber && rollInputRef.current) rollInputRef.current.focus();
-      else if (errors.rankGmr && rankInputRef.current) rankInputRef.current.focus();
+      else if (errors.rollOrRank && rollRankInputRef.current) rollRankInputRef.current.focus();
       else if (errors.currentInstitute && collegeInputRef.current) collegeInputRef.current.focus();
       else if (errors.contactInfo && phoneInputRef.current) phoneInputRef.current.focus();
       return false;
@@ -153,8 +147,8 @@ export default function EmailTool({ onActionCompleted }) {
   const recordSubmissionAndCelebrate = () => {
     saveStudentSubmission({
       studentName: formData.studentName.trim(),
-      rollNumber: formData.rollNumber.trim(),
-      rankGmr: formData.rankGmr.trim(),
+      rollNumber: formData.rollOrRank.trim(),
+      rankGmr: formData.rollOrRank.trim(),
       currentInstitute: formData.currentInstitute.trim(),
       contactInfo: formData.contactInfo.trim(),
       subject: subject,
@@ -240,7 +234,7 @@ export default function EmailTool({ onActionCompleted }) {
             <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
             <div>
               <strong className="font-bold text-white block">Mandatory Candidate Information Required:</strong>
-              <span>Please fill in all candidate details below (Name, WBJEE Roll Number, Rank/GMR, College & Contact Number) before dispatching.</span>
+              <span>Please fill in all candidate details below (Name, WBJEE Roll Number / Rank, College & Contact Number) before dispatching.</span>
             </div>
           </div>
         )}
@@ -261,10 +255,10 @@ export default function EmailTool({ onActionCompleted }) {
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
-              All representations must carry verified candidate credentials to maintain official legal validity and merit standing.
+              All representations carry verified candidate credentials to maintain official legal validity and merit standing.
             </p>
 
-            <div className="space-y-3 pt-1">
+            <div className="space-y-3.5 pt-1">
               {/* Name */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -293,58 +287,30 @@ export default function EmailTool({ onActionCompleted }) {
                 )}
               </div>
 
-              {/* WBJEE Roll Number */}
+              {/* Unified WBJEE Roll Number / Rank (GMR) */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  WBJEE 2026 Roll Number <span className="text-rose-400">*</span>
+                  WBJEE 2026 Roll Number / Rank (GMR) <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <Hash className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
-                    ref={rollInputRef}
+                    ref={rollRankInputRef}
                     type="text"
-                    name="rollNumber"
-                    value={formData.rollNumber}
+                    name="rollOrRank"
+                    value={formData.rollOrRank}
                     onChange={handleInputChange}
-                    placeholder="e.g. 26010045892"
+                    placeholder="e.g. Roll: 26010045892 or GMR: 12450"
                     className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
-                      formErrors.rollNumber 
+                      formErrors.rollOrRank 
                         ? 'border-rose-500 ring-1 ring-rose-500' 
                         : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
                     }`}
                   />
                 </div>
-                {formErrors.rollNumber && (
+                {formErrors.rollOrRank && (
                   <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
-                    {formErrors.rollNumber}
-                  </span>
-                )}
-              </div>
-
-              {/* WBJEE Rank / GMR */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  WBJEE 2026 Rank / GMR <span className="text-rose-400">*</span>
-                </label>
-                <div className="relative">
-                  <Award className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    ref={rankInputRef}
-                    type="text"
-                    name="rankGmr"
-                    value={formData.rankGmr}
-                    onChange={handleInputChange}
-                    placeholder="e.g. GMR 12450"
-                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
-                      formErrors.rankGmr 
-                        ? 'border-rose-500 ring-1 ring-rose-500' 
-                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-                    }`}
-                  />
-                </div>
-                {formErrors.rankGmr && (
-                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
-                    {formErrors.rankGmr}
+                    {formErrors.rollOrRank}
                   </span>
                 )}
               </div>
