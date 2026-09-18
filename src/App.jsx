@@ -1,15 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import LiveCounter from './components/LiveCounter';
 import EmailTool from './components/EmailTool';
 import ShareCampaign from './components/ShareCampaign';
 import Directory from './components/Directory';
 import Footer from './components/Footer';
 import AdminSubmissionsModal from './components/AdminSubmissionsModal';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('email-tool');
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+  // Real Community Stats initialized starting strictly from 0
+  const [stats, setStats] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pnd_wbjee_stats_v9_clean');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      emails: 0
+    };
+  });
 
   // Check URL routes (?admin=true, #admin, /admin) or key combination Ctrl+Shift+A
   useEffect(() => {
@@ -45,6 +58,88 @@ export default function App() {
     }
   }, []);
 
+  // Load and subscribe to real-time stats from Supabase
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    async function fetchGlobalStats() {
+      try {
+        const { data, error } = await supabase
+          .from('campaign_stats')
+          .select('*')
+          .eq('id', 'global')
+          .single();
+
+        if (data && !error) {
+          setStats({
+            emails: data.emails || 0
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats from Supabase:', err);
+      }
+    }
+
+    fetchGlobalStats();
+
+    // Subscribe to live changes
+    const channel = supabase
+      .channel('campaign_stats_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'campaign_stats', filter: 'id=eq.global' },
+        (payload) => {
+          if (payload.new) {
+            setStats({
+              emails: payload.new.emails || 0
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Save to local storage as fallback
+  useEffect(() => {
+    localStorage.setItem('pnd_wbjee_stats_v9_clean', JSON.stringify(stats));
+  }, [stats]);
+
+  // Increment action handler with optimistic local update and Supabase sync
+  const handleActionCompleted = async (type = 'emails') => {
+    // 1. Optimistic local increment
+    setStats(prev => {
+      const updated = {
+        ...prev,
+        [type]: (prev[type] || 0) + 1
+      };
+
+      // 2. Sync to Supabase
+      if (isSupabaseConfigured && supabase) {
+        supabase.rpc('increment_campaign_stat', { stat_column: type }).then(({ error }) => {
+          if (error) {
+            supabase
+              .from('campaign_stats')
+              .update({ [type]: updated[type], updated_at: new Date().toISOString() })
+              .eq('id', 'global')
+              .catch(console.error);
+          }
+        }).catch(() => {
+          supabase
+            .from('campaign_stats')
+            .update({ [type]: updated[type], updated_at: new Date().toISOString() })
+            .eq('id', 'global')
+            .catch(console.error);
+        });
+      }
+
+      return updated;
+    });
+  };
+
   const scrollToSection = (id) => {
     setActiveSection(id);
     const element = document.getElementById(id);
@@ -61,10 +156,16 @@ export default function App() {
       />
 
       <main className="flex-1">
-        <EmailTool />
+        <EmailTool 
+          onActionCompleted={handleActionCompleted} 
+        />
 
         <Hero 
           scrollToSection={scrollToSection} 
+        />
+
+        <LiveCounter 
+          stats={stats} 
         />
 
         <ShareCampaign />

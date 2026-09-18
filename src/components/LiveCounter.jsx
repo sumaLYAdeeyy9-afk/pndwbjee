@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Mail, Building2, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { TrendingUp, Mail, Building2, ShieldCheck } from 'lucide-react';
 
 export default function LiveCounter({ stats }) {
   const counterCards = [
@@ -31,12 +31,12 @@ export default function LiveCounter({ stats }) {
       color: 'text-emerald-400',
       bgColor: 'bg-emerald-500/10',
       borderColor: 'border-emerald-500/30',
-      desc: 'Scrap Online DC & restore campus spot rounds'
+      desc: 'Conduct Offline Spot Rounds at Campuses'
     }
   ];
 
   return (
-    <section className="py-8 bg-slate-900/50 border-b border-slate-800/80">
+    <section id="metrics" className="py-8 bg-slate-900/50 border-b border-slate-800/80 scroll-mt-16">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -51,7 +51,7 @@ export default function LiveCounter({ stats }) {
             </h2>
           </div>
           <p className="text-xs text-slate-400 mt-1 sm:mt-0">
-            Metrics increment only when 100% complete candidate details are submitted
+            Real-time counter tracking bonafide WBJEE representations dispatched to official desks
           </p>
         </div>
 
