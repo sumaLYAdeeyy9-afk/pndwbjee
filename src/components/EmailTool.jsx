@@ -109,23 +109,7 @@ export default function EmailTool({ onActionCompleted }) {
   const webOutlookUrl = buildOutlookComposeUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, subject, body);
   const webYahooUrl = buildYahooComposeUrl(PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, subject, body);
 
-  // Copy handler
-  const handleCopy = (type) => {
-    let textToCopy = '';
-    if (type === 'all') {
-      textToCopy = `TO: ${PRIMARY_TO_RECIPIENTS.join(', ')}\nCC: ${CC_RECIPIENTS.join(', ')}\nSUBJECT: ${subject}\n\n${body}`;
-    } else if (type === 'subject') {
-      textToCopy = subject;
-    } else if (type === 'body') {
-      textToCopy = body;
-    }
-
-    navigator.clipboard.writeText(textToCopy);
-    setCopiedType(type);
-    setTimeout(() => setCopiedType(null), 2500);
-  };
-
-  // Record submission in database & trigger UI celebration
+  // Record submission in database, notify parent counter & trigger UI celebration
   const recordSubmissionAndCelebrate = () => {
     saveStudentSubmission({
       studentName: formData.studentName || 'Concerned Candidate (Anonymous)',
@@ -146,12 +130,29 @@ export default function EmailTool({ onActionCompleted }) {
       });
     } catch {}
 
-    if (onActionCompleted) {
-      onActionCompleted('email');
+    if (typeof onActionCompleted === 'function') {
+      onActionCompleted('emails');
     }
 
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 5000);
+  };
+
+  // Copy handler
+  const handleCopy = (type) => {
+    let textToCopy = '';
+    if (type === 'all') {
+      textToCopy = `TO: ${PRIMARY_TO_RECIPIENTS.join(', ')}\nCC: ${CC_RECIPIENTS.join(', ')}\nSUBJECT: ${subject}\n\n${body}`;
+      recordSubmissionAndCelebrate();
+    } else if (type === 'subject') {
+      textToCopy = subject;
+    } else if (type === 'body') {
+      textToCopy = body;
+    }
+
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedType(type);
+    setTimeout(() => setCopiedType(null), 2500);
   };
 
   // Direct dispatch action

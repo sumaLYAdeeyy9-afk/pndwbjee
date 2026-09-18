@@ -16,7 +16,7 @@ export default function App() {
   // Real Community Stats initialized starting strictly from 0
   const [stats, setStats] = useState(() => {
     try {
-      const saved = localStorage.getItem('pnd_wbjee_stats_v9_clean');
+      const saved = localStorage.getItem('pnd_wbjee_stats_v10_live');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
@@ -105,32 +105,36 @@ export default function App() {
 
   // Save to local storage as fallback
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stats_v9_clean', JSON.stringify(stats));
+    localStorage.setItem('pnd_wbjee_stats_v10_live', JSON.stringify(stats));
   }, [stats]);
 
   // Increment action handler with optimistic local update and Supabase sync
   const handleActionCompleted = async (type = 'emails') => {
+    const statKey = (type === 'email' || type === 'emails') ? 'emails' : type;
+
     // 1. Optimistic local increment
     setStats(prev => {
+      const currentVal = Number(prev[statKey] || prev.emails || 0);
       const updated = {
         ...prev,
-        [type]: (prev[type] || 0) + 1
+        [statKey]: currentVal + 1,
+        emails: currentVal + 1
       };
 
       // 2. Sync to Supabase
       if (isSupabaseConfigured && supabase) {
-        supabase.rpc('increment_campaign_stat', { stat_column: type }).then(({ error }) => {
+        supabase.rpc('increment_campaign_stat', { stat_column: 'emails' }).then(({ error }) => {
           if (error) {
             supabase
               .from('campaign_stats')
-              .update({ [type]: updated[type], updated_at: new Date().toISOString() })
+              .update({ emails: updated.emails, updated_at: new Date().toISOString() })
               .eq('id', 'global')
               .catch(console.error);
           }
         }).catch(() => {
           supabase
             .from('campaign_stats')
-            .update({ [type]: updated[type], updated_at: new Date().toISOString() })
+            .update({ emails: updated.emails, updated_at: new Date().toISOString() })
             .eq('id', 'global')
             .catch(console.error);
         });
