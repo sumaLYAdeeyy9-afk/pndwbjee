@@ -12,45 +12,19 @@ export default function ShareCampaign() {
 
   const shareText = `🚨 *UNITED WE STAND, DIVIDED WE FALL!* ✊
 
-*REQUEST FOR GENUINE OFFLINE DECENTRALISED COUNSELLING FOR WBJEE 2026*
+*DEMAND GENUINE OFFLINE DECENTRALISED COUNSELLING FOR WBJEE 2026*
 
-👉 *SEND 1-CLICK EMAIL REPRESENTATION NOW:*
+Thousands of deserving engineering aspirants are suffering due to seat-blocking, ghost vacancies, and abnormally high cut-offs while seats remain vacant in government colleges!
+
+🛑 *Our Core Demands to WBJEEB & Govt of WB:*
+1️⃣ Conduct *Physical Offline DC* directly at college campuses (JU, CU, KGEC, JGEC, etc.)
+2️⃣ Publish complete *college-wise & category-wise vacancy lists* beforehand
+3️⃣ Stop online seat-holding & fill vacant seats through transparent spot admission
+
+👉 *Send Your 1-Click Official Representation to WBJEEB & DTE in 10 Seconds:*
 ${portalUrl}
 
-*To,*
-The Chairman / Competent Authority
-West Bengal Joint Entrance Examinations Board (WBJEEB)
-& Directorate of Technical Education (DTE), Government of West Bengal
-
-*Subject: Request for Genuine Offline Decentralised Counselling for WBJEE 2026*
-
-*Respected Sir/Madam,*
-
-We, the undersigned WBJEE 2026 candidates and aspirants, respectfully request the authorities to urgently address the present counselling situation and consider conducting a *genuine offline Decentralised Counselling (DC)* for the remaining vacant seats.
-
-Students are concerned that *multiple allocation/holding of seats by candidates across counselling processes may be contributing to unusually high cut-offs while substantial numbers of seats remain vacant*. This has created difficulties for candidates who are genuinely willing to take admission, particularly those who depend on the comparatively affordable fees of government institutions.
-
-A genuine offline DC at the respective college campuses could help ensure that vacant seats reach candidates who are actually willing to join. Physical reporting would allow candidates to:
-• Verify documents and eligibility directly at the institution;
-• Choose from seats actually vacant at that time;
-• Accept a seat immediately; and
-• Reduce the possibility of seats being held by candidates without genuine intention to join.
-
-*We therefore request WBJEEB and the Government of West Bengal to consider:*
-1️⃣ Conducting *physical, college-level DC* for remaining vacant seats;
-2️⃣ Publishing *college-wise, branch-wise and category-wise vacancy data* beforehand;
-3️⃣ Following a transparent process based on *merit, eligibility and applicable reservation rules*;
-4️⃣ Providing adequate advance notice for candidates to arrange travel;
-5️⃣ Publishing the seats filled and remaining vacant after each phase; and
-6️⃣ Providing an official schedule at the earliest possible opportunity.
-
-Many students cannot afford expensive private alternatives or another academic year. We therefore respectfully request the authorities to examine the present counselling mechanism and provide eligible candidates with a transparent opportunity to fill genuinely vacant seats.
-
-*Yours faithfully,*
-*Concerned WBJEE 2026 Candidates & Bonafide Aspirants*
-
-👉 *DISPATCH YOUR OFFICIAL REPRESENTATION NOW:*
-${portalUrl}
+Please forward this to all WBJEE 2026 aspirants, batch groups & parents!
 
 #WBJEEOfflineDC #DemandOfflineDC #ConductOfflineDC #StopSeatBlocking #WBJEE2026 #SaveAcademicYear`;
 
@@ -100,7 +74,7 @@ ${portalUrl}
           </h2>
 
           <p className="text-slate-300 text-xs sm:text-sm max-w-2xl mx-auto mb-8 leading-relaxed">
-            Every share mobilizes another candidate. Forward this representation to your coaching batch groups, Telegram channels, and WhatsApp circles.
+            Every share mobilizes another candidate. Forward this broadcast to your coaching batch groups, Telegram channels, and WhatsApp circles.
           </p>
 
           {/* Social Buttons */}
