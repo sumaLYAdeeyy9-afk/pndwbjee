@@ -14,14 +14,14 @@ export default function ShareCampaign() {
 
 *DEMAND GENUINE OFFLINE DECENTRALISED COUNSELLING FOR WBJEE 2026*
 
-Thousands of deserving engineering aspirants are suffering due to seat-blocking, ghost vacancies, and abnormally high cut-offs while seats remain vacant in government colleges!
+Even after DC Phase 1 completion, vacant seats have reduced by only a negligible margin due to online seat-holding and faulty process mechanisms!
 
-🛑 *Our Core Demands to WBJEEB & Govt of WB:*
+🛑 *Our Core Demands to WBJEEB, DTE & JU VC:*
 1️⃣ Conduct *Physical Offline DC* directly at college campuses (JU, CU, KGEC, JGEC, etc.)
 2️⃣ Publish complete *college-wise & category-wise vacancy lists* beforehand
 3️⃣ Stop online seat-holding & fill vacant seats through transparent spot admission
 
-👉 *Send Your 1-Click Official Representation to WBJEEB & DTE in 10 Seconds:*
+👉 *Send Your 1-Click Official Representation in 10 Seconds:*
 ${portalUrl}
 
 Please forward this to all WBJEE 2026 aspirants, batch groups & parents!

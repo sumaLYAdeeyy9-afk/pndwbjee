@@ -130,6 +130,8 @@ We, the undersigned WBJEE 2026 candidates and aspirants, respectfully submit thi
 
 Students are concerned that multiple allocation/holding of seats by candidates across counselling processes may be contributing to unusually high cut-offs while substantial numbers of seats remain vacant. This has created difficulties for candidates who are genuinely willing to take admission, particularly those who depend on the comparatively affordable fees of government institutions and state universities.
 
+Furthermore, Phase 1 of Decentralised Counselling (DCAP Phase 1) has now been completed, yet the number of vacant seats across institutions has gone down by only a negligible margin. This clearly signifies the deeply faulty and ineffective mechanism of the current online centralised DC process, where seats continue to remain blocked online without resulting in genuine physical admissions on campus.
+
 A genuine offline DC at the respective college and university campuses could help ensure that vacant seats reach candidates who are actually willing to join. Physical reporting would allow candidates to:
 
 * Verify documents and eligibility directly at the institution;
