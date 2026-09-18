@@ -167,74 +167,63 @@ export function generateUniqueEmail({
 }
 
 /**
- * Build mailto: URL string with clean URI encoding
+ * Build mailto: URL string with clean URI encoding (%20 for spaces, not +)
  */
 export function buildMailtoUrl(toArr, ccArr, subject, body) {
-  const toStr = toArr.join(',');
-  const params = new URLSearchParams();
+  const toStr = (toArr || []).join(',');
+  const parts = [];
 
   if (ccArr && ccArr.length > 0) {
-    params.set('cc', ccArr.join(','));
+    parts.push(`cc=${encodeURIComponent(ccArr.join(','))}`);
   }
-  params.set('subject', subject);
-  params.set('body', body);
 
-  return `mailto:${toStr}?${params.toString()}`;
+  parts.push(`subject=${encodeURIComponent(subject)}`);
+
+  // Proper CRLF line breaks for mail clients
+  const formattedBody = (body || '').replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+  parts.push(`body=${encodeURIComponent(formattedBody)}`);
+
+  return `mailto:${toStr}?${parts.join('&')}`;
 }
 
 /**
- * Build direct web Gmail compose URL
+ * Build direct web Gmail compose URL (%20 for spaces, not +)
  */
 export function buildGmailComposeUrl(toArr, ccArr, subject, body) {
-  const toStr = toArr.join(',');
-  const params = new URLSearchParams({
-    view: 'cm',
-    fs: '1',
-    to: toStr,
-    su: subject,
-    body: body
-  });
+  const toStr = (toArr || []).join(',');
+  let url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toStr)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   if (ccArr && ccArr.length > 0) {
-    params.set('cc', ccArr.join(','));
+    url += `&cc=${encodeURIComponent(ccArr.join(','))}`;
   }
 
-  return `https://mail.google.com/mail/?${params.toString()}`;
+  return url;
 }
 
 /**
- * Build direct web Outlook compose URL
+ * Build direct web Outlook compose URL (%20 for spaces, not +)
  */
 export function buildOutlookComposeUrl(toArr, ccArr, subject, body) {
-  const toStr = toArr.join(';');
-  const params = new URLSearchParams({
-    path: '/mail/action/compose',
-    to: toStr,
-    subject: subject,
-    body: body
-  });
+  const toStr = (toArr || []).join(';');
+  let url = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(toStr)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   if (ccArr && ccArr.length > 0) {
-    params.set('cc', ccArr.join(';'));
+    url += `&cc=${encodeURIComponent(ccArr.join(';'))}`;
   }
 
-  return `https://outlook.live.com/mail/0/deeplink/compose?${params.toString()}`;
+  return url;
 }
 
 /**
- * Build direct web Yahoo compose URL
+ * Build direct web Yahoo compose URL (%20 for spaces, not +)
  */
 export function buildYahooComposeUrl(toArr, ccArr, subject, body) {
-  const toStr = toArr.join(',');
-  const params = new URLSearchParams({
-    to: toStr,
-    subj: subject,
-    body: body
-  });
+  const toStr = (toArr || []).join(',');
+  let url = `https://compose.mail.yahoo.com/?to=${encodeURIComponent(toStr)}&subj=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   if (ccArr && ccArr.length > 0) {
-    params.set('cc', ccArr.join(','));
+    url += `&cc=${encodeURIComponent(ccArr.join(','))}`;
   }
 
-  return `https://compose.mail.yahoo.com/?${params.toString()}`;
+  return url;
 }
