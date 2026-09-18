@@ -13,10 +13,10 @@ export default function App() {
   const [activeSection, setActiveSection] = useState('hero');
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
-  // Real Community Stats (Fallback to initial stats if Supabase is connecting)
+  // Real Community Stats initialized to 0 (Nulled metrics)
   const [stats, setStats] = useState(() => {
     try {
-      const saved = localStorage.getItem('pnd_wbjee_stats_v6');
+      const saved = localStorage.getItem('pnd_wbjee_stats_v8_offline_dc');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
@@ -103,12 +103,12 @@ export default function App() {
     };
   }, []);
 
-  // Save to local storage as fallback
+  // Save to local storage
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stats_v6', JSON.stringify(stats));
+    localStorage.setItem('pnd_wbjee_stats_v8_offline_dc', JSON.stringify(stats));
   }, [stats]);
 
-  // Increment action handler with automatic fallback
+  // Increment action handler
   const handleActionCompleted = async (type = 'emails') => {
     // 1. Optimistic local increment
     setStats(prev => {

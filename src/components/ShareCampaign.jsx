@@ -10,24 +10,23 @@ export default function ShareCampaign() {
     ? window.location.origin
     : 'https://wbjee.playnodice.com';
 
-  const shareText = `🚨 MASS MAILING CAMPAIGN: DEMAND OFFLINE DECENTRALIZED COUNSELING!
+  const shareText = `🚨 MASS MAILING CAMPAIGN: DEMAND OFFLINE DECENTRALIZED COUNSELLING!
 👉 SEND 1-CLICK REPRESENTATION NOW: ${portalUrl}
 
 URGENT FOR ALL WBJEE 2026 CANDIDATES & PARENTS!
-We refuse to be the experimental batch of WBJEEB. Scrap the flawed Online DC portal!
+Vacant seats and unusually high cut-offs cannot coexist indefinitely. Thousands of students cannot afford to lose an academic year!
 
-🛑 Core Demands & Why We Oppose Online DC:
-1️⃣ Multiple Allotments & Rampant Seat Blocking
-2️⃣ Fresh Registration in Each Round destroying merit
-3️⃣ No real "Yes-Upgradation" mechanism
-4️⃣ Allow SC/ST/OBC/EWS candidates converted to General due to Govt certificate delays to opt for their correct category
-5️⃣ Urgent Confirmation & Enforcement of Fee Refund Policy when changing colleges during Decentralized Counseling
+🛑 Key Demands to WBJEEB & Higher Education Dept:
+1️⃣ Physical Reporting at college campuses (JU, CU, KGEC, JGEC, GCECT, GCELT, etc.)
+2️⃣ Pre-Counselling Publication of college-wise, branch-wise, and category-wise vacant seats
+3️⃣ Elimination of online seat-blocking and ghost vacancies
+4️⃣ Transparent spot admission strictly by merit
+5️⃣ Revision of Phase 2 eligibility to protect unadmitted candidates
 
-🏛️ Demand: Conduct Decentralized Counseling OFFLINE directly at institute campuses (JU, CU, KGEC, JGEC, etc.) as per historical precedent.
+👉 Dispatch Your Official Email Representation in 10 Seconds:
+${portalUrl}
 
-👉 Action Portal (Takes 10 seconds): ${portalUrl}
-
-#WBJEEOfflineDC #ScrapOnlineDC #FeeRefundWBJEE #WBJEE2026 #JusticeForWBJEEStudents`;
+#WBJEEOfflineDC #DemandOfflineDC #ConductOfflineDC #StopSeatBlocking #WBJEE2026 #SaveAcademicYear`;
 
   const handleWhatsAppShare = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
@@ -67,11 +66,11 @@ We refuse to be the experimental batch of WBJEEB. Scrap the flawed Online DC por
           
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-4">
             <Users className="w-3.5 h-3.5" />
-            <span>Action 2: Mobilize Student Batches</span>
+            <span>Mobilize Aspirants Across West Bengal</span>
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight mb-3">
-            Amplify the Movement Across Channels
+            Amplify the Demand Across Student Circles
           </h2>
 
           <p className="text-slate-300 text-xs sm:text-sm max-w-2xl mx-auto mb-8 leading-relaxed">
@@ -102,12 +101,12 @@ We refuse to be the experimental batch of WBJEEB. Scrap the flawed Online DC por
             {/* Copy Share Text */}
             <button
               onClick={handleCopyLink}
-              className="py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs sm:text-sm border border-slate-700 flex items-center justify-center space-x-2 transition-all cursor-pointer"
+              className="py-3.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 border border-slate-700 transition-all cursor-pointer"
             >
               {copied ? (
                 <>
                   <Check className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-400">Copied Text!</span>
+                  <span className="text-emerald-400">Copied to Clipboard!</span>
                 </>
               ) : (
                 <>
@@ -119,8 +118,8 @@ We refuse to be the experimental batch of WBJEEB. Scrap the flawed Online DC por
 
           </div>
 
-          <p className="text-[11px] text-slate-400">
-            Includes direct portal links and the grievance summary formatted for instant messaging.
+          <p className="text-[11px] text-slate-500">
+            Share in WBJEE coaching groups, college discussion forums & student networks.
           </p>
 
         </div>

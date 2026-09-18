@@ -39,24 +39,24 @@ export default function Directory() {
 
   const faqs = [
     {
-      q: 'Why must Online DC be scrapped in favor of Offline DC?',
-      a: 'If it has "Decentralized" in its name, it cannot be run centrally online. Online DC causes multiple virtual allotments and rampant seat-blocking across colleges, allows fresh registrations per round that distort merit, and offers no real "yes-upgradation" mechanism. Offline spot counseling conducted directly at institute campuses (JU, CU, KGEC, JGEC, etc.) ensures 100% physical attendance, instant seat turnover, and zero ghost vacancies.'
+      q: 'Why are students demanding Offline Decentralised Counselling?',
+      a: 'A genuine decentralized counselling process, as conducted in previous years, provides colleges with an opportunity to fill remaining vacant seats through physical, college-level spot rounds. Candidates travel to institutions, physically report, verify documents, and accept seats immediately. This naturally filters out candidates who are merely holding seats online without genuine intent to join, eliminating artificial cut-off inflation.'
     },
     {
-      q: 'Can SC/ST/OBC/EWS candidates converted to General reclaim their category?',
-      a: 'Yes, this is a top campaign demand. Many bonafide reserved category candidates were converted to General during Centralized Counseling solely because their certificates were delayed by issuing authorities beyond student control. We demand that candidates be allowed to opt for their correct category and produce issued certificates at Decentralized Counseling registration.'
+      q: 'Why are thousands of seats still vacant despite high cut-offs?',
+      a: 'The current counselling flow and online allocation mechanism suffer from systemic seat-blocking. Candidates hold multiple options across institutions without physical reporting, keeping genuine candidates from securing vacant public and private engineering seats and creating unnatural cutoff inflation.'
     },
     {
-      q: 'What is the Fee Refund Policy when changing colleges during Decentralized Counseling?',
-      a: 'A previous government notification explicitly states that if a student\'s allotted college changes during the counselling process, the fees paid to the former institution must be refunded upon taking admission to the newly allotted college. We are seeking urgent confirmation and binding enforcement from the Board and Higher Education Department that this exact fee refund protection applies to all Decentralized Counseling admissions.'
+      q: 'Are students willing to travel physically to campuses?',
+      a: 'Yes. Students across West Bengal are ready to take full responsibility and travel hundreds of kilometres to physically report at college campuses (JU, CU, KGEC, JGEC, GCECT, GCELT, GCETTS, etc.) to secure vacant seats rather than lose an academic year.'
     },
     {
-      q: 'Why do students refuse to be the "experimental batch"?',
-      a: 'WBJEE 2026 students already suffered immense cutoff compression, seat anomalies, and academic loss during the experimental centralized online rounds. Imposing another untested online portal for decentralized admissions will lead to complete administrative collapse and leave thousands of premier engineering seats vacant.'
+      q: 'What is the demand regarding Phase 2 DCAP eligibility?',
+      a: 'We appeal to the Board to exclude candidates who have already confirmed admission in Centralised Counselling or DC Phase 1 from competing again in Phase 2, so that remaining vacancies can reach candidates who are still without admission.'
     },
     {
-      q: 'Is participating in this grievance campaign safe?',
-      a: 'Yes. Submitting respectful, fact-based grievance representations to statutory authorities (WBJEEB, DTE, Higher Education Dept, and Hon\'ble CM) is a democratic right. PlayNoDice operates 100% client-side with zero storage of your personal credentials.'
+      q: 'Is participating in this grievance representation campaign safe?',
+      a: 'Yes. Submitting respectful, fact-based representations to statutory authorities (WBJEEB, DTE, Higher Education Dept, and CMO) is a constitutionally protected right. PlayNoDice operates 100% client-side with zero storage of your personal credentials.'
     }
   ];
 
@@ -99,32 +99,32 @@ export default function Directory() {
                     <span className="text-slate-400">{c.location}</span>
                   </div>
 
-                  <div className="flex items-start space-x-1.5">
-                    <PhoneCall className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      {c.phones.map((p, pIdx) => (
-                        <div key={pIdx} className="font-mono text-slate-300">{p}</div>
-                      ))}
+                  {c.phones.map((p, pIdx) => (
+                    <div key={pIdx} className="flex items-center space-x-1.5">
+                      <PhoneCall className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <a href={`tel:${p.replace(/[^0-9+]/g, '')}`} className="hover:text-rose-400 transition-colors">
+                        {p}
+                      </a>
                     </div>
-                  </div>
+                  ))}
 
-                  <div className="flex items-start space-x-1.5">
-                    <Mail className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
-                    <div className="space-y-0.5">
-                      {c.emails.map((e, eIdx) => (
-                        <div key={eIdx} className="font-mono text-slate-300 break-all">{e}</div>
-                      ))}
+                  {c.emails.map((em, eIdx) => (
+                    <div key={eIdx} className="flex items-center space-x-1.5">
+                      <Mail className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                      <a href={`mailto:${em}`} className="hover:text-rose-400 transition-colors font-mono text-[10px] truncate">
+                        {em}
+                      </a>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="pt-3 mt-3 border-t border-slate-800">
+              <div className="pt-3 mt-3 border-t border-slate-800/80">
                 <a
                   href={c.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[11px] font-bold text-rose-400 hover:text-rose-300 flex items-center justify-between"
+                  className="inline-flex items-center space-x-1 text-[11px] font-semibold text-rose-400 hover:text-rose-300 transition-colors"
                 >
                   <span>Official Portal</span>
                   <ExternalLink className="w-3 h-3" />
@@ -134,20 +134,20 @@ export default function Directory() {
           ))}
         </div>
 
-        {/* FAQ Section */}
-        <div className="bg-slate-900/60 rounded-2xl p-6 sm:p-8 border border-slate-800">
+        {/* FAQ Accordion Section */}
+        <div className="max-w-3xl mx-auto">
           <div className="flex items-center space-x-2 text-rose-400 text-xs font-bold uppercase tracking-wider mb-4">
             <HelpCircle className="w-4 h-4" />
-            <span>Frequently Asked Questions</span>
+            <span>Frequently Asked Questions & Context</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {faqs.map((f, idx) => (
-              <div key={idx} className="space-y-2">
-                <h4 className="font-bold text-white text-xs sm:text-sm">
+          <div className="space-y-3">
+            {faqs.map((f, fIdx) => (
+              <div key={fIdx} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                <h4 className="text-xs sm:text-sm font-bold text-white mb-1.5">
                   {f.q}
                 </h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-300 leading-relaxed">
                   {f.a}
                 </p>
               </div>
