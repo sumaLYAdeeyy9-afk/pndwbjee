@@ -6,6 +6,7 @@ export const PRIMARY_TO_RECIPIENTS = [
 
 export const CC_RECIPIENTS = [
   'dtewbgovt@gmail.com',
+  'vc@jadavpuruniversity.in',
   'techedndirectoratewb@gmail.com',
   'highereducationwb@gmail.com',
   'dpihedn@gmail.com',
@@ -26,6 +27,13 @@ export const OFFICIAL_RECIPIENTS = [
     name: 'Directorate of Technical Education (DTE)',
     email: 'dtewbgovt@gmail.com',
     designation: 'Directorate of Technical Education, Bikash Bhavan 10th Floor',
+    category: 'CC'
+  },
+  {
+    id: 'vc_ju',
+    name: 'Hon’ble Vice-Chancellor, Jadavpur University',
+    email: 'vc@jadavpuruniversity.in',
+    designation: 'Office of the Vice-Chancellor, Jadavpur University',
     category: 'CC'
   },
   {
@@ -73,14 +81,14 @@ export const SUBJECT_VARIANTS = [
   "Formal Appeal: Request for Genuine Offline Decentralised Counselling for WBJEE 2026",
   "WBJEE 2026 Candidate Appeal: Request for Genuine Offline Decentralised Counselling",
   "Submission of WBJEE 2026 Aspirants: Request for Genuine Offline Decentralised Counselling",
-  "Urgent Representation to WBJEEB & DTE: Request for Genuine Offline Decentralised Counselling for WBJEE 2026",
+  "Urgent Representation to WBJEEB, DTE & JU: Request for Genuine Offline Decentralised Counselling for WBJEE 2026",
   "Appeal for Physical Campus Spot Rounds: Request for Genuine Offline Decentralised Counselling for WBJEE 2026",
   "Grievance & Appeal: Request for Genuine Offline Decentralised Counselling for WBJEE 2026 Remaining Vacant Seats",
   "Mass Student Representation: Request for Genuine Offline Decentralised Counselling for WBJEE 2026"
 ];
 
 /**
- * Generate Exact Single Offline DC Representation
+ * Generate Universal Offline DC Representation Addressed to All Key Authorities
  */
 export function generateOfflineDcBody({
   studentName = '',
@@ -98,8 +106,8 @@ export function generateOfflineDcBody({
     if (studentName.trim()) lines.push(studentName.trim());
     else lines.push('Concerned WBJEE 2026 Candidate');
 
-    if (rollNumber.trim()) lines.push(`WBJEE-2026 Application Number: ${rollNumber.trim()}`);
-    if (rankGmr.trim()) lines.push(`WBJEE-2026 Rank / GMR: ${rankGmr.trim()}`);
+    if (rollNumber.trim()) lines.push(`WBJEE 2026 Roll Number: ${rollNumber.trim()}`);
+    if (rankGmr.trim()) lines.push(`WBJEE 2026 Rank / GMR: ${rankGmr.trim()}`);
     if (currentInstitute.trim()) lines.push(`Interested / Allotted College: ${currentInstitute.trim()}`);
     if (contactInfo.trim()) lines.push(`Contact Number: ${contactInfo.trim()}`);
 
@@ -107,26 +115,29 @@ export function generateOfflineDcBody({
   }
 
   return `To,
-The Chairman / Competent Authority
-West Bengal Joint Entrance Examinations Board (WBJEEB)
-& Directorate of Technical Education (DTE), Government of West Bengal
+1. The Chairman / Competent Authority, West Bengal Joint Entrance Examinations Board (WBJEEB)
+2. The Director of Technical Education (DTE), Government of West Bengal
+3. The Vice-Chancellor, Jadavpur University
+4. The Principal Secretary, Department of Higher Education, Government of West Bengal
+5. The Director of Public Instruction (DPI), Government of West Bengal
+6. The Chief Minister's Office & Higher Education Wing, Government of West Bengal
 
 Subject: Request for Genuine Offline Decentralised Counselling for WBJEE 2026
 
-Respected Sir/Madam,
+Respected Authorities / Respected Sir/Madam,
 
-We, the undersigned WBJEE 2026 candidates and aspirants, respectfully request the authorities to urgently address the present counselling situation and consider conducting a genuine offline Decentralised Counselling (DC) for the remaining vacant seats.
+We, the undersigned WBJEE 2026 candidates and aspirants, respectfully submit this joint representation to WBJEEB, DTE, the Higher Education Department, and Participating University Administrations to urgently address the present counselling situation and consider conducting a genuine offline Decentralised Counselling (DC) for the remaining vacant seats.
 
-Students are concerned that multiple allocation/holding of seats by candidates across counselling processes may be contributing to unusually high cut-offs while substantial numbers of seats remain vacant. This has created difficulties for candidates who are genuinely willing to take admission, particularly those who depend on the comparatively affordable fees of government institutions.
+Students are concerned that multiple allocation/holding of seats by candidates across counselling processes may be contributing to unusually high cut-offs while substantial numbers of seats remain vacant. This has created difficulties for candidates who are genuinely willing to take admission, particularly those who depend on the comparatively affordable fees of government institutions and state universities.
 
-A genuine offline DC at the respective college campuses could help ensure that vacant seats reach candidates who are actually willing to join. Physical reporting would allow candidates to:
+A genuine offline DC at the respective college and university campuses could help ensure that vacant seats reach candidates who are actually willing to join. Physical reporting would allow candidates to:
 
 * Verify documents and eligibility directly at the institution;
 * Choose from seats actually vacant at that time;
 * Accept a seat immediately; and
 * Reduce the possibility of seats being held by candidates without genuine intention to join.
 
-We therefore request WBJEEB and the Government of West Bengal to consider:
+We therefore request WBJEEB, the Directorate of Technical Education, and the Higher Education Authorities to consider:
 
 1. Conducting physical, college-level DC for remaining vacant seats;
 2. Publishing college-wise, branch-wise and category-wise vacancy data beforehand;
@@ -135,7 +146,7 @@ We therefore request WBJEEB and the Government of West Bengal to consider:
 5. Publishing the seats filled and remaining vacant after each phase; and
 6. Providing an official schedule at the earliest possible opportunity.
 
-Many students cannot afford expensive private alternatives or another academic year. We therefore respectfully request the authorities to examine the present counselling mechanism and provide eligible candidates with a transparent opportunity to fill genuinely vacant seats.
+Many students cannot afford expensive private alternatives or another academic year. We therefore respectfully request the competent authorities to examine the present counselling mechanism and provide eligible candidates with a transparent opportunity to fill genuinely vacant seats.
 
 Yours faithfully,
 ${signature}`;

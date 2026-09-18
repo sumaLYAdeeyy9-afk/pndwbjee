@@ -20,6 +20,14 @@ export default function Directory() {
       link: 'https://wbhed.gov.in'
     },
     {
+      title: 'Office of the Vice-Chancellor, Jadavpur University',
+      authority: 'Hon’ble Vice-Chancellor, Jadavpur University',
+      location: 'Aurobindo Bhavan, 188, Raja S.C. Mallick Rd, Kolkata 700032',
+      phones: ['033-24146000', '033-24572222'],
+      emails: ['vc@jadavpuruniversity.in'],
+      link: 'http://www.jaduniv.edu.in'
+    },
+    {
       title: 'Higher Education Department & DPI',
       authority: 'Govt. of West Bengal, Bikash Bhavan (6th Floor)',
       location: 'Bikash Bhavan, 6th Floor, Salt Lake, Kolkata 700091',

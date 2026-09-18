@@ -114,7 +114,7 @@ export default function EmailTool({ onActionCompleted }) {
       errors.studentName = 'Full Name is mandatory';
     }
     if (!formData.rollNumber.trim() || formData.rollNumber.trim().length < 3) {
-      errors.rollNumber = 'WBJEE Application Number is mandatory';
+      errors.rollNumber = 'WBJEE Roll Number is mandatory';
     }
     if (!formData.rankGmr.trim()) {
       errors.rankGmr = 'WBJEE Rank / GMR is mandatory';
@@ -221,16 +221,16 @@ export default function EmailTool({ onActionCompleted }) {
         <div className="text-center max-w-3xl mx-auto mb-8">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-wider mb-3">
             <Mail className="w-4 h-4 text-rose-500" />
-            <span>Formal Representation Dispatcher</span>
+            <span>Universal Representation Dispatcher</span>
             <span className="w-1 h-1 rounded-full bg-slate-500"></span>
             <span className="text-amber-400 font-semibold lowercase">#DemandOfflineDC</span>
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight mb-2">
-            Send Official Email Representation to <span className="text-rose-500">WBJEEB & Govt</span>
+            Send Official Email Representation to <span className="text-rose-500">WBJEEB, DTE & JU VC</span>
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm">
-            Fill your mandatory candidate credentials to generate your bonafide representation and dispatch directly to WBJEEB, DTE & Higher Education Department.
+            Fill your mandatory candidate credentials to generate your bonafide representation and dispatch directly to WBJEEB, DTE, JU VC, and Higher Education Desks.
           </p>
         </div>
 
@@ -240,7 +240,7 @@ export default function EmailTool({ onActionCompleted }) {
             <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
             <div>
               <strong className="font-bold text-white block">Mandatory Candidate Information Required:</strong>
-              <span>Please fill in all candidate details below (Name, WBJEE Application Number, Rank/GMR, College & Contact Number) before dispatching.</span>
+              <span>Please fill in all candidate details below (Name, WBJEE Roll Number, Rank/GMR, College & Contact Number) before dispatching.</span>
             </div>
           </div>
         )}
@@ -293,10 +293,10 @@ export default function EmailTool({ onActionCompleted }) {
                 )}
               </div>
 
-              {/* Application / Roll Number */}
+              {/* WBJEE Roll Number */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  WBJEE 2026 Application Number <span className="text-rose-400">*</span>
+                  WBJEE 2026 Roll Number <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <Hash className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -410,16 +410,20 @@ export default function EmailTool({ onActionCompleted }) {
             {/* Official Recipients Mini-Card */}
             <div className="pt-3 border-t border-slate-800 space-y-2 text-xs">
               <span className="font-bold text-slate-400 block uppercase tracking-wider text-[11px]">
-                Targeted Official Recipients:
+                Targeted Official Recipients (All Addressed):
               </span>
-              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-1 text-[11px] text-slate-300">
+              <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-1.5 text-[11px] text-slate-300">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400">TO (Primary):</span>
                   <span className="font-mono text-rose-400 font-bold">info@wbjeeb.in</span>
                 </div>
                 <div className="flex items-center justify-between">
+                  <span className="text-slate-400">CC (JU VC Desk):</span>
+                  <span className="font-mono text-emerald-400 font-semibold">vc@jadavpuruniversity.in</span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-slate-400">CC (State Desks):</span>
-                  <span className="text-slate-400 font-mono">DTE, Higher Ed, DPI, CM Desk</span>
+                  <span className="text-slate-400 font-mono text-[10px]">DTE, Higher Ed, DPI, CM Desk</span>
                 </div>
               </div>
             </div>
@@ -434,7 +438,7 @@ export default function EmailTool({ onActionCompleted }) {
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3 mb-3">
                 <div className="flex items-center space-x-2">
                   <Edit3 className="w-4 h-4 text-rose-400" />
-                  <span className="text-sm font-bold text-white">Representation Draft Preview</span>
+                  <span className="text-sm font-bold text-white">Universal Representation Draft Preview</span>
                   {isManuallyEdited && (
                     <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">
                       Customized
@@ -446,7 +450,7 @@ export default function EmailTool({ onActionCompleted }) {
                   <button
                     type="button"
                     onClick={handleShuffleDraft}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-400 text-xs font-semibold flex items-center space-x-1.5 transition-colors border border-slate-700"
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-400 text-xs font-semibold flex items-center space-x-1.5 transition-colors border border-slate-700 cursor-pointer"
                     title="Shuffle Subject Line"
                   >
                     <Shuffle className="w-3.5 h-3.5" />
@@ -456,7 +460,7 @@ export default function EmailTool({ onActionCompleted }) {
                   <button
                     type="button"
                     onClick={handleResetDraft}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1 transition-colors border border-slate-700"
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1 transition-colors border border-slate-700 cursor-pointer"
                     title="Reset to Original Template"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -474,7 +478,7 @@ export default function EmailTool({ onActionCompleted }) {
                   <button
                     type="button"
                     onClick={() => handleCopy('subject')}
-                    className="text-[11px] text-rose-400 hover:underline flex items-center space-x-1"
+                    className="text-[11px] text-rose-400 hover:underline flex items-center space-x-1 cursor-pointer"
                   >
                     {copiedType === 'subject' ? <span>Copied!</span> : <span>Copy Subject</span>}
                   </button>
@@ -494,18 +498,18 @@ export default function EmailTool({ onActionCompleted }) {
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-semibold text-slate-400">
-                    Representation Body (Auto-Signed with Your Mandatory Details):
+                    Representation Body (Universally Addressed & Auto-Signed):
                   </label>
                   <button
                     type="button"
                     onClick={() => handleCopy('body')}
-                    className="text-[11px] text-rose-400 hover:underline flex items-center space-x-1"
+                    className="text-[11px] text-rose-400 hover:underline flex items-center space-x-1 cursor-pointer"
                   >
                     {copiedType === 'body' ? <span>Copied!</span> : <span>Copy Body Text</span>}
                   </button>
                 </div>
                 <textarea
-                  rows={15}
+                  rows={16}
                   value={body}
                   onChange={handleBodyChange}
                   className="w-full p-3.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-slate-200 font-sans leading-relaxed focus:outline-none focus:border-rose-500 resize-y"
@@ -518,7 +522,7 @@ export default function EmailTool({ onActionCompleted }) {
             <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
               <span className="flex items-center space-x-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Formal, verified representation addressed to WBJEEB & DTE</span>
+                <span>Universally addressed to WBJEEB, DTE, JU VC, Higher Ed & DPI</span>
               </span>
             </div>
 
@@ -539,10 +543,10 @@ export default function EmailTool({ onActionCompleted }) {
                 </span>
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-white">
-                Dispatch Representation to Official Desks
+                Dispatch Representation to All Statutory Desks
               </h3>
               <p className="text-xs text-slate-300 max-w-xl">
-                Click below to launch your email client with verified recipients, tailored subject line, and your signed appeal pre-loaded.
+                Click below to launch your email client with verified recipients (WBJEEB, JU VC, DTE & Higher Ed), tailored subject line, and your signed appeal pre-loaded.
               </p>
             </div>
 

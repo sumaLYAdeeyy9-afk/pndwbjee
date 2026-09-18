@@ -11,17 +11,17 @@ export default function LiveCounter({ stats }) {
       color: 'text-rose-400',
       bgColor: 'bg-rose-500/10',
       borderColor: 'border-rose-500/30',
-      desc: 'Submissions sent to WBJEEB, DTE & CMO'
+      desc: 'Submissions sent to WBJEEB, DTE, JU VC & Higher Ed'
     },
     {
       id: 'desks',
       label: 'Statutory Desks Targeted',
-      value: '7 Desks',
+      value: '8 Desks',
       icon: Building2,
       color: 'text-amber-400',
       bgColor: 'bg-amber-500/10',
       borderColor: 'border-amber-500/30',
-      desc: 'WBJEEB, DTE, Higher Ed, DPI & CM Desk'
+      desc: 'WBJEEB, DTE, JU VC, Higher Ed, DPI & CMO'
     },
     {
       id: 'demand',
@@ -60,24 +60,26 @@ export default function LiveCounter({ stats }) {
           {counterCards.map((card) => {
             const Icon = card.icon;
             return (
-              <div
+              <div 
                 key={card.id}
-                className={`bg-slate-950/80 rounded-2xl p-5 border ${card.borderColor} flex items-center justify-between shadow-lg`}
+                className={`p-5 rounded-2xl bg-slate-900/90 border ${card.borderColor} shadow-xl relative overflow-hidden transition-all hover:scale-[1.01]`}
               >
-                <div>
-                  <div className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono mb-1">
-                    {card.value}
-                  </div>
-                  <div className="text-xs sm:text-sm font-bold text-slate-200">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
                     {card.label}
-                  </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    {card.desc}
+                  </span>
+                  <div className={`p-2 rounded-xl ${card.bgColor}`}>
+                    <Icon className={`w-5 h-5 ${card.color}`} />
                   </div>
                 </div>
 
-                <div className={`p-3.5 rounded-xl ${card.bgColor} ${card.color} shrink-0`}>
-                  <Icon className="w-6 h-6" />
+                <div className="space-y-1">
+                  <div className={`text-3xl sm:text-4xl font-black tracking-tight ${card.color}`}>
+                    {card.value}
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    {card.desc}
+                  </p>
                 </div>
               </div>
             );
