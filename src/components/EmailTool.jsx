@@ -4,7 +4,7 @@ import {
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
   User, Hash, School, Phone, CheckCircle2, Globe,
   RotateCcw, Edit3, AlertCircle, Shuffle, GraduationCap,
-  Users, Building, BookOpen, Sparkles
+  Users, Building, BookOpen, Sparkles, Award
 } from 'lucide-react';
 import { 
   PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, SENDER_ROLES,
@@ -14,10 +14,10 @@ import {
 import { saveStudentSubmission } from '../lib/submissionStore';
 
 export default function EmailTool({ onActionCompleted }) {
-  // Selected Sender Persona ('candidate' | 'senior' | 'guardian')
+  // Selected Sender Persona ('candidate' | 'senior' | 'alumni' | 'guardian')
   const [activeRole, setActiveRole] = useState('candidate');
 
-  // Form states for all 3 sender personas
+  // Form states for all 4 sender personas
   const [formData, setFormData] = useState({
     // Candidate fields
     studentName: '',
@@ -27,6 +27,9 @@ export default function EmailTool({ onActionCompleted }) {
     // Senior fields
     seniorCollege: '',
     seniorDeptYear: '',
+    // Alumni fields
+    alumniCollege: '',
+    alumniBatchDept: '',
     // Guardian fields
     guardianName: '',
     wardDetails: '',
@@ -48,6 +51,8 @@ export default function EmailTool({ onActionCompleted }) {
   const phoneRef = useRef(null);
   const seniorCollegeRef = useRef(null);
   const seniorDeptYearRef = useRef(null);
+  const alumniCollegeRef = useRef(null);
+  const alumniBatchDeptRef = useRef(null);
   const guardianNameRef = useRef(null);
   const wardDetailsRef = useRef(null);
   const wardAllotmentRef = useRef(null);
@@ -123,13 +128,25 @@ export default function EmailTool({ onActionCompleted }) {
     }
   };
 
-  // Quick senior college selector helper
+  // Quick college selector helper for Senior
   const handleQuickSeniorCollege = (collegeName) => {
     setFormData(prev => ({ ...prev, seniorCollege: collegeName }));
     if (formErrors.seniorCollege) {
       setFormErrors(prev => {
         const next = { ...prev };
         delete next.seniorCollege;
+        return next;
+      });
+    }
+  };
+
+  // Quick college selector helper for Alumni
+  const handleQuickAlumniCollege = (collegeName) => {
+    setFormData(prev => ({ ...prev, alumniCollege: collegeName }));
+    if (formErrors.alumniCollege) {
+      setFormErrors(prev => {
+        const next = { ...prev };
+        delete next.alumniCollege;
         return next;
       });
     }
@@ -194,7 +211,20 @@ export default function EmailTool({ onActionCompleted }) {
         errors.seniorCollege = 'Institution / University Name is mandatory';
       }
       if (!formData.seniorDeptYear.trim() || formData.seniorDeptYear.trim().length < 2) {
-        errors.seniorDeptYear = 'Department & Academic Year is mandatory';
+        errors.seniorDeptYear = 'Department & Year of Study is mandatory';
+      }
+      if (!formData.contactInfo.trim() || formData.contactInfo.trim().length < 6) {
+        errors.contactInfo = 'Contact Number or Email is mandatory';
+      }
+    } else if (activeRole === 'alumni') {
+      if (!formData.studentName.trim() || formData.studentName.trim().length < 2) {
+        errors.studentName = 'Your Full Name is mandatory';
+      }
+      if (!formData.alumniCollege.trim() || formData.alumniCollege.trim().length < 2) {
+        errors.alumniCollege = 'Alma Mater / College Name is mandatory';
+      }
+      if (!formData.alumniBatchDept.trim() || formData.alumniBatchDept.trim().length < 2) {
+        errors.alumniBatchDept = 'Department & Graduation Batch is mandatory';
       }
       if (!formData.contactInfo.trim() || formData.contactInfo.trim().length < 6) {
         errors.contactInfo = 'Contact Number or Email is mandatory';
@@ -229,6 +259,11 @@ export default function EmailTool({ onActionCompleted }) {
         else if (errors.seniorCollege && seniorCollegeRef.current) seniorCollegeRef.current.focus();
         else if (errors.seniorDeptYear && seniorDeptYearRef.current) seniorDeptYearRef.current.focus();
         else if (errors.contactInfo && phoneRef.current) phoneRef.current.focus();
+      } else if (activeRole === 'alumni') {
+        if (errors.studentName && nameRef.current) nameRef.current.focus();
+        else if (errors.alumniCollege && alumniCollegeRef.current) alumniCollegeRef.current.focus();
+        else if (errors.alumniBatchDept && alumniBatchDeptRef.current) alumniBatchDeptRef.current.focus();
+        else if (errors.contactInfo && phoneRef.current) phoneRef.current.focus();
       } else if (activeRole === 'guardian') {
         if (errors.guardianName && guardianNameRef.current) guardianNameRef.current.focus();
         else if (errors.wardDetails && wardDetailsRef.current) wardDetailsRef.current.focus();
@@ -255,9 +290,13 @@ export default function EmailTool({ onActionCompleted }) {
     let collegeToSave = formData.currentInstitute.trim();
 
     if (activeRole === 'senior') {
-      nameToSave = `${formData.studentName.trim()} (Senior)`;
+      nameToSave = `${formData.studentName.trim()} (Senior Student)`;
       rollToSave = formData.seniorDeptYear.trim();
       collegeToSave = formData.seniorCollege.trim();
+    } else if (activeRole === 'alumni') {
+      nameToSave = `${formData.studentName.trim()} (Alumnus)`;
+      rollToSave = formData.alumniBatchDept.trim();
+      collegeToSave = formData.alumniCollege.trim();
     } else if (activeRole === 'guardian') {
       nameToSave = `${formData.guardianName.trim()} (Guardian)`;
       rollToSave = formData.wardDetails.trim();
@@ -347,69 +386,90 @@ export default function EmailTool({ onActionCompleted }) {
           </p>
         </div>
 
-        {/* PROFILE / ROLE SELECTOR TABS */}
-        <div className="max-w-3xl mx-auto mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
+        {/* PROFILE / ROLE SELECTOR TABS (4 DISTINCT PROFILES) */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
             
             {/* 1. Candidate Tab */}
             <button
               type="button"
               onClick={() => handleRoleChange('candidate')}
-              className={`p-3 rounded-xl flex items-center space-x-3 transition-all cursor-pointer text-left ${
+              className={`p-2.5 rounded-xl flex items-center space-x-2.5 transition-all cursor-pointer text-left ${
                 activeRole === 'candidate'
                   ? 'bg-gradient-to-r from-rose-600 to-rose-500 text-white shadow-lg shadow-rose-950 ring-1 ring-rose-400'
                   : 'bg-slate-950/60 text-slate-300 hover:bg-slate-800/80 border border-slate-800'
               }`}
             >
-              <div className={`p-2 rounded-lg ${activeRole === 'candidate' ? 'bg-white/20' : 'bg-slate-800 text-rose-400'}`}>
-                <GraduationCap className="w-5 h-5" />
+              <div className={`p-1.5 rounded-lg shrink-0 ${activeRole === 'candidate' ? 'bg-white/20' : 'bg-slate-800 text-rose-400'}`}>
+                <GraduationCap className="w-4 h-4" />
               </div>
-              <div>
-                <span className="font-bold text-xs sm:text-sm block">WBJEE Candidate</span>
-                <span className={`text-[11px] ${activeRole === 'candidate' ? 'text-rose-100' : 'text-slate-400'}`}>
-                  1st Year Aspirant
+              <div className="min-w-0">
+                <span className="font-bold text-xs block truncate">Candidate</span>
+                <span className={`text-[10px] block truncate ${activeRole === 'candidate' ? 'text-rose-100' : 'text-slate-400'}`}>
+                  1st Yr Aspirant
                 </span>
               </div>
             </button>
 
-            {/* 2. Senior / Alumni Tab */}
+            {/* 2. Senior Student Tab */}
             <button
               type="button"
               onClick={() => handleRoleChange('senior')}
-              className={`p-3 rounded-xl flex items-center space-x-3 transition-all cursor-pointer text-left ${
+              className={`p-2.5 rounded-xl flex items-center space-x-2.5 transition-all cursor-pointer text-left ${
                 activeRole === 'senior'
                   ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-lg shadow-amber-950 ring-1 ring-amber-400'
                   : 'bg-slate-950/60 text-slate-300 hover:bg-slate-800/80 border border-slate-800'
               }`}
             >
-              <div className={`p-2 rounded-lg ${activeRole === 'senior' ? 'bg-white/20' : 'bg-slate-800 text-amber-400'}`}>
-                <School className="w-5 h-5" />
+              <div className={`p-1.5 rounded-lg shrink-0 ${activeRole === 'senior' ? 'bg-white/20' : 'bg-slate-800 text-amber-400'}`}>
+                <School className="w-4 h-4" />
               </div>
-              <div>
-                <span className="font-bold text-xs sm:text-sm block">Senior / Alumni</span>
-                <span className={`text-[11px] ${activeRole === 'senior' ? 'text-amber-100' : 'text-slate-400'}`}>
-                  2nd/3rd/4th Yr & Graduate
+              <div className="min-w-0">
+                <span className="font-bold text-xs block truncate">Senior Student</span>
+                <span className={`text-[10px] block truncate ${activeRole === 'senior' ? 'text-amber-100' : 'text-slate-400'}`}>
+                  2nd/3rd/4th Year
                 </span>
               </div>
             </button>
 
-            {/* 3. Parent / Guardian Tab */}
+            {/* 3. College Alumni Tab */}
+            <button
+              type="button"
+              onClick={() => handleRoleChange('alumni')}
+              className={`p-2.5 rounded-xl flex items-center space-x-2.5 transition-all cursor-pointer text-left ${
+                activeRole === 'alumni'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-950 ring-1 ring-blue-400'
+                  : 'bg-slate-950/60 text-slate-300 hover:bg-slate-800/80 border border-slate-800'
+              }`}
+            >
+              <div className={`p-1.5 rounded-lg shrink-0 ${activeRole === 'alumni' ? 'bg-white/20' : 'bg-slate-800 text-blue-400'}`}>
+                <Award className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-bold text-xs block truncate">College Alumnus</span>
+                <span className={`text-[10px] block truncate ${activeRole === 'alumni' ? 'text-blue-100' : 'text-slate-400'}`}>
+                  Graduate Engineer
+                </span>
+              </div>
+            </button>
+
+            {/* 4. Parent / Guardian Tab */}
             <button
               type="button"
               onClick={() => handleRoleChange('guardian')}
-              className={`p-3 rounded-xl flex items-center space-x-3 transition-all cursor-pointer text-left ${
+              className={`p-2.5 rounded-xl flex items-center space-x-2.5 transition-all cursor-pointer text-left ${
                 activeRole === 'guardian'
                   ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-950 ring-1 ring-emerald-400'
                   : 'bg-slate-950/60 text-slate-300 hover:bg-slate-800/80 border border-slate-800'
               }`}
             >
-              <div className={`p-2 rounded-lg ${activeRole === 'guardian' ? 'bg-white/20' : 'bg-slate-800 text-emerald-400'}`}>
-                <Users className="w-5 h-5" />
+              <div className={`p-1.5 rounded-lg shrink-0 ${activeRole === 'guardian' ? 'bg-white/20' : 'bg-slate-800 text-emerald-400'}`}>
+                <Users className="w-4 h-4" />
               </div>
-              <div>
-                <span className="font-bold text-xs sm:text-sm block">Parent / Guardian</span>
-                <span className={`text-[11px] ${activeRole === 'guardian' ? 'text-emerald-100' : 'text-slate-400'}`}>
-                  Family & Concerned Citizen
+              <div className="min-w-0">
+                <span className="font-bold text-xs block truncate">Parent / Guardian</span>
+                <span className={`text-[10px] block truncate ${activeRole === 'guardian' ? 'text-emerald-100' : 'text-slate-400'}`}>
+                  Concerned Family
                 </span>
               </div>
             </button>
@@ -428,7 +488,7 @@ export default function EmailTool({ onActionCompleted }) {
           </div>
         )}
 
-        {/* 1. Dynamic Candidate Details & Live Draft Editor Grid (FIRST) */}
+        {/* 1. Dynamic Candidate Details & Live Draft Editor Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-5xl mx-auto mb-8">
           
           {/* Left Column: Dynamic Persona Form */}
@@ -438,10 +498,12 @@ export default function EmailTool({ onActionCompleted }) {
               <div className="flex items-center space-x-2 font-bold text-sm text-white">
                 {activeRole === 'candidate' && <GraduationCap className="w-4 h-4 text-rose-400" />}
                 {activeRole === 'senior' && <School className="w-4 h-4 text-amber-400" />}
+                {activeRole === 'alumni' && <Award className="w-4 h-4 text-blue-400" />}
                 {activeRole === 'guardian' && <Users className="w-4 h-4 text-emerald-400" />}
                 <span>
                   {activeRole === 'candidate' && 'Candidate Verification Details'}
-                  {activeRole === 'senior' && 'Senior / Alumni Details'}
+                  {activeRole === 'senior' && 'Senior Undergrad Details'}
+                  {activeRole === 'alumni' && 'Alumnus / Graduate Details'}
                   {activeRole === 'guardian' && 'Guardian & Ward Details'}
                 </span>
               </div>
@@ -452,7 +514,8 @@ export default function EmailTool({ onActionCompleted }) {
 
             <p className="text-xs text-slate-400 leading-relaxed">
               {activeRole === 'candidate' && 'Your credentials will be attached to the official representation signature to certify bonafide candidate status.'}
-              {activeRole === 'senior' && 'Representing your university and branch in solidarity with incoming juniors against seat wastage.'}
+              {activeRole === 'senior' && 'Representing your university department as an enrolled senior in solidarity with incoming juniors against seat wastage.'}
+              {activeRole === 'alumni' && 'Representing your alma mater as an engineering graduate to protect institutional excellence and meritocracy.'}
               {activeRole === 'guardian' && 'Representing as parents and guardians to appeal against unjust seat-blocking and financial distress.'}
             </p>
 
@@ -560,7 +623,7 @@ export default function EmailTool({ onActionCompleted }) {
                 </>
               )}
 
-              {/* ================= SENIOR / ALUMNI FIELDS ================= */}
+              {/* ================= SENIOR STUDENT FIELDS ================= */}
               {activeRole === 'senior' && (
                 <>
                   {/* Senior Name */}
@@ -594,7 +657,7 @@ export default function EmailTool({ onActionCompleted }) {
                   {/* Senior College / University */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      College / University Name <span className="text-rose-400">*</span>
+                      Current College / University <span className="text-rose-400">*</span>
                     </label>
                     <div className="relative">
                       <Building className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -632,10 +695,10 @@ export default function EmailTool({ onActionCompleted }) {
                     )}
                   </div>
 
-                  {/* Department & Year / Alumni Status */}
+                  {/* Department & Year of Study */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Department & Academic Year / Alumni Status <span className="text-rose-400">*</span>
+                      Department & Year of Study <span className="text-rose-400">*</span>
                     </label>
                     <div className="relative">
                       <BookOpen className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -645,7 +708,7 @@ export default function EmailTool({ onActionCompleted }) {
                         name="seniorDeptYear"
                         value={formData.seniorDeptYear}
                         onChange={handleInputChange}
-                        placeholder="e.g. 3rd Year CSE / 2nd Year ME / Alumni 2025"
+                        placeholder="e.g. 3rd Year CSE / 2nd Year ME / 4th Year EE"
                         className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
                           formErrors.seniorDeptYear 
                             ? 'border-rose-500 ring-1 ring-rose-500' 
@@ -656,6 +719,108 @@ export default function EmailTool({ onActionCompleted }) {
                     {formErrors.seniorDeptYear && (
                       <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
                         {formErrors.seniorDeptYear}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* ================= ALUMNI FIELDS ================= */}
+              {activeRole === 'alumni' && (
+                <>
+                  {/* Alumni Name */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      Your Full Name <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={nameRef}
+                        type="text"
+                        name="studentName"
+                        value={formData.studentName}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Sayantan Banerjee"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.studentName 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.studentName && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.studentName}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Alma Mater */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      Alma Mater / College Name <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <Building className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={alumniCollegeRef}
+                        type="text"
+                        name="alumniCollege"
+                        value={formData.alumniCollege}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Jadavpur University / KGEC / CU"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.alumniCollege 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                        }`}
+                      />
+                    </div>
+                    {/* Quick College Pills */}
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      {['Jadavpur University', 'Calcutta University', 'KGEC Kalyani', 'JGEC Jalpaiguri'].map((col) => (
+                        <button
+                          key={col}
+                          type="button"
+                          onClick={() => handleQuickAlumniCollege(col)}
+                          className="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors cursor-pointer"
+                        >
+                          {col}
+                        </button>
+                      ))}
+                    </div>
+                    {formErrors.alumniCollege && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.alumniCollege}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Department & Graduation Batch */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      Department & Graduation Batch <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <Award className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={alumniBatchDeptRef}
+                        type="text"
+                        name="alumniBatchDept"
+                        value={formData.alumniBatchDept}
+                        onChange={handleInputChange}
+                        placeholder="e.g. B.Tech Mechanical (Batch of 2023) / CSE 2024"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.alumniBatchDept 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.alumniBatchDept && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.alumniBatchDept}
                       </span>
                     )}
                   </div>

@@ -83,22 +83,29 @@ export const SENDER_ROLES = [
   },
   {
     id: 'senior',
-    title: 'Senior Student / Alumni',
-    subtitle: '2nd / 3rd / 4th Year & Passed Out',
-    badge: 'Senior & Alumni',
+    title: 'Senior Student',
+    subtitle: '2nd / 3rd / 4th Year Enrolled',
+    badge: 'Senior Undergrad',
     icon: 'School'
+  },
+  {
+    id: 'alumni',
+    title: 'College Alumnus',
+    subtitle: 'Engineering Graduate / Alumni',
+    badge: 'Alumni',
+    icon: 'Award'
   },
   {
     id: 'guardian',
     title: 'Parent / Guardian',
-    subtitle: 'Concerned Citizen / Family',
+    subtitle: 'Concerned Family & Citizen',
     badge: 'Guardian',
     icon: 'Users'
   }
 ];
 
 // ==========================================
-// 100+ DIVERSE AI-CRAFTED COMBINATORIAL POOL
+// 100+ DIVERSE FORMAL COMBINATORIAL POOL (NO EMOJIS)
 // ==========================================
 
 const SUBJECTS_BY_ROLE = {
@@ -120,21 +127,38 @@ const SUBJECTS_BY_ROLE = {
     "Formal Petition: Conduct Genuine Offline Decentralised Counselling for WBJEE 2026 Candidates"
   ],
   senior: [
-    "Senior Students & Alumni Appeal: Request for Genuine Offline Decentralised Counselling in WBJEE 2026",
-    "Solidarity Representation: Urging WBJEEB, DTE & JU to Conduct Genuine Offline DC for WBJEE 2026",
-    "Appeal from Engineering Students of West Bengal: Conduct Physical Spot Rounds for WBJEE 2026",
-    "Senior Engineering Community Representation: Demand for Offline Decentralised Counselling for WBJEE 2026",
-    "Alumni & Senior Student Appeal: Urgent Need for Physical Campus Decentralised Counselling in WBJEE 2026",
-    "Preserve Institutional Seats: Senior Students Appeal for Genuine Offline DC in WBJEE 2026",
-    "Representation from State Engineering Students: Conduct Genuine Offline DC to Fill Campus Vacancies",
-    "Call for Fair Admissions: Senior Students & Alumni Appeal for Offline Decentralised Counselling 2026",
-    "Engineering Student Body Appeal: Restore Physical Decentralised Counselling in WB Engineering Colleges",
-    "Joint Senior Student Appeal: Conduct Offline Decentralised Counselling to Prevent Seat Wastage in WBJEE 2026",
-    "Institutional Integrity & Admissions: Senior Students Urge Offline Spot Rounds for WBJEE 2026",
-    "Appeal from West Bengal University Students: Implement Physical Decentralised Counselling for WBJEE 2026",
-    "Solidarity with WBJEE 2026 Aspirants: Demand for Immediate Offline Decentralised Counselling",
-    "Senior Engineers & Students Petition: Fill Vacant Seats via Physical Offline DC in WBJEE 2026",
-    "University Students Representation: Conduct Transparent Offline Spot Counselling for WBJEE 2026"
+    "Senior Undergraduates Appeal: Request for Genuine Offline Decentralised Counselling in WBJEE 2026",
+    "Solidarity Representation from Senior Engineering Students: Conduct Offline DC for WBJEE 2026",
+    "Appeal from Enrolled Senior Students of West Bengal: Conduct Physical Spot Rounds for WBJEE 2026",
+    "Senior Engineering Undergraduates: Urgent Demand for Offline Decentralised Counselling for WBJEE 2026",
+    "Prevent Classroom Vacancies: Senior Students Appeal for Genuine Offline DC in WBJEE 2026",
+    "Senior Student Body Appeal: Restore Physical Decentralised Counselling in WB Engineering Colleges",
+    "Undergraduate Student Appeal: Conduct Genuine Offline DC to Fill Departmental Vacancies",
+    "Senior Students Representation: Demand for Transparent Offline Spot Rounds for WBJEE 2026",
+    "Institutional Welfare: Senior Engineering Undergraduates Urge Physical Spot Rounds for WBJEE 2026",
+    "Joint Senior Student Representation: Conduct Offline DC to Fill Empty Classrooms in WBJEE 2026",
+    "Departmental Integrity: Enrolled Senior Students Appeal for Physical Decentralised Counselling",
+    "Appeal from State Engineering Undergraduates: Implement Physical Spot Admissions for WBJEE 2026",
+    "Solidarity with WBJEE 2026 Aspirants: Senior Students Demand Immediate Offline DC",
+    "Senior Engineering Students Petition: Fill Vacant Departmental Desks via Offline DC in WBJEE 2026",
+    "University Undergraduates Representation: Conduct Transparent Offline Spot Counselling for WBJEE 2026"
+  ],
+  alumni: [
+    "Alumni Representation: Request for Genuine Offline Decentralised Counselling in WBJEE 2026",
+    "Engineering Alumni Appeal: Urging Authorities to Conduct Physical Offline DC for WBJEE 2026",
+    "Alma Mater & Student Welfare: Alumni Petition for Offline Spot Admissions in WBJEE 2026",
+    "Alumni Body Appeal: Restore Physical Decentralised Counselling in WB Engineering Colleges",
+    "Preserve Institutional Legacy: Alumni Appeal for Offline Decentralised Counselling in WBJEE 2026",
+    "West Bengal Engineering Alumni Representation: Conduct Offline DC to Fill Campus Vacancies",
+    "Call for Fair Admissions: Engineering Graduates Appeal for Offline Decentralised Counselling 2026",
+    "Alumni Appeal to WBJEEB, DTE & JU: Conduct Physical Decentralised Spot Rounds for WBJEE 2026",
+    "Engineering Graduates Petition: Fill Vacant Seats via Physical Offline DC in WBJEE 2026",
+    "Graduates Representation: Protect State Engineering Seats through Genuine Offline DC",
+    "Institutional Excellence: Alumni Urge Prompt Physical Decentralised Admissions for WBJEE 2026",
+    "Appeal from Engineering Alumni of West Bengal: Implement Physical Campus Spot Rounds",
+    "Preserve Public Education: Alumni Demand Offline Decentralised Counselling for WBJEE 2026",
+    "Alumni Solidarity Petition: Ensure 100% Seat Occupancy via Physical Offline DC in WBJEE 2026",
+    "Formal Alumni Memorandum: Request for Transparent Offline Decentralised Counselling for WBJEE 2026"
   ],
   guardian: [
     "Parents & Guardians Appeal: Request for Genuine Offline Decentralised Counselling for WBJEE 2026",
@@ -166,12 +190,20 @@ const INTROS_BY_ROLE = {
     "With deep faith in the fairness of our state educational authorities, we, the undersigned aspirants of WBJEE 2026, place this collective grievance and humble representation to urgently request an offline, on-campus Decentralised Counselling process for the genuine disposal of vacant seats."
   ],
   senior: [
-    "We, the undersigned senior engineering students and proud alumni representing premier state universities and government engineering institutions of West Bengal (including Jadavpur University, Calcutta University, Kalyani Government Engineering College, Jalpaiguri Government Engineering College, and other reputed institutions), respectfully submit this formal representation in firm solidarity with the WBJEE 2026 aspirants.",
-    "As current senior students, department representatives, and alumni of West Bengal's leading government engineering colleges and universities, we write with great concern regarding the ongoing WBJEE 2026 admission process and respectfully appeal to WBJEEB, DTE, and university administrations to conduct genuine offline Decentralised Counselling for vacant seats.",
-    "We, senior engineering undergraduates and alumni of state universities and engineering institutes across West Bengal, respectfully bring this urgent collective representation to the statutory authorities, urging you to protect institutional infrastructure and student welfare by conducting physical, on-campus Decentralised Counselling for WBJEE 2026.",
-    "Having successfully traversed the WBJEE counselling process in previous academic years, we, the senior students and alumni of West Bengal's premier engineering institutions, respectfully write to WBJEEB, DTE, and University Authorities to advocate for the immediate restoration of genuine offline Decentralised Counselling for the WBJEE 2026 batch.",
-    "We, the senior student community and alumni body of technical education institutes across West Bengal, submit this joint appeal in support of the WBJEE 2026 aspirants, urging your esteemed authorities to implement physical, college-level Decentralised Counselling to resolve the persistent vacancy crisis in our departments.",
-    "Standing shoulder-to-shoulder with thousands of deserving WBJEE 2026 candidates, we, the senior undergraduates and alumni of engineering colleges across West Bengal, respectfully petition the competent authorities to conduct genuine physical Decentralised Counselling on college campuses without further delay."
+    "We, the undersigned senior engineering students currently enrolled in the 2nd, 3rd, and 4th years across premier state universities and government engineering institutions of West Bengal (including Jadavpur University, Calcutta University, Kalyani Government Engineering College, Jalpaiguri Government Engineering College, and other reputed institutions), respectfully submit this formal representation in firm solidarity with our incoming junior batch of WBJEE 2026.",
+    "As currently studying senior undergraduates and departmental student representatives of West Bengal's leading government engineering colleges and universities, we write with great concern regarding the ongoing WBJEE 2026 admission deadlock and respectfully appeal to WBJEEB, DTE, and university administrations to conduct genuine offline Decentralised Counselling for vacant seats.",
+    "We, senior engineering undergraduates across various departments in West Bengal state engineering colleges, respectfully bring this urgent collective representation to the statutory authorities, urging you to protect departmental strength and student welfare by conducting physical, on-campus Decentralised Counselling for WBJEE 2026.",
+    "Having successfully navigated the WBJEE counselling process in earlier academic years, we, the enrolled senior students of West Bengal's premier engineering institutions, respectfully write to WBJEEB, DTE, and University Authorities to advocate for the immediate restoration of genuine offline Decentralised Counselling for the incoming 2026 batch.",
+    "We, the currently enrolled senior student body across technical education institutes in West Bengal, submit this joint appeal in support of the WBJEE 2026 aspirants, urging your esteemed authorities to implement physical, college-level Decentralised Counselling to resolve the persistent vacancy crisis in our departments.",
+    "Standing shoulder-to-shoulder with thousands of deserving WBJEE 2026 candidates, we, the senior undergraduates of engineering colleges across West Bengal, respectfully petition the competent authorities to conduct genuine physical Decentralised Counselling on college campuses without further delay."
+  ],
+  alumni: [
+    "We, the undersigned proud alumni and engineering graduates of premier state universities and government engineering institutions of West Bengal (including Jadavpur University, Calcutta University, Kalyani Government Engineering College, Jalpaiguri Government Engineering College, and other premier institutes), respectfully submit this formal representation before WBJEEB, DTE, the Higher Education Department, and University Administrations.",
+    "As graduates and alumni who owe our careers and professional growth to the world-class technical education provided by West Bengal's state institutions, we write with deep concern regarding the ongoing admission cycle and earnestly appeal for genuine offline Decentralised Counselling for the WBJEE 2026 batch.",
+    "We, the alumni community representing diverse engineering disciplines across West Bengal, submit this joint memorandum urging the statutory authorities to protect institutional standards and prevent taxpayer-funded engineering seats from remaining empty by authorizing physical, on-campus Decentralised Counselling.",
+    "Reflecting on our time as students and the proven legacy of fair admissions, we, the alumni of West Bengal's premier engineering colleges, respectfully urge WBJEEB, DTE, and University Leadership to restore the traditional on-campus offline Decentralised Counselling model for WBJEE 2026.",
+    "As alumni actively working in industry and academia, we recognize the immense value of every seat in our state engineering institutions. We submit this formal appeal to the competent authorities, requesting immediate implementation of physical, college-level spot counselling to ensure complete seat utilization.",
+    "In deep gratitude to our alma mater and in support of the next generation of engineers, we, the engineering graduates of West Bengal, respectfully petition the competent authorities to conduct genuine offline Decentralised Counselling across college campuses."
   ],
   guardian: [
     "We, the undersigned parents, guardians, and concerned citizens of West Bengal, write to your esteemed authorities with immense anguish and pressing urgency regarding the future of our children who appeared in WBJEE 2026, respectfully petitioning for the immediate conduction of genuine offline Decentralised Counselling (DC) for all remaining vacant seats.",
@@ -194,12 +226,20 @@ const CONTEXT_CRITIQUES_BY_ROLE = {
     "Thousands of qualified students are facing severe distress because virtual seat allocation has prevented seats from reaching willing candidates. With Phase 1 of Decentralised Counselling now concluded, the number of vacant seats has reduced by only a negligible margin. This outcome confirms that centralised online counselling cannot resolve vacancies when candidates are not required to physically report and take on-spot admission."
   ],
   senior: [
-    "From our experience on campus and inside departmental classrooms, we are observing an alarming number of unfilled desks and vacant lab stations in core and emerging engineering branches. Crucially, Phase 1 of Decentralised Counselling (DCAP Phase 1) has concluded, yet vacancy counts across colleges have decreased by a negligible margin. This proves that an online centralised DC format merely encourages phantom seat-holding rather than ensuring genuine students arrive on campus to commence classes.",
-    "Having witnessed multiple past admission seasons, we know that physical decentralised rounds are the proven and reliable method to fill departmental vacancies. The completion of Phase 1 of Decentralised Counselling with only a negligible reduction in vacant seats proves that online centralised allocation is failing our institutions. Deserving juniors who genuinely want to study in our institutions are being locked out while virtual allotments go unclaimed.",
+    "From our experience on campus and inside departmental classrooms, we are observing an alarming number of unfilled desks and vacant lab stations in core and emerging engineering branches. Crucially, Phase 1 of Decentralised Counselling (DCAP Phase 1) has concluded, yet vacancy counts across colleges have decreased by a negligible margin. This proves that an online centralised DC format merely encourages phantom seat-holding rather than ensuring genuine students arrive on campus to join our classes.",
+    "Inside our departments and laboratories, we see how virtual seat allocations fail to translate into actual enrolled classmates. The completion of Phase 1 of Decentralised Counselling with only a negligible reduction in vacant seats proves that online centralised allocation is failing our institutions. Deserving juniors who genuinely want to study in our institutions are being locked out while virtual allotments go unclaimed.",
     "Our departments and student laboratories thrive when classrooms are fully occupied by passionate, dedicated students. It is distressing to note that after the conclusion of Phase 1 of Decentralised Counselling, the drop in vacant seats has been completely negligible. This reflects the failure of online centralised DC, which allows seats to be held casually online rather than filled through physical commitment.",
     "As seniors who actively assist newcomers during orientation and department admissions, we see the real-world fallout of this flawed process. Phase 1 of Decentralised Counselling has finished, yet vacant seats in our institutes have reduced by only a negligible margin. This demonstrates conclusively that an online centralised framework cannot replace the efficacy of physical on-campus spot rounds.",
     "The academic health of our state engineering colleges depends on timely and complete seat occupancy. The fact that Phase 1 of Decentralised Counselling resulted in only a negligible change in vacant seat numbers is clear evidence that the centralised online mechanism is defective, enabling virtual seat-blocking while genuine students are left waiting outside.",
     "In previous years, offline college-level DC successfully filled virtually 100% of remaining vacancies within days. In contrast, the current online DC Phase 1 has completed with an almost negligible reduction in vacancies. This stark difference proves that online centralised DC is unsuited for final spot admissions and causes unnecessary seat wastage in our alma mater."
+  ],
+  alumni: [
+    "Having graduated from these esteemed institutions, we know that the reputation and academic ecosystem of West Bengal's engineering colleges depend on full classroom occupancy and meritocracy. Crucially, Phase 1 of Decentralised Counselling (DCAP Phase 1) has now concluded, yet the drop in vacant seats across state colleges has been entirely negligible. This demonstrates that an online centralized allocation process is fundamentally ill-equipped for spot admissions, leading to massive seat wastage in public institutions funded by taxpayers.",
+    "As alumni, it is painful to see world-class laboratories and faculty resources in our alma mater go underutilized due to systemic admission bottlenecks. The conclusion of Phase 1 of Decentralised Counselling with almost negligible reduction in vacancies proves that online centralised allocation allows seats to remain frozen on digital portals without converting into physical admissions.",
+    "The strength of our engineering alumni network rests upon the continuous induction of bright, dedicated students into our institutions. The reality that Phase 1 of Decentralised Counselling failed to significantly reduce vacant seats exposes the inherent flaws of online seat allocation, which enables candidates to hold multiple allotments without physical reporting.",
+    "During our years of study, physical spot rounds ensured that not a single seat was wasted. The fact that the present online DC Phase 1 concluded with a negligible change in vacancies confirms that virtual allocation cannot solve the seat-holding problem and deprives deserving aspirants of life-changing educational opportunities.",
+    "We have witnessed how premier engineering institutions lose valuable talent when seats remain locked online. With Phase 1 DC completed and vacancies remaining virtually unaffected, it is abundantly clear that the online centralised mechanism is broken and must be replaced by direct on-campus spot admissions.",
+    "Taxpayer-subsidised engineering seats in prestigious government colleges are public assets of immense value. The failure of online DC Phase 1 to produce any meaningful drop in vacant seats proves that physical on-campus verification is indispensable to ensure genuine admissions."
   ],
   guardian: [
     "As parents who have supported our children through years of rigorous schooling and board examinations, it is distressing to witness them suffer due to systemic seat-blocking. Furthermore, Phase 1 of Decentralised Counselling has already concluded, yet the number of vacant seats has declined by only a negligible margin. This clearly proves that the online centralised DC process is deeply flawed, allowing seats to be occupied virtually while willing children are denied physical admission.",
@@ -222,12 +262,20 @@ const OFFLINE_JUSTIFICATIONS_BY_ROLE = {
     "By shifting to physical on-campus Decentralised Counselling, the authorities can achieve 100% genuine seat occupancy. Physical reporting ensures that only serious, committed candidates participate, instantly resolving the vacancy crisis that online iterations have failed to solve."
   ],
   senior: [
-    "From our institutional experience, offline decentralized spot rounds conducted on college grounds are the single most effective way to fill departmental seats. Physical reporting ensures that only students with genuine intent and physical readiness appear, allowing our departments to welcome a full batch of motivated junior classmates without administrative delay.",
+    "From our institutional experience as enrolled seniors, offline decentralized spot rounds conducted on college grounds are the single most effective way to fill departmental seats. Physical reporting ensures that only students with genuine intent and physical readiness appear, allowing our departments to welcome a full batch of motivated junior classmates without administrative delay.",
     "On-campus offline spot counselling brings absolute transparency to the admission process. When merit ranks are called publicly in college auditoriums and documents verified in person, every single seat is filled strictly on merit without the possibility of multiple seat hoarding across institutions.",
     "Having seen how smoothly offline spot rounds functioned in earlier batches at our institutes, we can attest that on-campus physical counselling eliminates artificial cutoff inflation and fills vacant seats transparently in real time.",
     "Physical decentralized counselling allows individual colleges and universities to assess real-time branch vacancies and admit bonafide candidates on spot. This protects laboratory resources, faculty workload distribution, and the vibrant academic culture of our institutions.",
     "Our student unions, departmental bodies, and senior batches stand ready to volunteer and assist college administrations in conducting smooth, disciplined, and transparent on-campus offline spot rounds for incoming juniors.",
     "A physical on-campus round is self-filtering: candidates who are already admitted elsewhere or not genuinely interested will not travel to campus, immediately unlocking these high-value government engineering seats for deserving candidates who are present on spot."
+  ],
+  alumni: [
+    "In our graduation years, offline decentralized spot rounds held on college premises consistently proved to be the most reliable and transparent method for filling residual vacancies. Physical reporting demands genuine commitment, naturally filtering out inactive applicants and ensuring that every public engineering seat is occupied by a deserving student.",
+    "On-campus physical spot counselling ensures absolute meritocracy and transparency. When candidates assemble in person and seats are allotted publicly against live vacancy boards, the risk of arbitrary seat blocking or digital glitches is entirely eliminated.",
+    "Having benefited from the traditional offline spot counselling system during our own admission cycles, we can affirm that on-campus physical counselling successfully matches available vacancies with deserving aspirants in real time.",
+    "Physical decentralized rounds allow autonomous institutes and state universities to directly engage with prospective students, verify credentials on the spot, and complete admissions seamlessly without administrative bottlenecks.",
+    "Alumni networks across West Bengal strongly advocate for physical campus spot rounds because they protect our institutions from seat wastage and preserve the high academic standards of our engineering departments.",
+    "An on-campus physical Decentralised Counselling round is self-regulating: only serious, unallotted candidates undertake the journey to campus, ensuring that seats in government engineering colleges are allocated with 100% genuine occupancy."
   ],
   guardian: [
     "We, as parents, are fully prepared to accompany our children and travel to college campuses across West Bengal (Jadavpur University, Calcutta University, KGEC, JGEC, GCECT, GCELT, GCETTS, etc.) for physical spot admissions. Physical reporting ensures that parents can verify documents, pay fees on the spot, and secure our children's future with complete peace of mind.",
@@ -239,7 +287,7 @@ const OFFLINE_JUSTIFICATIONS_BY_ROLE = {
   ]
 };
 
-// Structured Demands Blocks (4 formatting variants)
+// Structured Demands Blocks (4 formatting variants - NO EMOJIS)
 const DEMANDS_VARIANTS = [
   `We therefore earnestly request WBJEEB, the Directorate of Technical Education, the Higher Education Department, and University Authorities to urgently consider and implement:
 
@@ -289,12 +337,20 @@ const CONCLUSIONS_BY_ROLE = {
     "Time is of the absolute essence for the WBJEE 2026 aspirants. We respectfully pray for your immediate intervention to ensure no engineering seat goes to waste and every deserving student finds their rightful place on campus."
   ],
   senior: [
-    "As seniors who deeply value our institutions and the future of technical education in West Bengal, we urge you to listen to the legitimate grievances of the WBJEE 2026 aspirants and conduct physical offline Decentralised Counselling immediately to protect institutional seats from going waste.",
+    "As enrolled seniors who deeply value our institutions and the future of technical education in West Bengal, we urge you to listen to the legitimate grievances of the WBJEE 2026 aspirants and conduct physical offline Decentralised Counselling immediately to protect institutional seats from going waste.",
     "Our colleges and departments flourish when every classroom is complete. We respectfully urge WBJEEB, DTE, and university authorities to uphold meritocracy and issue guidelines for physical on-campus decentralised rounds without delay.",
     "In the spirit of institutional excellence and student solidarity, we place this urgent representation before you and sincerely hope that prompt administrative directives will be issued to conduct genuine offline spot rounds across West Bengal.",
     "We thank the authorities for their dedication to technical education in West Bengal and earnestly request your timely action to ensure full seat occupancy through transparent campus spot admissions.",
     "Protecting our state's premier engineering seats is a shared responsibility. We appeal to your esteemed leadership to authorize physical on-campus Decentralised Counselling and welcome our newest junior batch.",
     "We look forward to your proactive intervention to resolve this admission deadlock and ensure that every vacant seat in our institutions is allotted to a deserving candidate through genuine offline DC."
+  ],
+  alumni: [
+    "As alumni who carry the name and pride of our alma mater globally, we urge WBJEEB, DTE, and university administrations to protect the integrity of our engineering colleges and conduct physical on-campus Decentralised Counselling without further delay.",
+    "Preserving public engineering seats is vital for the future industrial and technological leadership of West Bengal. We respectfully appeal for prompt administrative action to authorize physical offline spot rounds across all institutions.",
+    "In deep gratitude to our alma mater and in support of aspiring engineers, we hope our representation will be granted immediate and favorable consideration by the highest authorities of the state.",
+    "We thank the state educational authorities for their continued service and earnestly request your decisive intervention to ensure zero seat wastage in our alma mater through physical decentralised counselling.",
+    "Every vacant seat in a government engineering institution is a loss of potential innovation. We respectfully petition the authorities to conduct offline Decentralised Counselling and uphold the legacy of our institutions.",
+    "We look forward to your benevolent leadership in notifying the physical offline Decentralised Counselling schedule, ensuring that meritorious candidates receive their rightful admission."
   ],
   guardian: [
     "As parents whose sole aspiration is to see our children receive quality higher education based on merit, we humbly beseech the authorities to intervene immediately and conduct physical offline Decentralised Counselling to save our children's academic year.",
@@ -311,7 +367,7 @@ const CONCLUSIONS_BY_ROLE = {
  * Over 100+ unique, rich combinations for every sender role
  */
 export function generateUniversalRepresentation({
-  role = 'candidate', // 'candidate' | 'senior' | 'guardian'
+  role = 'candidate', // 'candidate' | 'senior' | 'alumni' | 'guardian'
   studentName = '',
   rollOrRank = '',
   currentInstitute = '',
@@ -319,6 +375,9 @@ export function generateUniversalRepresentation({
   // Senior specific
   seniorCollege = '',
   seniorDeptYear = '',
+  // Alumni specific
+  alumniCollege = '',
+  alumniBatchDept = '',
   // Guardian specific
   guardianName = '',
   wardDetails = '',
@@ -372,11 +431,23 @@ export function generateUniversalRepresentation({
     signature = lines.join('\n');
   } else if (safeRole === 'senior') {
     const lines = [];
-    if (studentName.trim()) lines.push(`${studentName.trim()} (Senior Student / Alumnus)`);
-    else lines.push('Senior Engineering Student / Alumnus of West Bengal');
+    if (studentName.trim()) lines.push(`${studentName.trim()} (Senior Engineering Student)`);
+    else lines.push('Senior Engineering Undergraduate of West Bengal');
 
     if (seniorCollege.trim()) lines.push(`Institution / University: ${seniorCollege.trim()}`);
-    if (seniorDeptYear.trim()) lines.push(`Department & Academic Year: ${seniorDeptYear.trim()}`);
+    if (seniorDeptYear.trim()) lines.push(`Department & Year of Study: ${seniorDeptYear.trim()}`);
+    if (contactInfo.trim()) lines.push(`Contact Info: ${contactInfo.trim()}`);
+
+    signature = lines.join('\n');
+  } else if (safeRole === 'alumni') {
+    const lines = [];
+    if (studentName.trim()) lines.push(`${studentName.trim()} (Alumnus / Engineering Graduate)`);
+    else lines.push('Engineering Alumnus of West Bengal');
+
+    const col = alumniCollege.trim() || seniorCollege.trim();
+    if (col) lines.push(`Alma Mater: ${col}`);
+    const batch = alumniBatchDept.trim() || seniorDeptYear.trim();
+    if (batch) lines.push(`Department & Graduation Batch: ${batch}`);
     if (contactInfo.trim()) lines.push(`Contact Info: ${contactInfo.trim()}`);
 
     signature = lines.join('\n');
