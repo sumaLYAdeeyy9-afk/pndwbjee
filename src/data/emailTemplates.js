@@ -261,12 +261,12 @@ const DEMANDS_VARIANTS = [
 
   `We respectfully submit the following actionable demands for immediate consideration by the competent educational authorities:
 
-1️⃣ Conduction of genuine, physical Offline Decentralised Counselling (DC) directly at respective college/university premises;
-2️⃣ Prior publication of accurate, college-wise, department-wise, and category-wise vacancy lists;
-3️⃣ Execution of on-the-spot physical document verification and instant admission based strictly on GMR and applicable quotas;
-4️⃣ Reasonable advance intimation for candidate travel and logistical preparation;
-5️⃣ Open eligibility for all bonafide WBJEE candidates to participate in offline Decentralised Counselling; and
-6️⃣ Urgent notification of official dates and spot round procedures.`,
+1. Conduction of genuine, physical Offline Decentralised Counselling (DC) directly at respective college/university premises;
+2. Prior publication of accurate, college-wise, department-wise, and category-wise vacancy lists;
+3. Execution of on-the-spot physical document verification and instant admission based strictly on GMR and applicable quotas;
+4. Reasonable advance intimation for candidate travel and logistical preparation;
+5. Open eligibility for all bonafide WBJEE candidates to participate in offline Decentralised Counselling; and
+6. Urgent notification of official dates and spot round procedures.`,
 
   `To resolve the persistent admission deadlock and prevent seat wastage, we respectfully urge the administration to adopt the following measures:
 
