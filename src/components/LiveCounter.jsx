@@ -11,17 +11,17 @@ export default function LiveCounter({ stats }) {
       color: 'text-rose-400',
       bgColor: 'bg-rose-500/10',
       borderColor: 'border-rose-500/30',
-      desc: 'Submissions sent to WBJEEB, DTE, JU VC & Higher Ed'
+      desc: 'Submissions sent to WBJEEB, DTE, JU VC, FETSU & Higher Ed'
     },
     {
       id: 'desks',
-      label: 'Statutory Desks Targeted',
-      value: '8 Desks',
+      label: 'Targeted Authorities & Bodies',
+      value: '9 Desks & Bodies',
       icon: Building2,
       color: 'text-amber-400',
       bgColor: 'bg-amber-500/10',
       borderColor: 'border-amber-500/30',
-      desc: 'WBJEEB, DTE, JU VC, Higher Ed, DPI & CMO'
+      desc: 'WBJEEB, DTE, JU VC, FETSU, Higher Ed, DPI & CMO'
     },
     {
       id: 'demand',

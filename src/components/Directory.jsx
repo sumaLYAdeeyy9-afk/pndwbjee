@@ -28,6 +28,14 @@ export default function Directory() {
       link: 'http://www.jaduniv.edu.in'
     },
     {
+      title: "FETSU (Faculty of Engineering & Tech Students' Union, JU)",
+      authority: "Students' Union Office, Jadavpur University",
+      location: "FETSU Union Room, Subarna Jayanti Bhavan, JU Main Campus, Kolkata 700032",
+      phones: ['033-24146666', '033-24572222'],
+      emails: ['fetsujadavpuruniversity@gmail.com'],
+      link: 'http://www.jaduniv.edu.in'
+    },
+    {
       title: 'Higher Education Department & DPI',
       authority: 'Govt. of West Bengal, Bikash Bhavan (6th Floor)',
       location: 'Bikash Bhavan, 6th Floor, Salt Lake, Kolkata 700091',

@@ -7,6 +7,7 @@ export const PRIMARY_TO_RECIPIENTS = [
 export const CC_RECIPIENTS = [
   'dtewbgovt@gmail.com',
   'vc@jadavpuruniversity.in',
+  'fetsujadavpuruniversity@gmail.com',
   'techedndirectoratewb@gmail.com',
   'highereducationwb@gmail.com',
   'dpihedn@gmail.com',
@@ -34,6 +35,13 @@ export const OFFICIAL_RECIPIENTS = [
     name: 'Hon’ble Vice-Chancellor, Jadavpur University',
     email: 'vc@jadavpuruniversity.in',
     designation: 'Office of the Vice-Chancellor, Jadavpur University',
+    category: 'CC'
+  },
+  {
+    id: 'fetsu_ju',
+    name: 'FETSU (Faculty of Engg & Tech Students’ Union, JU)',
+    email: 'fetsujadavpuruniversity@gmail.com',
+    designation: 'Students’ Union Office, Faculty of Engineering & Technology, Jadavpur University',
     category: 'CC'
   },
   {
@@ -473,9 +481,10 @@ export function generateUniversalRepresentation({
 1. The Chairman / Competent Authority, West Bengal Joint Entrance Examinations Board (WBJEEB)
 2. The Director of Technical Education (DTE), Government of West Bengal
 3. The Vice-Chancellor, Jadavpur University
-4. The Principal Secretary, Department of Higher Education, Government of West Bengal
-5. The Director of Public Instruction (DPI), Government of West Bengal
-6. The Chief Minister's Office & Higher Education Wing, Government of West Bengal
+4. Faculty of Engineering and Technology Students' Union (FETSU), Jadavpur University
+5. The Principal Secretary, Department of Higher Education, Government of West Bengal
+6. The Director of Public Instruction (DPI), Government of West Bengal
+7. The Chief Minister's Office & Higher Education Wing, Government of West Bengal
 
 Subject: ${subject}
 

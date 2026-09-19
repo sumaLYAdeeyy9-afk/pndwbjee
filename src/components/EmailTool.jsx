@@ -974,8 +974,12 @@ export default function EmailTool({ onActionCompleted }) {
                   <span className="font-mono text-emerald-400 font-semibold">vc@jadavpuruniversity.in</span>
                 </div>
                 <div className="flex items-center justify-between">
+                  <span className="text-slate-400">CC (FETSU JU):</span>
+                  <span className="font-mono text-amber-400 font-semibold">fetsujadavpuruniversity@gmail.com</span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-slate-400">CC (State Desks):</span>
-                  <span className="text-slate-400 font-mono text-[10px]">DTE, Higher Ed, DPI, CM Desk</span>
+                  <span className="text-slate-400 font-mono text-[10px]">DTE, Higher Ed, DPI, CMO</span>
                 </div>
               </div>
             </div>
