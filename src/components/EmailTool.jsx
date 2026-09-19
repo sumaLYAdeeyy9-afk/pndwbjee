@@ -3,62 +3,86 @@ import confetti from 'canvas-confetti';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
   User, Hash, School, Phone, CheckCircle2, Globe,
-  RotateCcw, Edit3, AlertCircle, Shuffle, Ban
+  RotateCcw, Edit3, AlertCircle, Shuffle, GraduationCap,
+  Users, Building, BookOpen, Sparkles
 } from 'lucide-react';
 import { 
-  PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, 
-  generateUniqueEmail, buildMailtoUrl, buildGmailComposeUrl, 
+  PRIMARY_TO_RECIPIENTS, CC_RECIPIENTS, SENDER_ROLES,
+  generateUniversalRepresentation, buildMailtoUrl, buildGmailComposeUrl, 
   buildOutlookComposeUrl, buildYahooComposeUrl 
 } from '../data/emailTemplates';
 import { saveStudentSubmission } from '../lib/submissionStore';
 
 export default function EmailTool({ onActionCompleted }) {
-  // Mandatory candidate info state
+  // Selected Sender Persona ('candidate' | 'senior' | 'guardian')
+  const [activeRole, setActiveRole] = useState('candidate');
+
+  // Form states for all 3 sender personas
   const [formData, setFormData] = useState({
+    // Candidate fields
     studentName: '',
     rollOrRank: '',
     currentInstitute: '',
-    contactInfo: ''
+    contactInfo: '',
+    // Senior fields
+    seniorCollege: '',
+    seniorDeptYear: '',
+    // Guardian fields
+    guardianName: '',
+    wardDetails: '',
+    wardAllotment: ''
   });
 
   const [formErrors, setFormErrors] = useState({});
   const [showValidationAlert, setShowValidationAlert] = useState(false);
 
-  const nameInputRef = useRef(null);
-  const rollRankInputRef = useRef(null);
-  const collegeInputRef = useRef(null);
-  const phoneInputRef = useRef(null);
-
-  // Dynamic variation seed (starts on a random variation)
+  // Dynamic variation seed (starts on a random number between 1 and 100 on page open)
   const [variationSeed, setVariationSeed] = useState(() => {
-    return Math.floor(Math.random() * 10) + 1;
+    return Math.floor(Math.random() * 100) + 1;
   });
 
-  // Editable Subject & Body State initialized with dynamic variation
-  const [subject, setSubject] = useState(() => {
-    const initial = generateUniqueEmail({ seed: 1 });
-    return initial.subject;
-  });
-  const [body, setBody] = useState(() => {
-    const initial = generateUniqueEmail({ seed: 1 });
-    return initial.body;
-  });
+  // Input refs for automatic focus on validation error
+  const nameRef = useRef(null);
+  const rollRankRef = useRef(null);
+  const collegeRef = useRef(null);
+  const phoneRef = useRef(null);
+  const seniorCollegeRef = useRef(null);
+  const seniorDeptYearRef = useRef(null);
+  const guardianNameRef = useRef(null);
+  const wardDetailsRef = useRef(null);
+  const wardAllotmentRef = useRef(null);
+
+  // Editable Subject & Body State
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
   const [isManuallyEdited, setIsManuallyEdited] = useState(false);
 
   const [copiedType, setCopiedType] = useState(null); // 'all' | 'subject' | 'body'
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // Synchronize draft dynamically with formData and variationSeed unless manually edited
+  // Synchronize draft dynamically when role, formData, or variationSeed changes (unless manually edited)
   useEffect(() => {
     if (!isManuallyEdited) {
-      const generated = generateUniqueEmail({ 
+      const generated = generateUniversalRepresentation({ 
+        role: activeRole,
         ...formData, 
         seed: variationSeed 
       });
       setSubject(generated.subject);
       setBody(generated.body);
     }
-  }, [formData, variationSeed, isManuallyEdited]);
+  }, [activeRole, formData, variationSeed, isManuallyEdited]);
+
+  // Handle role tab change
+  const handleRoleChange = (newRole) => {
+    setActiveRole(newRole);
+    setFormErrors({});
+    setShowValidationAlert(false);
+    setIsManuallyEdited(false);
+    // Pick a new random seed for the new persona
+    const newSeed = Math.floor(Math.random() * 100) + 1;
+    setVariationSeed(newSeed);
+  };
 
   // Form input handler
   const handleInputChange = (e) => {
@@ -75,13 +99,37 @@ export default function EmailTool({ onActionCompleted }) {
     }
   };
 
-  // Quick select None handler
+  // Quick select None handler for Candidate
   const handleSelectNone = () => {
     setFormData(prev => ({ ...prev, currentInstitute: 'None' }));
     if (formErrors.currentInstitute) {
       setFormErrors(prev => {
         const next = { ...prev };
-        delete next[name];
+        delete next.currentInstitute;
+        return next;
+      });
+    }
+  };
+
+  // Quick select None handler for Guardian's ward
+  const handleSelectNoneWard = () => {
+    setFormData(prev => ({ ...prev, wardAllotment: 'None' }));
+    if (formErrors.wardAllotment) {
+      setFormErrors(prev => {
+        const next = { ...prev };
+        delete next.wardAllotment;
+        return next;
+      });
+    }
+  };
+
+  // Quick senior college selector helper
+  const handleQuickSeniorCollege = (collegeName) => {
+    setFormData(prev => ({ ...prev, seniorCollege: collegeName }));
+    if (formErrors.seniorCollege) {
+      setFormErrors(prev => {
+        const next = { ...prev };
+        delete next.seniorCollege;
         return next;
       });
     }
@@ -93,11 +141,14 @@ export default function EmailTool({ onActionCompleted }) {
     setIsManuallyEdited(true);
   };
 
-  // Shuffle to next unique subject line
+  // Shuffle to another unique representation out of 100+
   const handleShuffleDraft = () => {
-    const nextSeed = (variationSeed % 10) + 1;
+    let nextSeed = Math.floor(Math.random() * 100) + 1;
+    if (nextSeed === variationSeed) nextSeed = ((variationSeed + 7) % 100) + 1;
     setVariationSeed(nextSeed);
-    const generated = generateUniqueEmail({ 
+    
+    const generated = generateUniversalRepresentation({ 
+      role: activeRole,
       ...formData, 
       seed: nextSeed 
     });
@@ -106,9 +157,10 @@ export default function EmailTool({ onActionCompleted }) {
     setIsManuallyEdited(false);
   };
 
-  // Reset body to default template
+  // Reset body to default generated template
   const handleResetDraft = () => {
-    const generated = generateUniqueEmail({ 
+    const generated = generateUniversalRepresentation({ 
+      role: activeRole,
       ...formData, 
       seed: variationSeed 
     });
@@ -117,20 +169,49 @@ export default function EmailTool({ onActionCompleted }) {
     setIsManuallyEdited(false);
   };
 
-  // Validate that all required candidate fields are filled
+  // Validate that all required fields for active role are filled
   const validateForm = () => {
     const errors = {};
-    if (!formData.studentName.trim() || formData.studentName.trim().length < 2) {
-      errors.studentName = 'Full Name is mandatory';
-    }
-    if (!formData.rollOrRank.trim() || formData.rollOrRank.trim().length < 2) {
-      errors.rollOrRank = 'WBJEE Roll Number or Rank (GMR) is mandatory';
-    }
-    if (!formData.currentInstitute.trim()) {
-      errors.currentInstitute = 'Please enter your allotted college or select "None"';
-    }
-    if (!formData.contactInfo.trim() || formData.contactInfo.trim().length < 6) {
-      errors.contactInfo = 'Valid Contact Number is mandatory';
+
+    if (activeRole === 'candidate') {
+      if (!formData.studentName.trim() || formData.studentName.trim().length < 2) {
+        errors.studentName = 'Full Name is mandatory';
+      }
+      if (!formData.rollOrRank.trim() || formData.rollOrRank.trim().length < 2) {
+        errors.rollOrRank = 'WBJEE Roll Number or Rank (GMR) is mandatory';
+      }
+      if (!formData.currentInstitute.trim()) {
+        errors.currentInstitute = 'Please enter your allotted college or select "None"';
+      }
+      if (!formData.contactInfo.trim() || formData.contactInfo.trim().length < 6) {
+        errors.contactInfo = 'Valid Contact Number is mandatory';
+      }
+    } else if (activeRole === 'senior') {
+      if (!formData.studentName.trim() || formData.studentName.trim().length < 2) {
+        errors.studentName = 'Your Full Name is mandatory';
+      }
+      if (!formData.seniorCollege.trim() || formData.seniorCollege.trim().length < 2) {
+        errors.seniorCollege = 'Institution / University Name is mandatory';
+      }
+      if (!formData.seniorDeptYear.trim() || formData.seniorDeptYear.trim().length < 2) {
+        errors.seniorDeptYear = 'Department & Academic Year is mandatory';
+      }
+      if (!formData.contactInfo.trim() || formData.contactInfo.trim().length < 6) {
+        errors.contactInfo = 'Contact Number or Email is mandatory';
+      }
+    } else if (activeRole === 'guardian') {
+      if (!formData.guardianName.trim() || formData.guardianName.trim().length < 2) {
+        errors.guardianName = 'Parent / Guardian Full Name is mandatory';
+      }
+      if (!formData.wardDetails.trim() || formData.wardDetails.trim().length < 2) {
+        errors.wardDetails = 'Ward’s Name and WBJEE Roll/Rank is mandatory';
+      }
+      if (!formData.wardAllotment.trim()) {
+        errors.wardAllotment = 'Please enter ward’s allotted college or select "None"';
+      }
+      if (!formData.contactInfo.trim() || formData.contactInfo.trim().length < 6) {
+        errors.contactInfo = 'Valid Contact Number is mandatory';
+      }
     }
 
     setFormErrors(errors);
@@ -138,10 +219,22 @@ export default function EmailTool({ onActionCompleted }) {
     if (Object.keys(errors).length > 0) {
       setShowValidationAlert(true);
       // Focus first error field
-      if (errors.studentName && nameInputRef.current) nameInputRef.current.focus();
-      else if (errors.rollOrRank && rollRankInputRef.current) rollRankInputRef.current.focus();
-      else if (errors.currentInstitute && collegeInputRef.current) collegeInputRef.current.focus();
-      else if (errors.contactInfo && phoneInputRef.current) phoneInputRef.current.focus();
+      if (activeRole === 'candidate') {
+        if (errors.studentName && nameRef.current) nameRef.current.focus();
+        else if (errors.rollOrRank && rollRankRef.current) rollRankRef.current.focus();
+        else if (errors.currentInstitute && collegeRef.current) collegeRef.current.focus();
+        else if (errors.contactInfo && phoneRef.current) phoneRef.current.focus();
+      } else if (activeRole === 'senior') {
+        if (errors.studentName && nameRef.current) nameRef.current.focus();
+        else if (errors.seniorCollege && seniorCollegeRef.current) seniorCollegeRef.current.focus();
+        else if (errors.seniorDeptYear && seniorDeptYearRef.current) seniorDeptYearRef.current.focus();
+        else if (errors.contactInfo && phoneRef.current) phoneRef.current.focus();
+      } else if (activeRole === 'guardian') {
+        if (errors.guardianName && guardianNameRef.current) guardianNameRef.current.focus();
+        else if (errors.wardDetails && wardDetailsRef.current) wardDetailsRef.current.focus();
+        else if (errors.wardAllotment && wardAllotmentRef.current) wardAllotmentRef.current.focus();
+        else if (errors.contactInfo && phoneRef.current) phoneRef.current.focus();
+      }
       return false;
     }
 
@@ -157,14 +250,28 @@ export default function EmailTool({ onActionCompleted }) {
 
   // Record submission in database, notify parent counter & trigger UI celebration
   const recordSubmissionAndCelebrate = () => {
+    let nameToSave = formData.studentName.trim();
+    let rollToSave = formData.rollOrRank.trim();
+    let collegeToSave = formData.currentInstitute.trim();
+
+    if (activeRole === 'senior') {
+      nameToSave = `${formData.studentName.trim()} (Senior)`;
+      rollToSave = formData.seniorDeptYear.trim();
+      collegeToSave = formData.seniorCollege.trim();
+    } else if (activeRole === 'guardian') {
+      nameToSave = `${formData.guardianName.trim()} (Guardian)`;
+      rollToSave = formData.wardDetails.trim();
+      collegeToSave = formData.wardAllotment.trim();
+    }
+
     saveStudentSubmission({
-      studentName: formData.studentName.trim(),
-      rollNumber: formData.rollOrRank.trim(),
-      rankGmr: formData.rollOrRank.trim(),
-      currentInstitute: formData.currentInstitute.trim(),
+      studentName: nameToSave || 'Bonafide Citizen',
+      rollNumber: rollToSave || 'Specified in Body',
+      rankGmr: rollToSave || '',
+      currentInstitute: collegeToSave || '',
       contactInfo: formData.contactInfo.trim(),
       subject: subject,
-      templateType: 'offline_dc',
+      templateType: `offline_dc_${activeRole}`,
       isAnonymous: false
     });
 
@@ -224,7 +331,7 @@ export default function EmailTool({ onActionCompleted }) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-8">
+        <div className="text-center max-w-3xl mx-auto mb-6">
           <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-wider mb-3">
             <Mail className="w-4 h-4 text-rose-500" />
             <span>Universal Representation Dispatcher</span>
@@ -236,8 +343,78 @@ export default function EmailTool({ onActionCompleted }) {
             Send Official Email Representation to <span className="text-rose-500">WBJEEB, DTE & JU VC</span>
           </h2>
           <p className="text-slate-300 text-xs sm:text-sm">
-            Fill your mandatory candidate credentials to generate your bonafide representation and dispatch directly to WBJEEB, DTE, JU VC, and Higher Education Desks.
+            Select your profile below. The representation letter, tone, and legal perspective will automatically calibrate to who is sending.
           </p>
+        </div>
+
+        {/* PROFILE / ROLE SELECTOR TABS */}
+        <div className="max-w-3xl mx-auto mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
+            
+            {/* 1. Candidate Tab */}
+            <button
+              type="button"
+              onClick={() => handleRoleChange('candidate')}
+              className={`p-3 rounded-xl flex items-center space-x-3 transition-all cursor-pointer text-left ${
+                activeRole === 'candidate'
+                  ? 'bg-gradient-to-r from-rose-600 to-rose-500 text-white shadow-lg shadow-rose-950 ring-1 ring-rose-400'
+                  : 'bg-slate-950/60 text-slate-300 hover:bg-slate-800/80 border border-slate-800'
+              }`}
+            >
+              <div className={`p-2 rounded-lg ${activeRole === 'candidate' ? 'bg-white/20' : 'bg-slate-800 text-rose-400'}`}>
+                <GraduationCap className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-bold text-xs sm:text-sm block">WBJEE Candidate</span>
+                <span className={`text-[11px] ${activeRole === 'candidate' ? 'text-rose-100' : 'text-slate-400'}`}>
+                  1st Year Aspirant
+                </span>
+              </div>
+            </button>
+
+            {/* 2. Senior / Alumni Tab */}
+            <button
+              type="button"
+              onClick={() => handleRoleChange('senior')}
+              className={`p-3 rounded-xl flex items-center space-x-3 transition-all cursor-pointer text-left ${
+                activeRole === 'senior'
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-lg shadow-amber-950 ring-1 ring-amber-400'
+                  : 'bg-slate-950/60 text-slate-300 hover:bg-slate-800/80 border border-slate-800'
+              }`}
+            >
+              <div className={`p-2 rounded-lg ${activeRole === 'senior' ? 'bg-white/20' : 'bg-slate-800 text-amber-400'}`}>
+                <School className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-bold text-xs sm:text-sm block">Senior / Alumni</span>
+                <span className={`text-[11px] ${activeRole === 'senior' ? 'text-amber-100' : 'text-slate-400'}`}>
+                  2nd/3rd/4th Yr & Graduate
+                </span>
+              </div>
+            </button>
+
+            {/* 3. Parent / Guardian Tab */}
+            <button
+              type="button"
+              onClick={() => handleRoleChange('guardian')}
+              className={`p-3 rounded-xl flex items-center space-x-3 transition-all cursor-pointer text-left ${
+                activeRole === 'guardian'
+                  ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-950 ring-1 ring-emerald-400'
+                  : 'bg-slate-950/60 text-slate-300 hover:bg-slate-800/80 border border-slate-800'
+              }`}
+            >
+              <div className={`p-2 rounded-lg ${activeRole === 'guardian' ? 'bg-white/20' : 'bg-slate-800 text-emerald-400'}`}>
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-bold text-xs sm:text-sm block">Parent / Guardian</span>
+                <span className={`text-[11px] ${activeRole === 'guardian' ? 'text-emerald-100' : 'text-slate-400'}`}>
+                  Family & Concerned Citizen
+                </span>
+              </div>
+            </button>
+
+          </div>
         </div>
 
         {/* Validation Error Banner */}
@@ -245,138 +422,357 @@ export default function EmailTool({ onActionCompleted }) {
           <div className="max-w-5xl mx-auto mb-6 p-4 rounded-2xl bg-rose-500/15 border border-rose-500/50 text-rose-300 flex items-center space-x-3 text-xs sm:text-sm shadow-xl animate-shake">
             <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
             <div>
-              <strong className="font-bold text-white block">Mandatory Candidate Information Required:</strong>
-              <span>Please fill in all candidate details below (Name, WBJEE Roll Number / Rank, Allotted College & Contact Number) before dispatching.</span>
+              <strong className="font-bold text-white block">Mandatory Information Required:</strong>
+              <span>Please fill all required fields marked with an asterisk (*) before dispatching your representation.</span>
             </div>
           </div>
         )}
 
-        {/* 1. Candidate Details & Live Draft Editor Grid (FIRST) */}
+        {/* 1. Dynamic Candidate Details & Live Draft Editor Grid (FIRST) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-5xl mx-auto mb-8">
           
-          {/* Left Column: Mandatory Candidate Info Form */}
+          {/* Left Column: Dynamic Persona Form */}
           <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+            
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center space-x-2 text-rose-400 font-bold text-sm">
-                <User className="w-4 h-4" />
-                <span>Candidate Information (Mandatory)</span>
+              <div className="flex items-center space-x-2 font-bold text-sm text-white">
+                {activeRole === 'candidate' && <GraduationCap className="w-4 h-4 text-rose-400" />}
+                {activeRole === 'senior' && <School className="w-4 h-4 text-amber-400" />}
+                {activeRole === 'guardian' && <Users className="w-4 h-4 text-emerald-400" />}
+                <span>
+                  {activeRole === 'candidate' && 'Candidate Verification Details'}
+                  {activeRole === 'senior' && 'Senior / Alumni Details'}
+                  {activeRole === 'guardian' && 'Guardian & Ward Details'}
+                </span>
               </div>
               <span className="text-[10px] px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-bold">
-                Required *
+                Mandatory *
               </span>
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed">
-              All representations carry verified candidate credentials to maintain official legal validity and merit standing.
+              {activeRole === 'candidate' && 'Your credentials will be attached to the official representation signature to certify bonafide candidate status.'}
+              {activeRole === 'senior' && 'Representing your university and branch in solidarity with incoming juniors against seat wastage.'}
+              {activeRole === 'guardian' && 'Representing as parents and guardians to appeal against unjust seat-blocking and financial distress.'}
             </p>
 
             <div className="space-y-3.5 pt-1">
-              {/* Name */}
+              
+              {/* ================= CANDIDATE FIELDS ================= */}
+              {activeRole === 'candidate' && (
+                <>
+                  {/* Candidate Name */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      Candidate Full Name <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={nameRef}
+                        type="text"
+                        name="studentName"
+                        value={formData.studentName}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Rahul Sen"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.studentName 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.studentName && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.studentName}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Unified Roll / Rank */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      WBJEE 2026 Roll Number / Rank (GMR) <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <Hash className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={rollRankRef}
+                        type="text"
+                        name="rollOrRank"
+                        value={formData.rollOrRank}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Roll: 26010045892 or GMR: 12450"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.rollOrRank 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.rollOrRank && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.rollOrRank}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Allotted College with quick None button */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-semibold text-slate-300">
+                        Allotted College <span className="text-rose-400">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleSelectNone}
+                        className={`text-[11px] px-2 py-0.5 rounded-md font-bold transition-colors cursor-pointer ${
+                          formData.currentInstitute.trim().toLowerCase() === 'none'
+                            ? 'bg-rose-600 text-white shadow-sm'
+                            : 'bg-slate-800 text-rose-400 hover:bg-slate-700 border border-slate-700'
+                        }`}
+                      >
+                        Select "None" (Unallotted)
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <School className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={collegeRef}
+                        type="text"
+                        name="currentInstitute"
+                        value={formData.currentInstitute}
+                        onChange={handleInputChange}
+                        placeholder="e.g. KGEC / HIT / or click None above"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.currentInstitute 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.currentInstitute && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.currentInstitute}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* ================= SENIOR / ALUMNI FIELDS ================= */}
+              {activeRole === 'senior' && (
+                <>
+                  {/* Senior Name */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      Your Full Name <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={nameRef}
+                        type="text"
+                        name="studentName"
+                        value={formData.studentName}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Anirban Mukherjee"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.studentName 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.studentName && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.studentName}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Senior College / University */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      College / University Name <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <Building className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={seniorCollegeRef}
+                        type="text"
+                        name="seniorCollege"
+                        value={formData.seniorCollege}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Jadavpur University / KGEC / CU"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.seniorCollege 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                        }`}
+                      />
+                    </div>
+                    {/* Quick College Pills */}
+                    <div className="flex flex-wrap gap-1.5 mt-1.5">
+                      {['Jadavpur University', 'Calcutta University', 'KGEC Kalyani', 'JGEC Jalpaiguri'].map((col) => (
+                        <button
+                          key={col}
+                          type="button"
+                          onClick={() => handleQuickSeniorCollege(col)}
+                          className="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors cursor-pointer"
+                        >
+                          {col}
+                        </button>
+                      ))}
+                    </div>
+                    {formErrors.seniorCollege && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.seniorCollege}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Department & Year / Alumni Status */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      Department & Academic Year / Alumni Status <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <BookOpen className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={seniorDeptYearRef}
+                        type="text"
+                        name="seniorDeptYear"
+                        value={formData.seniorDeptYear}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 3rd Year CSE / 2nd Year ME / Alumni 2025"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.seniorDeptYear 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.seniorDeptYear && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.seniorDeptYear}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* ================= GUARDIAN FIELDS ================= */}
+              {activeRole === 'guardian' && (
+                <>
+                  {/* Guardian Name */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      Parent / Guardian Full Name <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={guardianNameRef}
+                        type="text"
+                        name="guardianName"
+                        value={formData.guardianName}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Subir Kumar Dey"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.guardianName 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.guardianName && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.guardianName}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Ward Details */}
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1">
+                      Ward’s Name & WBJEE Roll No. / Rank (GMR) <span className="text-rose-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <Hash className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={wardDetailsRef}
+                        type="text"
+                        name="wardDetails"
+                        value={formData.wardDetails}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Sourav Dey (Roll: 26010045892 / GMR 8420)"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.wardDetails 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.wardDetails && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.wardDetails}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Ward Allotment with None button */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs font-semibold text-slate-300">
+                        Ward's Allotted College <span className="text-rose-400">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleSelectNoneWard}
+                        className={`text-[11px] px-2 py-0.5 rounded-md font-bold transition-colors cursor-pointer ${
+                          formData.wardAllotment.trim().toLowerCase() === 'none'
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'bg-slate-800 text-emerald-400 hover:bg-slate-700 border border-slate-700'
+                        }`}
+                      >
+                        Select "None" (Unallotted)
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <School className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        ref={wardAllotmentRef}
+                        type="text"
+                        name="wardAllotment"
+                        value={formData.wardAllotment}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Unallotted / None / GCETTS"
+                        className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
+                          formErrors.wardAllotment 
+                            ? 'border-rose-500 ring-1 ring-rose-500' 
+                            : 'border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                        }`}
+                      />
+                    </div>
+                    {formErrors.wardAllotment && (
+                      <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
+                        {formErrors.wardAllotment}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Contact Number (Common to all roles) */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Candidate Full Name <span className="text-rose-400">*</span>
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    ref={nameInputRef}
-                    type="text"
-                    name="studentName"
-                    value={formData.studentName}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Rahul Sen"
-                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
-                      formErrors.studentName 
-                        ? 'border-rose-500 ring-1 ring-rose-500' 
-                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-                    }`}
-                  />
-                </div>
-                {formErrors.studentName && (
-                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
-                    {formErrors.studentName}
-                  </span>
-                )}
-              </div>
-
-              {/* Unified WBJEE Roll Number / Rank (GMR) */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  WBJEE 2026 Roll Number / Rank (GMR) <span className="text-rose-400">*</span>
-                </label>
-                <div className="relative">
-                  <Hash className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    ref={rollRankInputRef}
-                    type="text"
-                    name="rollOrRank"
-                    value={formData.rollOrRank}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Roll: 26010045892 or GMR: 12450"
-                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
-                      formErrors.rollOrRank 
-                        ? 'border-rose-500 ring-1 ring-rose-500' 
-                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-                    }`}
-                  />
-                </div>
-                {formErrors.rollOrRank && (
-                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
-                    {formErrors.rollOrRank}
-                  </span>
-                )}
-              </div>
-
-              {/* Allotted College with quick "None" selection */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Allotted College <span className="text-rose-400">*</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleSelectNone}
-                    className={`text-[11px] px-2 py-0.5 rounded-md font-bold transition-colors cursor-pointer ${
-                      formData.currentInstitute.trim().toLowerCase() === 'none'
-                        ? 'bg-rose-600 text-white shadow-sm'
-                        : 'bg-slate-800 text-rose-400 hover:bg-slate-700 border border-slate-700'
-                    }`}
-                  >
-                    Select "None" (Unallotted)
-                  </button>
-                </div>
-                <div className="relative">
-                  <School className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    ref={collegeInputRef}
-                    type="text"
-                    name="currentInstitute"
-                    value={formData.currentInstitute}
-                    onChange={handleInputChange}
-                    placeholder="e.g. KGEC / HIT / or click None above"
-                    className={`w-full pl-9 pr-3 py-2 bg-slate-950 border rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none ${
-                      formErrors.currentInstitute 
-                        ? 'border-rose-500 ring-1 ring-rose-500' 
-                        : 'border-slate-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500'
-                    }`}
-                  />
-                </div>
-                {formErrors.currentInstitute && (
-                  <span className="text-[11px] text-rose-400 font-medium mt-0.5 block">
-                    {formErrors.currentInstitute}
-                  </span>
-                )}
-              </div>
-
-              {/* Contact Number */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Contact Number <span className="text-rose-400">*</span>
+                  Contact Number / Phone <span className="text-rose-400">*</span>
                 </label>
                 <div className="relative">
                   <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
-                    ref={phoneInputRef}
+                    ref={phoneRef}
                     type="text"
                     name="contactInfo"
                     value={formData.contactInfo}
@@ -429,7 +825,11 @@ export default function EmailTool({ onActionCompleted }) {
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3 mb-3">
                 <div className="flex items-center space-x-2">
                   <Edit3 className="w-4 h-4 text-rose-400" />
-                  <span className="text-sm font-bold text-white">Universal Representation Draft Preview</span>
+                  <span className="text-sm font-bold text-white">Live Representation Draft</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-amber-300 font-bold border border-slate-700 flex items-center space-x-1">
+                    <Sparkles className="w-3 h-3 text-amber-400" />
+                    <span>Variant #{variationSeed} of 100+</span>
+                  </span>
                   {isManuallyEdited && (
                     <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">
                       Customized
@@ -438,21 +838,22 @@ export default function EmailTool({ onActionCompleted }) {
                 </div>
 
                 <div className="flex items-center space-x-2">
+                  {/* Shuffle Representation Button */}
                   <button
                     type="button"
                     onClick={handleShuffleDraft}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-rose-400 text-xs font-semibold flex items-center space-x-1.5 transition-colors border border-slate-700 cursor-pointer"
-                    title="Shuffle Subject Line"
+                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600/30 to-amber-600/30 hover:from-rose-600/50 hover:to-amber-600/50 text-white text-xs font-bold flex items-center space-x-1.5 transition-all border border-rose-500/40 shadow-sm cursor-pointer active:scale-95"
+                    title="Shuffle between 100+ diverse AI-crafted representation templates"
                   >
-                    <Shuffle className="w-3.5 h-3.5" />
-                    <span>Shuffle Subject</span>
+                    <Shuffle className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Shuffle Draft (100+)</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleResetDraft}
-                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1 transition-colors border border-slate-700 cursor-pointer"
-                    title="Reset to Original Template"
+                    className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center space-x-1 transition-colors border border-slate-700 cursor-pointer"
+                    title="Reset to Template"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Reset</span>
@@ -464,7 +865,7 @@ export default function EmailTool({ onActionCompleted }) {
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-semibold text-slate-400">
-                    Subject Line:
+                    Subject Line (Calibrated to {activeRole.toUpperCase()}):
                   </label>
                   <button
                     type="button"
