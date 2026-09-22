@@ -53,6 +53,16 @@ export const TARGET_HANDLES = [
   },
   {
     id: 'target-5',
+    name: 'Puja Mehra',
+    handle: 'pujamehra',
+    category: 'journalist',
+    role: 'Journalist & Author',
+    priority: 'high',
+    bio: 'Senior journalist, columnist & author covering policy, public interest, and institutional governance.',
+    tags: ['Media', 'Journalist', 'Governance']
+  },
+  {
+    id: 'target-6',
     name: 'Indrajit Kundu',
     handle: 'iindrojit',
     category: 'journalist',
@@ -62,7 +72,7 @@ export const TARGET_HANDLES = [
     tags: ['Media', 'Editor']
   },
   {
-    id: 'target-6',
+    id: 'target-7',
     name: 'Manogya Loiwal',
     handle: 'manogyaloiwal',
     category: 'journalist',
@@ -72,7 +82,7 @@ export const TARGET_HANDLES = [
     tags: ['Media', 'Editor', 'National']
   },
   {
-    id: 'target-7',
+    id: 'target-8',
     name: 'Ritayan Basu',
     handle: 'ritayanbasu',
     category: 'journalist',
@@ -84,7 +94,7 @@ export const TARGET_HANDLES = [
 
   // 2. Education Advocates & RTI Activists
   {
-    id: 'target-8',
+    id: 'target-9',
     name: 'Saurav Das',
     handle: 'SauravDassss',
     category: 'advocate',
@@ -94,7 +104,7 @@ export const TARGET_HANDLES = [
     tags: ['Advocate', 'RTI', 'Transparency']
   },
   {
-    id: 'target-9',
+    id: 'target-10',
     name: 'Adv. Anubha Shrivastava Sahai',
     handle: 'anubha1812',
     category: 'advocate',
@@ -104,7 +114,7 @@ export const TARGET_HANDLES = [
     tags: ['Advocate', 'Legal', 'SupremeCourt']
   },
   {
-    id: 'target-10',
+    id: 'target-11',
     name: 'Dr. Vivek Pandey',
     handle: 'Vivekpandey21',
     category: 'advocate',
@@ -114,7 +124,7 @@ export const TARGET_HANDLES = [
     tags: ['Advocate', 'RTI', 'StudentRights']
   },
   {
-    id: 'target-11',
+    id: 'target-12',
     name: 'Adv. Alakh Alok Srivastava',
     handle: 'advocate_alakh',
     category: 'advocate',
@@ -126,7 +136,7 @@ export const TARGET_HANDLES = [
 
   // 3. Student & Youth Leaders
   {
-    id: 'target-12',
+    id: 'target-13',
     name: 'Abhijeet Dipke',
     handle: 'abhijeet_dipke',
     category: 'student',
@@ -136,7 +146,7 @@ export const TARGET_HANDLES = [
     tags: ['Youth', 'DigitalActivist', 'CJP', 'Viral']
   },
   {
-    id: 'target-13',
+    id: 'target-14',
     name: 'Cockroach Janta Party (CJP)',
     handle: 'CJP_2029',
     category: 'student',
@@ -146,7 +156,7 @@ export const TARGET_HANDLES = [
     tags: ['Youth', 'Movement', 'CJP', 'Students']
   },
   {
-    id: 'target-14',
+    id: 'target-15',
     name: 'Minakshi Mukherjee',
     handle: 'MinakshiMukher8',
     category: 'student',
@@ -158,7 +168,7 @@ export const TARGET_HANDLES = [
 
   // 4. Politicians & Leaders
   {
-    id: 'target-15',
+    id: 'target-16',
     name: 'Kunal Ghosh',
     handle: 'KunalGhoshAgain',
     category: 'politician',
@@ -168,7 +178,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'Spokesperson', 'Active']
   },
   {
-    id: 'target-16',
+    id: 'target-17',
     name: 'Saket Gokhale',
     handle: 'SaketGokhale',
     category: 'politician',
@@ -178,7 +188,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MP', 'RajyaSabha']
   },
   {
-    id: 'target-17',
+    id: 'target-18',
     name: 'Derek O\'Brien',
     handle: 'derekobrienmp',
     category: 'politician',
@@ -188,7 +198,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MP']
   },
   {
-    id: 'target-18',
+    id: 'target-19',
     name: 'Mohammed Salim',
     handle: 'salimdotcomrade',
     category: 'politician',
@@ -198,7 +208,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'Leadership']
   },
   {
-    id: 'target-19',
+    id: 'target-20',
     name: 'Dr. Sukanta Majumdar',
     handle: 'DrSukantaBJP',
     category: 'politician',
@@ -208,7 +218,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'UnionMinister', 'MP']
   },
   {
-    id: 'target-20',
+    id: 'target-21',
     name: 'Agnimitra Paul',
     handle: 'paulagnimitra1',
     category: 'politician',
@@ -218,7 +228,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MLA']
   },
   {
-    id: 'target-21',
+    id: 'target-22',
     name: 'Amit Malviya',
     handle: 'amitmalviya',
     category: 'politician',
@@ -228,7 +238,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'National']
   },
   {
-    id: 'target-22',
+    id: 'target-23',
     name: 'Suvendu Adhikari',
     handle: 'SuvenduWB',
     category: 'politician',
