@@ -15,7 +15,11 @@ import {
   Flame,
   AlertTriangle,
   ArrowRight,
-  Mail
+  Mail,
+  MessageCircle,
+  Share2,
+  Send,
+  Users
 } from 'lucide-react';
 import { TARGET_HANDLES } from '../data/targetHandles';
 import { generateUniqueReply } from '../data/dynamicReplyGenerator';
@@ -278,6 +282,59 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
   // Total global strikes across all targets
   const totalGlobalStrikes = Object.values(strikeCounts).reduce((a, b) => a + Number(b || 0), 0);
 
+  // WhatsApp & Social Mobilization Forwarding
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const strikePortalUrl = typeof window !== 'undefined' && !window.location.origin.includes('localhost')
+    ? `${window.location.origin}/strike`
+    : 'https://wbjee.playnodice.com/strike';
+
+  const strikeShareText = `🔥 *WBJEE 2026 DIGITAL STRIKE HUB IS LIVE!* ⚡
+
+Deserving students are stranded while vacant engineering seats in JU, CU & Government colleges are blocked by the flawed online portal!
+
+🎯 *We are taking our voice directly to Top Journalists, SC Lawyers & Leaders on X (Twitter):*
+✅ Pre-drafted 200+ unique student grievance messages
+✅ 1-Click copy & auto-redirect to verified target accounts
+✅ Official campaign poster attachment
+✅ Anti-spam automated queue protection
+
+👉 *Join the Strike & Tweet Your Demands in 10 Seconds:*
+${strikePortalUrl}
+
+Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants right now! Every single reply counts! ✊
+
+#JusticeForWBJEE #WBJEEOfflineDC #WBJEE2026`;
+
+  const handleWhatsAppForward = () => {
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(strikeShareText)}`;
+    window.open(url, '_blank');
+    confetti({
+      particleCount: 45,
+      spread: 60,
+      origin: { y: 0.8 },
+      colors: ['#25D366', '#128C7E', '#f59e0b', '#ffffff']
+    });
+  };
+
+  const handleCopyStrikeShareText = () => {
+    navigator.clipboard.writeText(strikeShareText).then(() => {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2500);
+      confetti({
+        particleCount: 35,
+        spread: 50,
+        origin: { y: 0.8 },
+        colors: ['#25D366', '#ffffff']
+      });
+    });
+  };
+
+  const handleTelegramForward = () => {
+    const url = `https://t.me/share/url?url=${encodeURIComponent(strikePortalUrl)}&text=${encodeURIComponent(strikeShareText)}`;
+    window.open(url, '_blank');
+  };
+
   // --------------------------------------------------------------------------
   // FULL PAGE LOCKOUT VIEW (SMARTPHONE & DESKTOP PERFECTED)
   // --------------------------------------------------------------------------
@@ -385,6 +442,14 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
 
           {/* Helpful actions while waiting */}
           <div className="w-full space-y-2.5 pt-1">
+            <button
+              onClick={handleWhatsAppForward}
+              className="w-full min-h-[48px] py-3 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-black font-black text-xs transition-all flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950/60 cursor-pointer active:scale-[0.99]"
+            >
+              <MessageCircle className="w-4 h-4 text-black fill-black" />
+              <span>Forward Strike Hub to WhatsApp Groups</span>
+            </button>
+
             <button
               onClick={() => handleDownloadPoster(false)}
               className="w-full min-h-[48px] py-3 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 font-bold text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.99]"
@@ -646,6 +711,70 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
             </div>
           </div>
 
+        </div>
+
+        {/* MOBILIZE ON WHATSAPP & TELEGRAM SECTION (BOTTOM OF STRIKE PAGE) */}
+        <div className="bg-gradient-to-br from-[#07130b] via-neutral-950 to-black border border-emerald-500/30 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 text-left relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="flex items-center space-x-2 text-emerald-400 font-extrabold text-[11px] sm:text-xs uppercase tracking-wider">
+            <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>Mobilize On WhatsApp & Telegram</span>
+          </div>
+
+          <div className="space-y-1">
+            <h3 className="text-base sm:text-lg font-black text-white leading-snug">
+              Forward Strike Hub to Batches & Groups
+            </h3>
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              Every student who joins strengthens our voice on Twitter/X. Share this ready-to-forward message to coaching batches, Telegram channels, and status updates!
+            </p>
+          </div>
+
+          {/* Formatted Message Preview Box */}
+          <div className="bg-black/80 border border-emerald-900/60 rounded-2xl p-3.5 sm:p-4 text-xs font-mono text-neutral-300 leading-relaxed space-y-1.5 shadow-inner select-all">
+            <p className="text-emerald-400 font-bold text-[11px] sm:text-xs">🔥 WBJEE 2026 DIGITAL STRIKE HUB IS LIVE! ⚡</p>
+            <p className="text-neutral-300 text-[11px] sm:text-xs">Deserving students are stranded while vacant engineering seats in JU, CU & Govt colleges are blocked by flawed online DC!</p>
+            <p className="text-neutral-400 text-[11px]">👉 Join & Tweet in 10s: <span className="text-emerald-300 underline font-bold">{strikePortalUrl}</span></p>
+            <p className="text-neutral-500 text-[10px]">#JusticeForWBJEE #WBJEEOfflineDC #WBJEE2026</p>
+          </div>
+
+          {/* Action Buttons Grid */}
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
+            <button
+              onClick={handleWhatsAppForward}
+              className="w-full sm:flex-1 min-h-[46px] py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-black font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950/60 transition-all cursor-pointer active:scale-[0.98]"
+            >
+              <MessageCircle className="w-4 h-4 text-black fill-black shrink-0" />
+              <span>Share to WhatsApp</span>
+            </button>
+
+            <button
+              onClick={handleCopyStrikeShareText}
+              className="w-full sm:flex-1 min-h-[46px] py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-100 border border-neutral-700/80 font-bold text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98]"
+            >
+              {shareCopied ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="text-emerald-400">Copied Full Text! ✓</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 text-neutral-400 shrink-0" />
+                  <span>Copy WhatsApp Text</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleTelegramForward}
+              className="w-full sm:w-auto min-h-[46px] py-3 px-4 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold text-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer active:scale-[0.98]"
+              title="Share on Telegram"
+            >
+              <Send className="w-4 h-4 shrink-0" />
+              <span>Telegram</span>
+            </button>
+          </div>
         </div>
 
       </main>
