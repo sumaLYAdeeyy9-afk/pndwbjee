@@ -951,51 +951,63 @@ ${strikePortalUrl}
             </div>
 
             {/* STEP 1 ACTION: DIRECT BUTTON TO GO TO X */}
-            <div className="pt-1">
+            <div className="pt-1 space-y-2">
               <button
                 onClick={() => {
                   setHasOpenedX(true);
                   window.open(`https://x.com/${pendingToken.handle}`, '_blank', 'noopener,noreferrer');
                 }}
-                className={`w-full min-h-[48px] py-3 px-4 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-lg active:scale-[0.98] ${
+                className={`w-full min-h-[50px] py-3.5 px-4 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-lg active:scale-[0.98] ${
                   hasOpenedX
-                    ? 'bg-neutral-800 text-sky-400 border border-sky-500/40'
-                    : 'bg-sky-500 hover:bg-sky-400 text-black shadow-sky-950/50'
+                    ? 'bg-neutral-800 hover:bg-neutral-750 text-sky-400 border border-sky-500/40'
+                    : 'bg-sky-500 hover:bg-sky-400 text-black shadow-sky-950/50 animate-pulse'
                 }`}
               >
                 <span>{hasOpenedX ? `Re-open @${pendingToken.handle} on X` : `👉 Step 1: Open @${pendingToken.handle} on X`}</span>
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-4 h-4 shrink-0" />
               </button>
             </div>
 
-            {/* STEP 2 ACTION: CONFIRMATION ONCE POSTED */}
-            <div className="border-t border-neutral-900 pt-3.5 space-y-2.5">
-              <p className="text-[11px] text-neutral-400 font-semibold">
-                Once you have replied on X, confirm below to record your strike:
-              </p>
+            {/* STEP 2 ACTION: UNLOCKED ONLY AFTER STEP 1 IS CLICKED */}
+            {hasOpenedX ? (
+              <div className="border-t border-neutral-900 pt-3.5 space-y-2.5 animate-fade-in">
+                <p className="text-[11px] text-emerald-400 font-bold flex items-center justify-center space-x-1.5 text-center">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>Profile opened on X! Once you have posted your reply with the poster, confirm below:</span>
+                </p>
 
-              <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                  <button
+                    onClick={() => handleConfirmPosted(false)}
+                    className="w-full sm:w-1/3 min-h-[44px] py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 font-semibold text-xs transition-all cursor-pointer"
+                  >
+                    Cancel / Back
+                  </button>
+
+                  <button
+                    onClick={() => handleConfirmPosted(true)}
+                    className="w-full sm:w-2/3 min-h-[46px] py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black text-xs sm:text-sm transition-all cursor-pointer shadow-lg shadow-emerald-950/60 active:scale-[0.98] flex items-center justify-center space-x-1.5"
+                  >
+                    <Check className="w-4 h-4 text-black shrink-0" />
+                    <span>Yes, I Have Posted My Reply! 🚀</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-center space-x-1.5 text-[10px] text-neutral-500">
+                  <ShieldCheck className="w-3 h-3 text-neutral-500 shrink-0" />
+                  <span>Confirming records your reply live across all devices & starts 10m timer</span>
+                </div>
+              </div>
+            ) : (
+              <div className="pt-2 text-center">
                 <button
                   onClick={() => handleConfirmPosted(false)}
-                  className="w-full sm:w-1/3 min-h-[44px] py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 font-semibold text-xs transition-all cursor-pointer"
+                  className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer py-1.5 px-4 rounded-lg hover:bg-neutral-900"
                 >
-                  Cancel / Back
-                </button>
-
-                <button
-                  onClick={() => handleConfirmPosted(true)}
-                  className="w-full sm:w-2/3 min-h-[46px] py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black text-xs sm:text-sm transition-all cursor-pointer shadow-lg shadow-emerald-950/60 active:scale-[0.98] flex items-center justify-center space-x-1.5"
-                >
-                  <Check className="w-4 h-4 text-black shrink-0" />
-                  <span>Yes, I Have Posted My Reply! 🚀</span>
+                  Cancel and go back
                 </button>
               </div>
-
-              <div className="flex items-center justify-center space-x-1.5 text-[10px] text-neutral-500">
-                <ShieldCheck className="w-3 h-3 text-neutral-500 shrink-0" />
-                <span>Confirming records your reply live across all devices & starts 10m timer</span>
-              </div>
-            </div>
+            )}
 
           </div>
         </div>
