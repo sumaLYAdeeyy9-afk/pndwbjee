@@ -41,16 +41,7 @@ export const TARGET_HANDLES = [
     bio: 'High youth and student viewership across West Bengal media networks.',
     tags: ['Media', 'PrimeTime', 'Youth']
   },
-  {
-    id: 'target-4',
-    name: 'Suman De',
-    handle: 'SumanDe16',
-    category: 'journalist',
-    role: 'Senior Executive Editor & Anchor',
-    priority: 'high',
-    bio: 'Chief editor & prime-time anchor leading major news discourse in Bengal.',
-    tags: ['Media', 'Editor', 'Lead']
-  },
+
   {
     id: 'target-5',
     name: 'Kamalika Sengupta',
