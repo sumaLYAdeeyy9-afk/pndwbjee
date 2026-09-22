@@ -72,16 +72,18 @@ export async function fetchAllSubmissions() {
         .order('submitted_at', { ascending: false });
 
       if (data && !error && data.length > 0) {
-        // Map supabase records to uniform format
-        const mapped = data.map(item => ({
-          id: item.id || 'sb_' + item.submitted_at,
-          studentName: item.student_name,
-          rollNumber: item.roll_number,
-          rankGmr: item.rank_gmr || '',
-          currentInstitute: item.current_institute || '',
-          contactInfo: item.contact_info || '',
-          timestamp: item.submitted_at
-        }));
+        // Map supabase records to uniform format (excluding internal dispatch strike events)
+        const mapped = data
+          .filter(item => item.student_name !== 'DISPATCH_STRIKE')
+          .map(item => ({
+            id: item.id || 'sb_' + item.submitted_at,
+            studentName: item.student_name,
+            rollNumber: item.roll_number,
+            rankGmr: item.rank_gmr || '',
+            currentInstitute: item.current_institute || '',
+            contactInfo: item.contact_info || '',
+            timestamp: item.submitted_at
+          }));
         return mapped;
       }
     } catch (e) {
