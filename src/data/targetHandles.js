@@ -120,7 +120,7 @@ export const TARGET_HANDLES = [
   {
     id: 'target-17',
     name: 'Dr. Vivek Pandey',
-    handle: 'Dr_Vivek_pandey',
+    handle: 'Vivekpandey21',
     category: 'advocate',
     role: 'RTI Activist & Healthcare/Education Advocate',
     priority: 'critical',
