@@ -14,7 +14,8 @@ import {
   Lock,
   Flame,
   AlertTriangle,
-  ArrowRight
+  ArrowRight,
+  Mail
 } from 'lucide-react';
 import { TARGET_HANDLES } from '../data/targetHandles';
 import { generateUniqueReply } from '../data/dynamicReplyGenerator';
@@ -30,7 +31,7 @@ const LOCKOUT_KEY = 'wbjee_strike_lockout_until';
 const STRUCK_TARGETS_KEY = 'wbjee_struck_targets_all';
 const POSTER_DOWNLOADED_KEY = 'wbjee_poster_downloaded_v2';
 
-export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
+export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigateToEmail }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [struckIds, setStruckIds] = useState(() => {
     try {
@@ -352,6 +353,34 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
               <span>Next in queue: <strong className="text-neutral-300">@{currentTarget.handle}</strong></span>
               <span className="text-amber-400 font-bold">⚡ {totalGlobalStrikes.toLocaleString()} Total Strikes</span>
             </div>
+          </div>
+
+          {/* Action while waiting: Email Higher Authorities */}
+          <div className="w-full bg-gradient-to-br from-rose-950/40 via-neutral-900/95 to-black border border-rose-500/40 rounded-2xl p-4 sm:p-5 text-left space-y-3 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-28 h-28 bg-rose-500/10 rounded-full blur-xl pointer-events-none" />
+            
+            <div className="flex items-center space-x-2 text-rose-400 font-extrabold text-[11px] sm:text-xs tracking-wider uppercase">
+              <Mail className="w-4 h-4 text-rose-400 shrink-0 animate-pulse" />
+              <span>While You Wait • Take Action</span>
+            </div>
+
+            <div className="space-y-1">
+              <h4 className="text-white font-extrabold text-sm sm:text-base leading-snug">
+                Haven't mailed higher authorities yet?
+              </h4>
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                Send an official legal representation to the Higher Education Dept, WBJEEB Chairman, JU, CU & State Engineering Universities in just 1 tap!
+              </p>
+            </div>
+
+            <button
+              onClick={onNavigateToEmail || onBackToMain}
+              className="w-full min-h-[46px] py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-black text-xs sm:text-sm transition-all flex items-center justify-center space-x-2 shadow-lg shadow-rose-950/60 cursor-pointer active:scale-[0.98]"
+            >
+              <Mail className="w-4 h-4 shrink-0" />
+              <span>Email Higher Authorities Now</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+            </button>
           </div>
 
           {/* Helpful actions while waiting */}

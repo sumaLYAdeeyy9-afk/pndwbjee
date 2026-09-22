@@ -186,6 +186,19 @@ export default function App() {
     }
   };
 
+  const navigateToEmail = () => {
+    setCurrentPage('main');
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', window.location.pathname);
+    }
+    setTimeout(() => {
+      const element = document.getElementById('email-tool');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   const scrollToSection = (id) => {
     if (currentPage !== 'main') {
       navigateToMain();
@@ -216,6 +229,7 @@ export default function App() {
       {currentPage === 'strike' ? (
         <TargetDispatchPage 
           onBackToMain={navigateToMain}
+          onNavigateToEmail={navigateToEmail}
           onActionCompleted={handleActionCompleted}
         />
       ) : (
