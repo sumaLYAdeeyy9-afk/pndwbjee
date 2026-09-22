@@ -52,16 +52,7 @@ export const TARGET_HANDLES = [
     bio: 'National and regional bureau coverage on Bengal governance and student issues.',
     tags: ['Media', 'National', 'Bureau']
   },
-  {
-    id: 'target-6',
-    name: 'Suryagni Roy',
-    handle: 'suryagniroy',
-    category: 'journalist',
-    role: 'Senior Special Correspondent',
-    priority: 'high',
-    bio: 'Investigative reporting and rapid coverage of breaking regional affairs.',
-    tags: ['Media', 'Correspondent']
-  },
+
   {
     id: 'target-7',
     name: 'Pooja Mehta',
