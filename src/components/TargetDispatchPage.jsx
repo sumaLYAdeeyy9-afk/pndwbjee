@@ -759,7 +759,7 @@ Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants 
 
           <div className="space-y-1">
             <h3 className="text-base sm:text-lg font-black text-white leading-snug">
-              Forward Strike Hub to Batches & Groups
+              Forward Campaign to Batches & Groups
             </h3>
             <p className="text-xs text-neutral-300 leading-relaxed">
               Every student who joins strengthens our voice on Twitter/X. Share this ready-to-forward message to coaching batches, Telegram channels, and status updates!
@@ -768,7 +768,7 @@ Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants 
 
           {/* Formatted Message Preview Box */}
           <div className="bg-black/80 border border-emerald-900/60 rounded-2xl p-3.5 sm:p-4 text-xs font-mono text-neutral-300 leading-relaxed space-y-1.5 shadow-inner select-all">
-            <p className="text-emerald-400 font-bold text-[11px] sm:text-xs">🔥 WBJEE 2026 DIGITAL STRIKE HUB IS LIVE! ⚡</p>
+            <p className="text-emerald-400 font-bold text-[11px] sm:text-xs">🔥 WBJEE 2026 STUDENT ADVOCACY & TWITTER CAMPAIGN IS LIVE! ⚡</p>
             <p className="text-neutral-300 text-[11px] sm:text-xs">Deserving students are stranded while vacant engineering seats in JU, CU & Govt colleges are blocked by flawed online DC!</p>
             <p className="text-neutral-400 text-[11px]">👉 Join & Tweet in 10s: <span className="text-emerald-300 underline font-bold">{strikePortalUrl}</span></p>
             <p className="text-neutral-500 text-[10px]">#JusticeForWBJEE #WBJEEOfflineDC #WBJEE2026</p>
@@ -855,48 +855,119 @@ Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants 
         </div>
       )}
 
-      {/* PERSISTENT CONFIRMATION POPUP MODAL (SURVIVES RELOADS) */}
+      {/* PERSISTENT STEP-BY-STEP GUIDANCE POPUP MODAL */}
       {pendingToken && !isLocked && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-5 sm:space-y-6 shadow-2xl animate-scale-in text-center">
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-3xl p-5 sm:p-7 max-w-lg w-full space-y-5 shadow-2xl animate-scale-in text-left my-auto">
             
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto text-2xl shadow-inner">
-              💬
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-lg font-black text-white">
-                Have you posted your message?
-              </h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                Did you reply to <strong className="text-white">@{pendingToken.handle}</strong>'s latest post on X and attach the campaign poster?
-              </p>
-            </div>
-
-            <div className="bg-neutral-950 p-3.5 sm:p-4 rounded-2xl border border-neutral-900 text-left space-y-1.5 text-xs text-neutral-300">
-              <div className="flex items-center space-x-2 text-amber-400 font-semibold text-[11px]">
-                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                <span>Anti-Spam 10-Minute Lockout</span>
+            {/* Header with Target Info */}
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3.5">
+              <div className="flex items-center space-x-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-lg shrink-0">
+                  ⚡
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-white leading-tight">
+                    How to Post Your Reply on X
+                  </h3>
+                  <p className="text-xs text-neutral-400">
+                    Replying to <span className="text-amber-400 font-bold">@{pendingToken.handle}</span> ({pendingToken.name})
+                  </p>
+                </div>
               </div>
-              <p className="text-[11px] text-neutral-400">
-                Clicking <strong>"Yes, I Posted"</strong> records your strike (+1 Live Counter) and locks the strike hub for <strong>10 minutes</strong>.
-              </p>
+
+              <a
+                href={`https://x.com/${pendingToken.handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold text-xs flex items-center space-x-1 transition-all cursor-pointer shrink-0"
+              >
+                <span>Open Profile</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-2.5 sm:gap-3">
-              <button
-                onClick={() => handleConfirmPosted(false)}
-                className="w-full sm:w-1/2 min-h-[46px] py-3.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 font-bold text-xs transition-all cursor-pointer"
-              >
-                Not Yet / Retry
-              </button>
+            {/* Visual Step-by-Step Instructions */}
+            <div className="space-y-2.5">
+              <div className="flex items-start space-x-3 p-3 rounded-2xl bg-neutral-950 border border-neutral-900">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                  1
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-bold text-white flex items-center space-x-1.5">
+                    <span>Message Copied to Clipboard</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  </p>
+                  <p className="text-[11px] text-neutral-400 leading-relaxed">
+                    Your unique 280-character demand draft has been copied to your device clipboard automatically.
+                  </p>
+                </div>
+              </div>
 
-              <button
-                onClick={() => handleConfirmPosted(true)}
-                className="w-full sm:w-1/2 min-h-[46px] py-3.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-xs transition-all cursor-pointer shadow-lg active:scale-[0.98]"
+              <div className="flex items-start space-x-3 p-3 rounded-2xl bg-amber-950/20 border border-amber-500/30">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                  2
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-bold text-amber-300">
+                    💬 Tap "Reply" to the Latest Post of @{pendingToken.handle}
+                  </p>
+                  <p className="text-[11px] text-neutral-300 leading-relaxed">
+                    When you land on their X profile, find their <strong>top / most recent post</strong> and tap the <strong>Reply (💬)</strong> button under it.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3 p-3 rounded-2xl bg-neutral-950 border border-neutral-900">
+                <div className="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                  3
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-xs font-bold text-white">
+                    Paste Draft + Attach Campaign Poster
+                  </p>
+                  <p className="text-[11px] text-neutral-400 leading-relaxed">
+                    Paste your copied text, click the image icon to attach the <strong>downloaded poster</strong> from your gallery/files, and tap <strong>Post/Reply</strong>!
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Action Link / Re-open X button */}
+            <div className="pt-1">
+              <a
+                href={`https://x.com/${pendingToken.handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full min-h-[44px] py-2.5 px-4 rounded-xl bg-[#1DA1F2]/15 hover:bg-[#1DA1F2]/25 text-[#1DA1F2] border border-[#1DA1F2]/40 font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer active:scale-[0.99]"
               >
-                Yes, I Posted! 🚀
-              </button>
+                <span>Go to @{pendingToken.handle}'s Profile on X</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {/* Confirmation & Anti-spam footer */}
+            <div className="border-t border-neutral-900 pt-4 space-y-3">
+              <div className="flex flex-col sm:flex-row items-center gap-2.5">
+                <button
+                  onClick={() => handleConfirmPosted(false)}
+                  className="w-full sm:w-1/3 min-h-[44px] py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 font-semibold text-xs transition-all cursor-pointer"
+                >
+                  Not Yet / Cancel
+                </button>
+
+                <button
+                  onClick={() => handleConfirmPosted(true)}
+                  className="w-full sm:w-2/3 min-h-[46px] py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-black text-xs sm:text-sm transition-all cursor-pointer shadow-lg shadow-emerald-950/60 active:scale-[0.98] flex items-center justify-center space-x-1.5"
+                >
+                  <span>Yes, I Posted on X! 🚀</span>
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center space-x-1.5 text-[10px] text-neutral-500">
+                <ShieldCheck className="w-3 h-3 text-neutral-500 shrink-0" />
+                <span>Confirming records your reply live and activates the 10-minute cooldown</span>
+              </div>
             </div>
 
           </div>
