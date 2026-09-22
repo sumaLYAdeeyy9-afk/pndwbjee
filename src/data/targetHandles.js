@@ -16,10 +16,10 @@ export const TARGET_HANDLES = [
     name: 'Jagannath Chattopadhyay',
     handle: 'iamJagannathC',
     category: 'politician',
-    role: 'State General Secretary, WB',
+    role: 'Education Minister / State Leadership, WB',
     priority: 'critical',
-    bio: 'State General Secretary, West Bengal; active communicator on student issues, meritocracy, and state governance.',
-    tags: ['Leadership', 'Bengal', 'Advocacy', 'TopPriority']
+    bio: 'Education Minister / State Leader; active communicator on student issues, meritocracy, and state governance.',
+    tags: ['EducationMinister', 'Leadership', 'Bengal', 'Advocacy', 'TopPriority']
   },
 
   // 2. Journalists & Media
@@ -254,10 +254,10 @@ export const TARGET_HANDLES = [
     name: 'Suvendu Adhikari',
     handle: 'SuvenduWB',
     category: 'politician',
-    role: 'Senior Leader & MLA, WB',
+    role: 'Chief Minister / Senior Leader & MLA, WB',
     priority: 'critical',
-    bio: 'Massive digital reach; frequently amplifies West Bengal governance and student grievances.',
-    tags: ['Politician', 'MLA', 'WB']
+    bio: 'Chief Minister / Senior Leader; massive digital reach, frequently amplifies West Bengal student grievances.',
+    tags: ['ChiefMinister', 'Leadership', 'MLA', 'WB']
   }
 ];
 

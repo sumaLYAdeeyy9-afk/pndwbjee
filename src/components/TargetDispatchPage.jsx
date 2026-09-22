@@ -618,8 +618,27 @@ Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants 
                     <ExternalLink className="w-3 h-3 opacity-60" />
                   </a>
                   <span className="text-neutral-600 hidden sm:inline">•</span>
-                  <span className="text-[11px] sm:text-xs text-neutral-400 truncate block sm:inline">{currentTarget.role}</span>
+                  <span className="text-[11px] sm:text-xs text-neutral-300 font-semibold truncate block sm:inline">{currentTarget.role}</span>
                 </div>
+
+                {currentTarget.tags && currentTarget.tags.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    {currentTarget.tags.map((tag, idx) => (
+                      <span 
+                        key={idx} 
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                          tag === 'EducationMinister' 
+                            ? 'bg-amber-950/70 border-amber-500/40 text-amber-300 font-bold' 
+                            : tag === 'ChiefMinister'
+                            ? 'bg-rose-950/70 border-rose-500/40 text-rose-300 font-bold'
+                            : 'bg-neutral-900 border-neutral-800 text-neutral-400'
+                        }`}
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
