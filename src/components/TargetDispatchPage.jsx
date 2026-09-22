@@ -9,58 +9,36 @@ import {
   ChevronRight, 
   ChevronLeft, 
   ArrowRight,
-  Sparkles
+  Download,
+  Image as ImageIcon,
+  CheckCircle2
 } from 'lucide-react';
 import { TARGET_HANDLES } from '../data/targetHandles';
 import { generateUniqueReply, checkTextCustomized } from '../data/dynamicReplyGenerator';
 
-function getTodayDateKey() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-}
-
 export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
-  const todayKey = getTodayDateKey();
-  const storageKey = `wbjee_strike_completed_${todayKey}`;
-
-  // Completed IDs for today from localStorage
-  const [completedIds, setCompletedIds] = useState(() => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [struckIds, setStruckIds] = useState(() => {
     try {
-      const saved = localStorage.getItem(storageKey);
+      const saved = localStorage.getItem('wbjee_struck_targets_all');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
 
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [originalDraft, setOriginalDraft] = useState('');
   const [editedText, setEditedText] = useState('');
   const [copied, setCopied] = useState(false);
+  const [posterDownloaded, setPosterDownloaded] = useState(false);
   const [showStepModal, setShowStepModal] = useState(false);
   const [lastStruckTarget, setLastStruckTarget] = useState(null);
-  const [viewCompleted, setViewCompleted] = useState(false);
 
-  // Active uncompleted targets queue
-  const activeQueue = useMemo(() => {
-    return TARGET_HANDLES.filter(t => !completedIds.includes(t.id));
-  }, [completedIds]);
+  // All 41 targets remain visible and accessible in order (NO vanishing)
+  const targets = TARGET_HANDLES;
+  const currentTarget = targets[currentIndex] || targets[0];
 
-  // Completed targets
-  const completedTargets = useMemo(() => {
-    return TARGET_HANDLES.filter(t => completedIds.includes(t.id));
-  }, [completedIds]);
-
-  // Clamp index
-  useEffect(() => {
-    if (currentIndex >= activeQueue.length && activeQueue.length > 0) {
-      setCurrentIndex(activeQueue.length - 1);
-    }
-  }, [activeQueue.length, currentIndex]);
-
-  const currentTarget = activeQueue[currentIndex] || activeQueue[0] || null;
-
-  // Generate initial draft
+  // Generate initial draft when target changes
   useEffect(() => {
     if (currentTarget) {
       const generated = generateUniqueReply();
@@ -85,10 +63,22 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
     setCopied(false);
   };
 
-  // 1-Click Strike Action
+  // Poster Download Handler
+  const handleDownloadPoster = () => {
+    const link = document.createElement('a');
+    link.href = '/poster.jpeg';
+    link.download = 'WBJEE_Decentralised_Counselling_Petition_Poster.jpeg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setPosterDownloaded(true);
+  };
+
+  // Primary Strike Action: Copy & Open X Profile
   const handleCopyAndStrike = () => {
     if (!currentTarget || !customizationStatus.isValid) return;
 
+    // 1. Copy text to clipboard
     navigator.clipboard.writeText(editedText).catch(() => {});
     setCopied(true);
     setLastStruckTarget(currentTarget);
@@ -98,14 +88,14 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
       particleCount: 50,
       spread: 60,
       origin: { y: 0.8 },
-      colors: ['#ffffff', '#a3a3a3', '#38bdf8']
+      colors: ['#ffffff', '#a3a3a3', '#38bdf8', '#f43f5e']
     });
 
-    // Mark completed today
-    const newCompleted = [...new Set([...completedIds, currentTarget.id])];
-    setCompletedIds(newCompleted);
+    // Mark as struck for user reference (without vanishing the card)
+    const newStruck = [...new Set([...struckIds, currentTarget.id])];
+    setStruckIds(newStruck);
     try {
-      localStorage.setItem(storageKey, JSON.stringify(newCompleted));
+      localStorage.setItem('wbjee_struck_targets_all', JSON.stringify(newStruck));
     } catch (e) {
       console.error(e);
     }
@@ -114,7 +104,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
       onActionCompleted('tweets');
     }
 
-    // Open target profile on X
+    // 2. Open target profile in a new tab
     window.open(`https://x.com/${currentTarget.handle}`, '_blank', 'noopener,noreferrer');
 
     setTimeout(() => {
@@ -122,256 +112,224 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
     }, 2500);
   };
 
-  // Re-strike a completed target
-  const handleReStrike = (target) => {
-    const updated = completedIds.filter(id => id !== target.id);
-    setCompletedIds(updated);
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(updated));
-    } catch (e) {
-      console.error(e);
-    }
-    setViewCompleted(false);
-    setCurrentIndex(0);
-    const generated = generateUniqueReply();
-    setOriginalDraft(generated.text);
-    setEditedText(generated.text);
-  };
-
-  const totalAll = TARGET_HANDLES.length;
-  const doneCount = completedIds.length;
+  const totalAll = targets.length;
+  const struckCount = struckIds.length;
+  const isCurrentStruck = struckIds.includes(currentTarget.id);
 
   return (
     <div className="min-h-screen bg-black text-neutral-100 flex flex-col font-sans selection:bg-neutral-800 selection:text-white">
       
-      {/* Pitch-Black Minimal Header */}
-      <header className="border-b border-neutral-900 bg-black/90 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+      {/* Pitch-Black Minimal Top Header */}
+      <header className="border-b border-neutral-900 bg-black/95 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={onBackToMain}
-            className="flex items-center space-x-1 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            className="flex items-center space-x-1.5 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back</span>
+            <span>Main Portal</span>
           </button>
 
-          <div className="text-xs font-semibold tracking-wider text-neutral-300">
-            TARGET STRIKE
+          <div className="text-xs font-bold tracking-widest text-neutral-300 uppercase">
+            TARGET STRIKE HUB
           </div>
 
-          <button
-            onClick={() => setViewCompleted(!viewCompleted)}
-            className="text-xs font-mono text-neutral-400 hover:text-white transition-colors cursor-pointer"
-          >
-            <span className="text-white font-bold">{doneCount}</span> / {totalAll} done
-          </button>
+          <div className="text-xs font-mono text-neutral-400">
+            <span className="text-white font-bold">{struckCount}</span> / {totalAll} struck
+          </div>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-xl mx-auto px-4 py-8 w-full flex flex-col justify-center">
+      {/* Main Spacious Container */}
+      <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 py-8 w-full flex flex-col justify-center space-y-6">
 
-        {!viewCompleted ? (
-          <>
-            {currentTarget ? (
-              <div className="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-5 animate-fade-in">
-                
-                {/* Target Profile Info */}
-                <div className="flex items-center justify-between border-b border-neutral-900 pb-4">
-                  <div className="flex items-center space-x-3.5">
-                    <div className="w-11 h-11 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center font-bold text-base text-neutral-200 shrink-0">
-                      {currentTarget.name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <h2 className="font-bold text-base text-white">
-                          {currentTarget.name}
-                        </h2>
-                      </div>
-                      <a
-                        href={`https://x.com/${currentTarget.handle}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-mono text-neutral-400 hover:text-white transition-colors inline-flex items-center space-x-1"
-                      >
-                        <span>@{currentTarget.handle}</span>
-                        <ExternalLink className="w-2.5 h-2.5 opacity-60" />
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Minimal Card Nav */}
-                  <div className="flex items-center space-x-1">
-                    <button
-                      onClick={() => setCurrentIndex(prev => (prev > 0 ? prev - 1 : activeQueue.length - 1))}
-                      className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer"
-                      title="Previous target"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setCurrentIndex(prev => (prev < activeQueue.length - 1 ? prev + 1 : 0))}
-                      className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer flex items-center space-x-1 text-xs"
-                      title="Skip / Next target"
-                    >
-                      <span className="text-[11px]">Skip</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Message Box */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-medium text-neutral-400 tracking-wide">
-                      HUMANIZED DRAFT
-                    </label>
-                    <button
-                      onClick={handleShuffleDraft}
-                      className="text-[11px] text-neutral-400 hover:text-white flex items-center space-x-1 transition-colors cursor-pointer"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      <span>Roll new text</span>
-                    </button>
-                  </div>
-
-                  <textarea
-                    value={editedText}
-                    onChange={(e) => setEditedText(e.target.value)}
-                    rows={5}
-                    maxLength={280}
-                    className={`w-full p-3.5 rounded-xl bg-black border text-xs leading-relaxed focus:outline-none transition-all resize-none ${
-                      !customizationStatus.isValid
-                        ? 'border-neutral-800 text-neutral-300 focus:border-neutral-600'
-                        : isOverLimit
-                          ? 'border-red-500 text-white'
-                          : 'border-neutral-700 text-white focus:border-white'
-                    }`}
-                    placeholder="Type or edit your genuine message here..."
-                  />
-
-                  <div className="flex items-center justify-between text-[11px] px-0.5">
-                    <span className={customizationStatus.isValid ? 'text-neutral-400' : 'text-neutral-500'}>
-                      {customizationStatus.reason}
-                    </span>
-                    <span className={`font-mono ${isOverLimit ? 'text-red-400 font-bold' : 'text-neutral-500'}`}>
-                      {charCount} / 280
-                    </span>
-                  </div>
-                </div>
-
-                {/* Single Primary Action Button */}
-                <div className="pt-2">
-                  <button
-                    onClick={handleCopyAndStrike}
-                    disabled={!customizationStatus.isValid || isOverLimit}
-                    className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer ${
-                      customizationStatus.isValid && !isOverLimit
-                        ? 'bg-white text-black hover:bg-neutral-200 active:scale-[0.99]'
-                        : 'bg-neutral-900 text-neutral-600 border border-neutral-800/80 cursor-not-allowed'
-                    }`}
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-4 h-4 text-black" />
-                        <span>Copied! Opening @{currentTarget.handle} on X...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        <span>Copy & Open @{currentTarget.handle} on X</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <p className="text-[11px] text-center text-neutral-500">
-                  Card vanishes once struck until tomorrow. Edit a few words to unlock.
-                </p>
-
+        {/* Poster Download & Attachment Directive Banner */}
+        <div className="bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+          <div className="flex items-start space-x-3.5">
+            <div className="w-16 h-16 rounded-xl overflow-hidden border border-neutral-800 shrink-0 bg-neutral-900">
+              <img 
+                src="/poster.jpeg" 
+                alt="WBJEE Campaign Poster" 
+                className="w-full h-full object-cover object-top hover:scale-105 transition-transform"
+              />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-black uppercase text-white tracking-wider">
+                  Official Campaign Poster
+                </span>
+                <span className="text-[10px] bg-neutral-900 border border-neutral-800 text-neutral-300 px-2 py-0.5 rounded-full font-mono">
+                  #JusticeForWBJEE
+                </span>
               </div>
+              <p className="text-xs text-neutral-400 leading-relaxed max-w-md">
+                <strong>Crucial:</strong> Download this poster and attach it to your reply on X to maximize visibility and grab public attention!
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleDownloadPoster}
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-xs transition-all flex items-center space-x-1.5 shrink-0 cursor-pointer shadow-md active:scale-[0.98]"
+          >
+            {posterDownloaded ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-black" />
+                <span>Poster Downloaded</span>
+              </>
             ) : (
-              /* All Done Screen */
-              <div className="bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-8 text-center space-y-4 shadow-2xl animate-fade-in">
-                <div className="w-12 h-12 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mx-auto text-xl text-white">
-                  ✓
-                </div>
-                <h3 className="text-lg font-bold text-white">
-                  All Targets Done for Today
-                </h3>
-                <p className="text-xs text-neutral-400 max-w-sm mx-auto leading-relaxed">
-                  You have struck all available targets today. Check back tomorrow or check completed profiles if they published new posts.
-                </p>
-                <button
-                  onClick={() => setViewCompleted(true)}
-                  className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-all cursor-pointer"
-                >
-                  View Completed Targets
-                </button>
-              </div>
+              <>
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Poster</span>
+              </>
             )}
-          </>
-        ) : (
-          /* Completed Targets List */
-          <div className="space-y-4 animate-fade-in">
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-900">
-              <span className="text-xs font-bold text-neutral-300">
-                Struck Targets Today ({completedTargets.length})
+          </button>
+        </div>
+
+        {/* ENLARGED ACTIVE TARGET FLASHCARD */}
+        <div className="bg-[#0a0a0a] border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+          
+          {/* Target Account Header & Card Navigation */}
+          <div className="flex items-start justify-between border-b border-neutral-900 pb-5">
+            <div className="flex items-center space-x-4">
+              <div className="w-14 h-14 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center font-black text-xl text-white shrink-0 shadow-inner">
+                {currentTarget.name.charAt(0)}
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h2 className="font-extrabold text-lg sm:text-xl text-white">
+                    {currentTarget.name}
+                  </h2>
+                  {isCurrentStruck && (
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                      ✓ Struck
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <a
+                    href={`https://x.com/${currentTarget.handle}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs sm:text-sm font-mono text-neutral-400 hover:text-white transition-colors inline-flex items-center space-x-1"
+                  >
+                    <span>@{currentTarget.handle}</span>
+                    <ExternalLink className="w-3 h-3 opacity-60" />
+                  </a>
+                  <span className="text-neutral-600">•</span>
+                  <span className="text-xs text-neutral-400">{currentTarget.role}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Target Card Navigator */}
+            <div className="flex items-center space-x-2 shrink-0">
+              <span className="text-xs font-mono text-neutral-500 hidden sm:inline-block mr-1">
+                {currentIndex + 1} of {totalAll}
               </span>
               <button
-                onClick={() => setViewCompleted(false)}
-                className="text-xs text-neutral-400 hover:text-white"
+                onClick={() => setCurrentIndex(prev => (prev > 0 ? prev - 1 : targets.length - 1))}
+                className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 transition-all cursor-pointer"
+                title="Previous target"
               >
-                ← Back to Deck
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setCurrentIndex(prev => (prev < targets.length - 1 ? prev + 1 : 0))}
+                className="px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 transition-all cursor-pointer flex items-center space-x-1 text-xs font-semibold"
+                title="Next target"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* ENLARGED HUMANIZED COMPOSER BOX */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center space-x-1.5">
+                <span>Personalized Grievance Message</span>
+              </label>
+              <button
+                onClick={handleShuffleDraft}
+                className="text-xs text-neutral-400 hover:text-white flex items-center space-x-1.5 transition-colors cursor-pointer bg-neutral-900 px-2.5 py-1 rounded-lg border border-neutral-800"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>Roll new text</span>
               </button>
             </div>
 
-            {completedTargets.length > 0 ? (
-              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                {completedTargets.map(target => (
-                  <div
-                    key={target.id}
-                    className="bg-[#0a0a0a] border border-neutral-800/80 p-3.5 rounded-xl flex items-center justify-between"
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-white block">
-                        {target.name}
-                      </span>
-                      <span className="text-[11px] font-mono text-neutral-400">
-                        @{target.handle}
-                      </span>
-                    </div>
+            {/* Large Textarea */}
+            <textarea
+              value={editedText}
+              onChange={(e) => setEditedText(e.target.value)}
+              rows={6}
+              maxLength={280}
+              className={`w-full p-4 sm:p-5 rounded-2xl bg-black border text-xs sm:text-sm leading-relaxed focus:outline-none transition-all resize-none font-sans ${
+                !customizationStatus.isValid
+                  ? 'border-neutral-800 text-neutral-300 focus:border-neutral-600'
+                  : isOverLimit
+                    ? 'border-red-500 text-white'
+                    : 'border-neutral-700 text-white focus:border-white'
+              }`}
+              placeholder="Type or customize your humanized appeal here..."
+            />
 
-                    <button
-                      onClick={() => handleReStrike(target)}
-                      className="px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-semibold text-neutral-200 transition-all cursor-pointer"
-                    >
-                      Re-Strike
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center text-neutral-500 text-xs bg-[#0a0a0a] rounded-xl border border-neutral-900">
-                No targets completed yet today.
-              </div>
-            )}
+            <div className="flex items-center justify-between text-xs px-1">
+              <span className={customizationStatus.isValid ? 'text-neutral-400' : 'text-neutral-500'}>
+                {customizationStatus.reason}
+              </span>
+              <span className={`font-mono font-bold ${isOverLimit ? 'text-red-400' : 'text-neutral-400'}`}>
+                {charCount} / 280
+              </span>
+            </div>
           </div>
-        )}
+
+          {/* SINGLE PROMINENT ACTION BUTTON */}
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={handleCopyAndStrike}
+              disabled={!customizationStatus.isValid || isOverLimit}
+              className={`w-full py-4 px-6 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-2xl ${
+                customizationStatus.isValid && !isOverLimit
+                  ? 'bg-white text-black hover:bg-neutral-200 active:scale-[0.99]'
+                  : 'bg-neutral-900 text-neutral-600 border border-neutral-800/80 cursor-not-allowed'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 text-black" />
+                  <span>Copied! Opening @{currentTarget.handle} on X...</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>Copy Message & Open @{currentTarget.handle} on X</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+
+            <div className="bg-neutral-950 p-3.5 rounded-xl border border-neutral-900 text-[11px] text-neutral-400 text-center leading-relaxed">
+              💡 <strong>Action Flow:</strong> Tweak words above → Click button → Paste (Ctrl+V) in @{currentTarget.handle}'s latest post reply → <strong>Attach the poster</strong>!
+            </div>
+          </div>
+
+        </div>
 
       </main>
 
-      {/* Step Instructions Modal */}
+      {/* 2-Step Strike Instructions Modal */}
       {showStepModal && lastStruckTarget && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl animate-scale-in">
-            <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center mx-auto font-bold text-lg">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-3xl p-6 sm:p-7 max-w-md w-full space-y-5 shadow-2xl animate-scale-in">
+            <div className="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center mx-auto font-black text-xl shadow-lg">
               ✓
             </div>
 
             <div className="text-center space-y-1">
-              <h3 className="text-sm font-bold text-white">
+              <h3 className="text-base font-bold text-white">
                 Message Copied!
               </h3>
               <p className="text-xs text-neutral-400">
@@ -379,23 +337,40 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
               </p>
             </div>
 
-            <div className="bg-black p-3.5 rounded-xl border border-neutral-900 space-y-2 text-xs text-neutral-300">
-              <div className="flex items-start space-x-2">
-                <span className="font-bold text-white">1.</span>
-                <span>Look at their top / latest post on X.</span>
+            <div className="bg-black p-4 rounded-2xl border border-neutral-900 space-y-3 text-xs text-neutral-300">
+              <div className="flex items-start space-x-3">
+                <span className="w-5 h-5 rounded-full bg-white text-black font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">
+                  1
+                </span>
+                <span>Look at <strong className="text-white">@{lastStruckTarget.handle}</strong>'s latest post.</span>
               </div>
-              <div className="flex items-start space-x-2">
-                <span className="font-bold text-white">2.</span>
-                <span>Click <strong className="text-white">Reply 💬</strong> and press <strong className="text-white font-mono">Ctrl + V</strong> to paste your message.</span>
+              <div className="flex items-start space-x-3">
+                <span className="w-5 h-5 rounded-full bg-white text-black font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">
+                  2
+                </span>
+                <span>Click <strong className="text-white">Reply 💬</strong>, press <strong className="text-white font-mono">Ctrl + V</strong> to paste, and <strong>attach the poster</strong>!</span>
               </div>
             </div>
 
-            <button
-              onClick={() => setShowStepModal(false)}
-              className="w-full py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-neutral-200 transition-all cursor-pointer"
-            >
-              Done / Next Target →
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleDownloadPoster}
+                className="flex-1 py-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 font-bold text-xs transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Poster</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowStepModal(false);
+                  setCurrentIndex(prev => (prev < targets.length - 1 ? prev + 1 : 0));
+                }}
+                className="flex-1 py-3 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-xs transition-all cursor-pointer shadow-lg"
+              >
+                Next Target →
+              </button>
+            </div>
           </div>
         </div>
       )}

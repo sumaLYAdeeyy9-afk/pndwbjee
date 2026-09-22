@@ -1,9 +1,10 @@
 // Dynamic Humanized Post Generator for WBJEE 2026 Strike Deck
 // RULES:
-// 1. NO HASHTAGS (#)
+// 1. Mandatory Hashtag: #JusticeForWBJEE on every post
 // 2. NO GMR, RANK NUMBERS, OR BRANCHES
-// 3. NO @ TAGS (to bypass anti-spam filters)
-// 4. Pure human, emotional, student-written language appealing for offline spot counselling.
+// 3. NO @ TAGS in body (to prevent bot triggers)
+// 4. Human, emotional, urgent student appeals for offline spot counselling
+// 5. Total length strictly <= 280 characters
 
 export const HUMANIZED_TEMPLATES = [
   {
@@ -11,14 +12,14 @@ export const HUMANIZED_TEMPLATES = [
     theme: 'Future & Years of Hard Work',
     opener: 'Thousands of us worked hard for years, but the online counselling system has completely frozen seat allotments.',
     body: 'Government colleges are sitting with empty seats while deserving students are left in despair.',
-    plea: 'We humbly urge you to raise our voice for an open offline spot counselling round after Phase 2.'
+    plea: 'We humbly urge you to raise our voice for an open offline spot counselling round.'
   },
   {
     id: 'human-2',
     theme: 'Multiple Seat Blocking Issue',
-    opener: 'Because the current online portal offers multiple seats to single candidates simultaneously, genuine admissions are completely blocked.',
+    opener: 'Because the online portal offers multiple seats to single candidates simultaneously, genuine admissions are completely blocked.',
     body: 'Seats that could change students lives are lying vacant across state universities.',
-    plea: 'Please support our appeal to conduct physical on-campus spot rounds so every seat is filled fairly.'
+    plea: 'Please support our appeal to conduct physical spot rounds so every seat is filled fairly.'
   },
   {
     id: 'human-3',
@@ -32,13 +33,13 @@ export const HUMANIZED_TEMPLATES = [
     theme: 'Phase 3 Exclusion Crisis',
     opener: 'Students who took admission early in Phase 1 are being unfairly locked out from upgrading in later rounds.',
     body: 'This directly hurts merit while core engineering seats remain unoccupied.',
-    plea: 'Please help us request the authorities to permit universal offline spot counselling for all.'
+    plea: 'Please help us request authorities to permit universal offline spot counselling for all.'
   },
   {
     id: 'human-5',
     theme: 'Urgent Administrative Intervention',
     opener: 'Please look into the engineering admission crisis in West Bengal.',
-    body: 'Even after Phase 1 and Phase 2, vacancies have barely reduced. A broken online algorithm cannot replace real-time physical counselling.',
+    body: 'Even after Phase 1 and Phase 2, vacancies have barely reduced. A broken algorithm cannot replace real-time physical counselling.',
     plea: 'We desperately need an offline spot round to save our academic year.'
   },
   {
@@ -66,8 +67,8 @@ export const HUMANIZED_TEMPLATES = [
 
 export const HUMANIZED_OPENERS = [
   'Respected sir, please hear the plea of thousands of engineering aspirants in Bengal.',
-  'Thousands of students worked tirelessly for years, but the current online counselling is failing us.',
-  'Please look into the serious counselling deadlock affecting thousands of students across West Bengal.',
+  'Thousands of students worked tirelessly for years, but current online counselling is failing us.',
+  'Please look into the serious counselling deadlock affecting students across West Bengal.',
   'Deserving students are losing their academic year because of flaws in the online seat allocation.',
   'We humbly appeal for your support regarding the ongoing admission crisis in state colleges.'
 ];
@@ -86,29 +87,30 @@ export const HUMANIZED_PLEAS = [
   'Kindly amplify our appeal so no student is deprived of their rightful education.'
 ];
 
+export const MANDATORY_HASHTAG = '#JusticeForWBJEE';
+
 /**
- * Generates a purely humanized draft under 250 characters
- * ZERO hashtags, ZERO GMR, ZERO rank placeholders, ZERO @ mentions
+ * Generates a humanized draft under 250 characters with #JusticeForWBJEE attached
  */
 export function generateUniqueReply() {
   const template = HUMANIZED_TEMPLATES[Math.floor(Math.random() * HUMANIZED_TEMPLATES.length)];
   
-  // Combine either full curated template or randomized natural variation
   const useCurated = Math.random() > 0.4;
   
-  let fullText = '';
+  let mainText = '';
   if (useCurated) {
-    fullText = `${template.opener} ${template.body} ${template.plea}`;
+    mainText = `${template.opener} ${template.body} ${template.plea}`;
   } else {
     const op = HUMANIZED_OPENERS[Math.floor(Math.random() * HUMANIZED_OPENERS.length)];
     const bd = HUMANIZED_BODIES[Math.floor(Math.random() * HUMANIZED_BODIES.length)];
     const pl = HUMANIZED_PLEAS[Math.floor(Math.random() * HUMANIZED_PLEAS.length)];
-    fullText = `${op} ${bd} ${pl}`;
+    mainText = `${op} ${bd} ${pl}`;
   }
 
-  // Ensure it's comfortably under 275 chars
+  // Ensure total length with hashtag is under 275 chars
+  let fullText = `${mainText.trim()} ${MANDATORY_HASHTAG}`;
   if (fullText.length > 275) {
-    fullText = `${template.opener} ${template.plea}`;
+    fullText = `${template.opener} ${template.plea} ${MANDATORY_HASHTAG}`;
   }
 
   return {
