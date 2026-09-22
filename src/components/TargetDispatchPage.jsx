@@ -290,8 +290,8 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
     targetStrikesSum
   );
 
-  // Current target's real strikes
-  const currentTargetStrikes = Number(strikeCounts[currentHandleClean] || strikeCounts[currentTarget.handle] || 0) || (totalGlobalStrikes > 0 ? Math.max(1, Math.floor(totalGlobalStrikes / (targets.length || 1))) : 0);
+  // Current target's real strikes (strictly individual count)
+  const currentTargetStrikes = Number(strikeCounts[currentHandleClean] || strikeCounts[currentTarget.handle] || 0);
 
   // WhatsApp & Social Mobilization Forwarding
   const [shareCopied, setShareCopied] = useState(false);
