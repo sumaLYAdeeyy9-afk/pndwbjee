@@ -40,7 +40,8 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
 
   // Embed State
   const embedContainerRef = useRef(null);
-  const [isEmbedLoading, setIsEmbedLoading] = useState(true);
+  const [isEmbedLoading, setIsEmbedLoading] = useState(false);
+  const [embedLoaded, setEmbedLoaded] = useState(false);
 
   // Initialize first draft
   useEffect(() => {
@@ -55,9 +56,76 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
     setCustomizationStatus(status);
   }, [editedText, originalDraft]);
 
-  // Load Twitter Widgets SDK and render latest 1 tweet
+  // Load Twitter Widgets SDK with strict timeout protection
   useEffect(() => {
     let isCancelled = false;
+    let timeoutId = null;
+
+    setIsEmbedLoading(true);
+    setEmbedLoaded(false);
+
+    const finishLoading = (success = false) => {
+      if (!isCancelled) {
+        setIsEmbedLoading(false);
+        setEmbedLoaded(success);
+      }
+    };
+
+    // Strict 2-second timeout to prevent infinite spinning
+    timeoutId = setTimeout(() => {
+      finishLoading(false);
+    }, 2000);
+
+    const renderEmbed = () => {
+      if (!embedContainerRef.current || !window.twttr || !window.twttr.widgets) {
+        finishLoading(false);
+        return;
+      }
+
+      embedContainerRef.current.innerHTML = '';
+
+      if (customTweetId) {
+        // Specific Tweet ID embed (supported reliably by X widgets)
+        window.twttr.widgets.createTweet(
+          customTweetId,
+          embedContainerRef.current,
+          {
+            theme: 'dark',
+            conversation: 'none',
+            dnt: true,
+            align: 'center'
+          }
+        ).then((el) => {
+          clearTimeout(timeoutId);
+          finishLoading(!!el);
+        }).catch(() => {
+          clearTimeout(timeoutId);
+          finishLoading(false);
+        });
+      } else {
+        // Timeline profile embed attempt
+        window.twttr.widgets.createTimeline(
+          {
+            sourceType: 'profile',
+            screenName: selectedTarget.handle
+          },
+          embedContainerRef.current,
+          {
+            tweetLimit: 1,
+            theme: 'dark',
+            chrome: 'noheader nofooter noborders transparent',
+            dnt: true,
+            width: '100%'
+          }
+        ).then((el) => {
+          clearTimeout(timeoutId);
+          finishLoading(!!el);
+        }).catch(() => {
+          clearTimeout(timeoutId);
+          finishLoading(false);
+        });
+      }
+    };
 
     const loadTwitterSDK = () => {
       if (window.twttr && window.twttr.widgets) {
@@ -77,60 +145,22 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
             renderEmbed();
           }
         };
+        script.onerror = () => {
+          clearTimeout(timeoutId);
+          finishLoading(false);
+        };
         document.body.appendChild(script);
       } else {
-        // Poll for twttr initialization
         const interval = setInterval(() => {
           if (window.twttr && window.twttr.widgets) {
             clearInterval(interval);
             if (!isCancelled) renderEmbed();
           }
-        }, 150);
-        setTimeout(() => clearInterval(interval), 5000);
-      }
-    };
-
-    const renderEmbed = () => {
-      if (!embedContainerRef.current || !window.twttr || !window.twttr.widgets) return;
-      setIsEmbedLoading(true);
-      embedContainerRef.current.innerHTML = '';
-
-      if (customTweetId) {
-        // Specific Tweet ID embed
-        window.twttr.widgets.createTweet(
-          customTweetId,
-          embedContainerRef.current,
-          {
-            theme: 'dark',
-            conversation: 'none',
-            dnt: true,
-            align: 'center'
-          }
-        ).then(() => {
-          setIsEmbedLoading(false);
-        }).catch(() => {
-          setIsEmbedLoading(false);
-        });
-      } else {
-        // Dynamic Profile Timeline with strictly tweetLimit: 1 (Only latest 1 post)
-        window.twttr.widgets.createTimeline(
-          {
-            sourceType: 'profile',
-            screenName: selectedTarget.handle
-          },
-          embedContainerRef.current,
-          {
-            tweetLimit: 1,
-            theme: 'dark',
-            chrome: 'noheader nofooter noborders transparent',
-            dnt: true,
-            width: '100%'
-          }
-        ).then(() => {
-          setIsEmbedLoading(false);
-        }).catch(() => {
-          setIsEmbedLoading(false);
-        });
+        }, 100);
+        setTimeout(() => {
+          clearInterval(interval);
+          finishLoading(false);
+        }, 1500);
       }
     };
 
@@ -138,6 +168,7 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
 
     return () => {
       isCancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [selectedTarget, customTweetId]);
 
@@ -452,7 +483,7 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
 
           </div>
 
-          {/* MIDDLE COLUMN: Live Latest Tweet Embed (4 cols) */}
+          {/* MIDDLE COLUMN: Live Target Strike & Post Terminal (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
             
             <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xl">
@@ -460,13 +491,13 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
               {/* Header of Active Target */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
                 <div className="flex items-center space-x-2.5">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-rose-600 flex items-center justify-center text-white font-black text-base shadow-lg shadow-sky-950/60 ring-2 ring-sky-500/30">
                     {selectedTarget.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1.5">
                       <span className="font-extrabold text-sm text-white">{selectedTarget.name}</span>
-                      <span className="text-sky-400 text-xs">✓</span>
+                      <span className="text-sky-400 text-xs bg-sky-500/10 rounded-full px-1 border border-sky-500/30">✓</span>
                     </div>
                     <span className="text-sky-400 text-xs font-mono font-semibold">@{selectedTarget.handle}</span>
                   </div>
@@ -476,38 +507,52 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
                   href={`https://x.com/${selectedTarget.handle}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 transition-all flex items-center space-x-1 text-xs"
-                  title="Open full profile on X"
+                  className="px-3 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 transition-all flex items-center space-x-1.5 text-xs font-bold"
+                  title="Open live profile on X.com"
                 >
                   <TwitterIcon className="w-3.5 h-3.5 fill-current" />
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                  <span>Profile</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+
+              {/* High-Impact 1-Click Latest Post Launcher */}
+              <div className="mb-4">
+                <a
+                  href={`https://x.com/${selectedTarget.handle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-sky-950 transition-all cursor-pointer"
+                >
+                  <TwitterIcon className="w-4 h-4 fill-current" />
+                  <span>⚡ Open @{selectedTarget.handle}'s Latest Posts on X</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               </div>
 
               {/* Direct Tweet URL / Custom Target Status ID Input */}
-              <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 mb-4">
+              <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 mb-4">
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
                     <Pin className="w-3 h-3 text-rose-400" />
-                    <span>Target Specific Tweet (Optional ID / URL):</span>
+                    <span>Target Specific Tweet (Paste URL or ID):</span>
                   </label>
                   {customTweetId && (
                     <button
                       onClick={() => setCustomTweetId('')}
                       className="text-[10px] text-rose-400 hover:underline font-semibold"
                     >
-                      Clear ID
+                      Clear
                     </button>
                   )}
                 </div>
                 <div className="flex items-center space-x-1.5">
                   <input
                     type="text"
-                    placeholder="Paste exact Tweet URL or Tweet ID..."
+                    placeholder="e.g. https://x.com/.../status/183765123456"
                     value={customTweetId}
                     onChange={(e) => {
                       const val = e.target.value.trim();
-                      // Extract numeric ID if full URL is pasted
                       const match = val.match(/status\/(\d+)/);
                       if (match) {
                         setCustomTweetId(match[1]);
@@ -515,18 +560,18 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
                         setCustomTweetId(val);
                       }
                     }}
-                    className="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-sky-500 font-mono"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs placeholder-slate-600 focus:outline-none focus:border-sky-500 font-mono"
                   />
                 </div>
               </div>
 
-              {/* Live Embed Window (Only Latest 1 Tweet) */}
-              <div className="relative min-h-[380px] bg-slate-950 rounded-2xl border border-slate-800 p-2 overflow-hidden flex flex-col justify-center">
+              {/* Live Embed / Target Action Spotlight Terminal */}
+              <div className="relative bg-slate-950 rounded-2xl border border-slate-800 p-3 flex flex-col justify-center min-h-[300px]">
                 
-                <div className="flex items-center justify-between px-2 py-1 mb-2 border-b border-slate-800/60">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
+                <div className="flex items-center justify-between px-1 py-1 mb-2 border-b border-slate-800/60">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
                     <RefreshCw className={`w-3 h-3 text-sky-400 ${isEmbedLoading ? 'animate-spin' : ''}`} />
-                    <span>Live Post Embed ({customTweetId ? 'Targeted Tweet' : 'Latest Post Only'})</span>
+                    <span>Live Post Terminal</span>
                   </span>
                   <a
                     href={`https://x.com/${selectedTarget.handle}`}
@@ -534,25 +579,66 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
                     rel="noopener noreferrer"
                     className="text-[10px] text-sky-400 hover:underline font-mono"
                   >
-                    View on X.com →
+                    @{selectedTarget.handle} feed →
                   </a>
                 </div>
 
-                {isEmbedLoading && (
-                  <div className="p-6 text-center space-y-2">
+                {isEmbedLoading ? (
+                  <div className="py-8 text-center space-y-2">
                     <div className="w-6 h-6 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
                     <p className="text-slate-400 text-xs font-semibold">
-                      Fetching latest post from @{selectedTarget.handle}...
+                      Connecting to @{selectedTarget.handle}...
                     </p>
+                  </div>
+                ) : embedLoaded ? (
+                  /* Rendered Twitter Widget */
+                  <div ref={embedContainerRef} className="w-full flex justify-center my-2" />
+                ) : (
+                  /* High-Utility Target Spotlight Card */
+                  <div className="space-y-3 my-1">
+                    <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-left space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] uppercase font-bold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+                          {selectedTarget.role}
+                        </span>
+                        {selectedTarget.priority === 'critical' && (
+                          <span className="text-[10px] font-black uppercase text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
+                            High Priority Target
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-300 leading-relaxed">
+                        {selectedTarget.bio}
+                      </p>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-gradient-to-br from-slate-900 to-sky-950/40 border border-slate-800/80 text-left space-y-2">
+                      <h4 className="text-[11px] font-extrabold text-white uppercase tracking-wider flex items-center space-x-1.5">
+                        <span>🎯 3-Step Hijack Strike:</span>
+                      </h4>
+                      <ol className="text-[11px] text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+                        <li>Open <strong className="text-sky-400">@{selectedTarget.handle}'s</strong> feed on X to see their newest post.</li>
+                        <li>Personalize your petition talking point on the right.</li>
+                        <li>Click <strong className="text-rose-400">"Copy & Open Target Post"</strong> and paste in their top reply thread!</li>
+                      </ol>
+                    </div>
+
+                    <div className="pt-1 flex items-center justify-center space-x-2">
+                      <a
+                        href={`https://x.com/search?q=from%3A${selectedTarget.handle}&f=live`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-sky-400 hover:text-sky-300 underline font-medium flex items-center space-x-1"
+                      >
+                        <span>Search @{selectedTarget.handle}'s latest live tweets</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
                   </div>
                 )}
 
-                {/* Twitter Widgets target container */}
-                <div ref={embedContainerRef} className="w-full flex justify-center" />
-
-                <div className="mt-3 p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-400 leading-relaxed text-center">
-                  💡 <strong>How it works:</strong> The embed automatically reflects the latest post from <strong>@{selectedTarget.handle}</strong>. Reply within the live thread to maximize reach.
-                </div>
+                {/* Twitter Widgets target container (hidden or active) */}
+                <div ref={embedContainerRef} className={`${embedLoaded ? 'block' : 'hidden'} w-full flex justify-center`} />
 
               </div>
 
