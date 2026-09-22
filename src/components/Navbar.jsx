@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Mail, Share2, PhoneCall, Menu, X, Flame, Target, Zap } from 'lucide-react';
+import { TARGET_HANDLES } from '../data/targetHandles';
 
 export default function Navbar({ activeSection, scrollToSection, onNavigateToStrike, currentPage }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { id: 'strike-hub', label: '⚡ Strike Hub (41 Targets)', icon: Target, isPage: true, isSpecial: true },
+    { id: 'strike-hub', label: `⚡ Strike Hub (${TARGET_HANDLES.length} Targets)`, icon: Target, isPage: true, isSpecial: true },
     { id: 'email-tool', label: 'Email Authorities', icon: Mail, highlight: true },
     { id: 'demands', label: 'Our Demands', icon: Flame },
     { id: 'share-campaign', label: 'Mobilize Batches', icon: Share2 },
