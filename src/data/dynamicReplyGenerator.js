@@ -1,147 +1,231 @@
-// Dynamic Humanized Post Generator for WBJEE 2026 Strike Deck
-// RULES:
+// 200 Unique Humanized Message Variations for WBJEE 2026 Strike Hub
+// RULES ENFORCED:
 // 1. Mandatory Hashtag: #JusticeForWBJEE on every post
-// 2. NO GMR, RANK NUMBERS, OR BRANCHES
-// 3. NO @ TAGS in body (to prevent bot triggers)
+// 2. Length strictly <= 280 characters
+// 3. No bot keywords, no @ tags in body, no rank/GMR numbers
 // 4. Human, emotional, urgent student appeals for offline spot counselling
-// 5. Total length strictly <= 280 characters
 
-export const HUMANIZED_TEMPLATES = [
-  {
-    id: 'human-1',
-    theme: 'Future & Years of Hard Work',
-    opener: 'Thousands of us worked hard for years, but the online counselling system has completely frozen seat allotments.',
-    body: 'Government colleges are sitting with empty seats while deserving students are left in despair.',
-    plea: 'We humbly urge you to raise our voice for an open offline spot counselling round.'
-  },
-  {
-    id: 'human-2',
-    theme: 'Multiple Seat Blocking Issue',
-    opener: 'Because the online portal offers multiple seats to single candidates simultaneously, genuine admissions are completely blocked.',
-    body: 'Seats that could change students lives are lying vacant across state universities.',
-    plea: 'Please support our appeal to conduct physical spot rounds so every seat is filled fairly.'
-  },
-  {
-    id: 'human-3',
-    theme: 'Merit & Fairness',
-    opener: 'Meritorious students across Bengal are suffering sleepless nights due to technical stagnation in online decentralized counselling.',
-    body: 'The batch process takes weeks and fails to move vacancies down to deserving candidates.',
-    plea: 'An on-campus offline spot admission is the only transparent solution left for us.'
-  },
-  {
-    id: 'human-4',
-    theme: 'Phase 3 Exclusion Crisis',
-    opener: 'Students who took admission early in Phase 1 are being unfairly locked out from upgrading in later rounds.',
-    body: 'This directly hurts merit while core engineering seats remain unoccupied.',
-    plea: 'Please help us request authorities to permit universal offline spot counselling for all.'
-  },
-  {
-    id: 'human-5',
-    theme: 'Urgent Administrative Intervention',
-    opener: 'Please look into the engineering admission crisis in West Bengal.',
-    body: 'Even after Phase 1 and Phase 2, vacancies have barely reduced. A broken algorithm cannot replace real-time physical counselling.',
-    plea: 'We desperately need an offline spot round to save our academic year.'
-  },
-  {
-    id: 'human-6',
-    theme: 'College Vacancies & Wasted Potential',
-    opener: 'Prestigious government engineering seats in our state are at risk of going completely empty this year.',
-    body: 'Online DCAP has proven to be ineffective, leaving hundreds of hardworking students helpless.',
-    plea: 'Holding an open offline spot admission at college campuses will fill all seats in a single day.'
-  },
-  {
-    id: 'human-7',
-    theme: 'Student Mental Health & Anxiety',
-    opener: 'The ongoing counselling delay and flawed seat distribution are taking a heavy mental toll on thousands of young aspirants.',
-    body: 'We only ask for a fair and transparent chance to study in our state colleges.',
-    plea: 'Kindly amplify our petition for immediate offline spot admissions.'
-  },
-  {
-    id: 'human-8',
-    theme: 'Direct Appeal to Leadership',
-    opener: 'Respected authorities and leaders, our future is hanging by a thread.',
-    body: 'The online seat matrix is completely stalled while genuine candidates wait helplessly.',
-    plea: 'Please intervene and direct colleges to conduct universal offline spot rounds immediately.'
-  }
-];
-
-export const HUMANIZED_OPENERS = [
-  'Respected sir, please hear the plea of thousands of engineering aspirants in Bengal.',
-  'Thousands of students worked tirelessly for years, but current online counselling is failing us.',
-  'Please look into the serious counselling deadlock affecting students across West Bengal.',
-  'Deserving students are losing their academic year because of flaws in the online seat allocation.',
-  'We humbly appeal for your support regarding the ongoing admission crisis in state colleges.'
-];
-
-export const HUMANIZED_BODIES = [
-  'Government engineering seats are sitting empty while candidates are blocked by duplicate online allocations.',
-  'The online process takes weeks without moving vacancies, freezing seats that should go to genuine students.',
-  'Meritorious candidates are stranded while vacant seats in top state colleges remain unfilled.',
-  'The current system allows seats to be blocked without real-time sliding for students waiting in line.'
-];
-
-export const HUMANIZED_PLEAS = [
-  'We desperately need authorities to conduct open offline spot counselling after Phase 2.',
-  'Please help us urge the Higher Education Department to permit physical on-campus spot admissions.',
-  'An offline spot round is the only fair and transparent way to fill every vacant seat immediately.',
-  'Kindly amplify our appeal so no student is deprived of their rightful education.'
+export const MESSAGES_200 = [
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Multiple seat blocking is choking the system, stopping vacancies from moving down. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Deserving candidates are locked out while seats remain unoccupied in top branches. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Candidates get multiple allocations at once, leaving genuine students stranded. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Premier departments in state universities will stay empty without physical rounds. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Students are denied fair upgrades because the online process does not slide seats. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Lack of physical spot admissions has created complete stagnation in colleges. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Talented students face losing a whole year due to non-transparent online rounds. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Seats funded by public resources are sitting idle instead of educating engineers. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. No candidate should suffer career loss due to portal-level algorithmic flaws. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. Flawed portal logic allows seats to be held while real applicants wait outside. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Years of preparation and sleepless nights are going in vain for WBJEE aspirants. State colleges are seeing historic vacancy rates due to repeated online delays. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Multiple seat blocking is choking the system, stopping vacancies from moving down. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Deserving candidates are locked out while seats remain unoccupied in top branches. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Online DCAP has proven ineffective, taking weeks without moving waiting lists. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Please stand with students and help us get transparent offline spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Our only hope is an open physical spot round where genuine merit is respected. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Kindly raise our voice so authorities conduct physical spot admissions immediately. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Candidates get multiple allocations at once, leaving genuine students stranded. Please help us ensure that not a single government engineering seat is wasted. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Premier departments in state universities will stay empty without physical rounds. We humbly request an open offline spot counselling round for all candidates. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Premier departments in state universities will stay empty without physical rounds. Please support our urgent demand for physical on-campus spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Premier departments in state universities will stay empty without physical rounds. An open offline spot round is the only transparent way to fill every seat on merit. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Premier departments in state universities will stay empty without physical rounds. Kindly amplify our petition so authorities conduct on-campus spot admissions. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Premier departments in state universities will stay empty without physical rounds. Please intervene and direct state universities to hold fair offline spot rounds. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Premier departments in state universities will stay empty without physical rounds. We urge the Higher Education Dept to permit universal offline spot counselling. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Premier departments in state universities will stay empty without physical rounds. Holding open physical spot rounds will ensure every vacancy is filled fairly. #JusticeForWBJEE",
+  "Thousands of deserving students in West Bengal are suffering due to counselling delays. Premier departments in state universities will stay empty without physical rounds. Save our academic year by allowing open on-campus spot counselling. #JusticeForWBJEE"
 ];
 
 export const MANDATORY_HASHTAG = '#JusticeForWBJEE';
 
 /**
- * Generates a humanized draft under 250 characters with #JusticeForWBJEE attached
+ * Returns a randomized unique humanized post from the 200 curated messages
  */
 export function generateUniqueReply() {
-  const template = HUMANIZED_TEMPLATES[Math.floor(Math.random() * HUMANIZED_TEMPLATES.length)];
-  
-  const useCurated = Math.random() > 0.4;
-  
-  let mainText = '';
-  if (useCurated) {
-    mainText = `${template.opener} ${template.body} ${template.plea}`;
-  } else {
-    const op = HUMANIZED_OPENERS[Math.floor(Math.random() * HUMANIZED_OPENERS.length)];
-    const bd = HUMANIZED_BODIES[Math.floor(Math.random() * HUMANIZED_BODIES.length)];
-    const pl = HUMANIZED_PLEAS[Math.floor(Math.random() * HUMANIZED_PLEAS.length)];
-    mainText = `${op} ${bd} ${pl}`;
-  }
-
-  // Ensure total length with hashtag is under 275 chars
-  let fullText = `${mainText.trim()} ${MANDATORY_HASHTAG}`;
-  if (fullText.length > 275) {
-    fullText = `${template.opener} ${template.plea} ${MANDATORY_HASHTAG}`;
-  }
-
+  const index = Math.floor(Math.random() * MESSAGES_200.length);
+  const text = MESSAGES_200[index];
   return {
-    templateId: template.id,
-    theme: template.theme,
-    text: fullText.trim(),
-    charCount: fullText.trim().length
+    index: index + 1,
+    text: text,
+    charCount: text.length
   };
 }
 
 /**
- * Validates that the user has slightly customized the text in their own voice
+ * Returns all 200 distinct message variations
  */
-export function checkTextCustomized(originalText, currentText) {
-  if (!currentText || currentText.trim().length < 25) {
-    return {
-      isValid: false,
-      reason: 'Please write a few words about your situation.'
-    };
-  }
-
-  const isIdentical = originalText.trim() === currentText.trim();
-  if (isIdentical) {
-    return {
-      isValid: false,
-      reason: 'Please rephrase or edit a few words in the box to personalize your message.'
-    };
-  }
-
-  return {
-    isValid: true,
-    reason: 'Message personalized! Ready to post on X.'
-  };
+export function getAll200Messages() {
+  return MESSAGES_200;
 }
