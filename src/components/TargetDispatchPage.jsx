@@ -309,20 +309,23 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
 
   const strikeShareText = `🔥 *WBJEE 2026 STUDENT ADVOCACY & TWITTER CAMPAIGN IS LIVE!* ⚡
 
-Deserving students are stranded while vacant engineering seats in JU, CU & Government colleges are blocked by the flawed online portal!
+Deserving students are stranded while vacant engineering seats in JU, CU, KGEC, JGEC & Government colleges remain blocked by flawed online DC!
 
-🎯 *We are taking our voice directly to Top Journalists, SC Lawyers & Leaders on X (Twitter):*
-✅ Pre-drafted 200+ unique student grievance messages
-✅ 1-Click copy & auto-redirect to verified target accounts
-✅ Official campaign poster attachment
-✅ Anti-spam automated queue protection
+🎯 *HOW TO PARTICIPATE IN 3 SIMPLE STEPS:*
+1️⃣ *Save Campaign Poster:* Tap the portal link below & download the official petition poster.
+2️⃣ *1-Click Copy Demand:* 200+ unique pre-drafted grievance messages ready to copy.
+3️⃣ *Reply on X (Twitter):*
+   👉 ⚠️ *DO NOT reply to Pinned Tweets!* Scroll down to their *LATEST / MOST RECENT post*.
+   👉 Tap *Reply (💬)*, paste your copied text, attach the downloaded poster, and hit *Post/Reply*!
 
-👉 *Join the Campaign & Tweet Your Demands in 10 Seconds:*
+🛡️ *Live Coordinated Queue:* Automated 10-minute cooldown prevents spam & synchronizes maximum outreach across all key leaders!
+
+👉 *Join the Campaign & Post Your Demand Now:*
 ${strikePortalUrl}
 
-Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants right now! Every single reply counts! ✊
+📢 *FORWARD THIS MESSAGE TO ALL WBJEE 2026 COACHING GROUPS, BATCHMATES & TELEGRAM CHANNELS!* Every single reply counts! ✊
 
-#JusticeForWBJEE #WBJEEOfflineDC #WBJEE2026`;
+#JusticeForWBJEE #WBJEEOfflineDC #WBJEE2026 #ConductOfflineDC`;
 
   const handleWhatsAppForward = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(strikeShareText)}`;
@@ -771,8 +774,9 @@ Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants 
           {/* Formatted Message Preview Box */}
           <div className="bg-black/80 border border-emerald-900/60 rounded-2xl p-3.5 sm:p-4 text-xs font-mono text-neutral-300 leading-relaxed space-y-1.5 shadow-inner select-all">
             <p className="text-emerald-400 font-bold text-[11px] sm:text-xs">🔥 WBJEE 2026 STUDENT ADVOCACY & TWITTER CAMPAIGN IS LIVE! ⚡</p>
-            <p className="text-neutral-300 text-[11px] sm:text-xs">Deserving students are stranded while vacant engineering seats in JU, CU & Govt colleges are blocked by flawed online DC!</p>
-            <p className="text-neutral-400 text-[11px]">👉 Join & Tweet in 10s: <span className="text-emerald-300 underline font-bold">{strikePortalUrl}</span></p>
+            <p className="text-neutral-300 text-[11px]">Deserving students stranded while vacant seats in JU, CU & Govt colleges stay blocked!</p>
+            <p className="text-amber-300 text-[11px]">📋 <strong>3 Steps:</strong> 1. Save Poster → 2. 1-Click Copy → 3. ⚠️ Reply to <strong>LATEST post (Not Pinned)</strong> with Poster!</p>
+            <p className="text-neutral-400 text-[11px]">👉 Join & Post: <span className="text-emerald-300 underline font-bold">{strikePortalUrl}</span></p>
             <p className="text-neutral-500 text-[10px]">#JusticeForWBJEE #WBJEEOfflineDC #WBJEE2026</p>
           </div>
 

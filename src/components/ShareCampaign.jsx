@@ -14,19 +14,25 @@ export default function ShareCampaign() {
 
 *DEMAND GENUINE OFFLINE DECENTRALISED COUNSELLING FOR WBJEE 2026*
 
-Even after DC Phase 1 completion, vacant seats have reduced by only a negligible margin due to online seat-holding and faulty process mechanisms!
+Even after online DC rounds, vacant engineering seats in JU, CU, KGEC, JGEC & Govt colleges remain blocked due to seat-holding!
 
-🛑 *Our Core Demands to WBJEEB, DTE & JU VC:*
-1️⃣ Conduct *Physical Offline DC* directly at college campuses (JU, CU, KGEC, JGEC, etc.)
-2️⃣ Publish complete *college-wise & category-wise vacancy lists* beforehand
-3️⃣ Stop online seat-holding & fill vacant seats through transparent spot admission
+🛑 *Our Core Demands:*
+1️⃣ Conduct *Physical Offline Decentralised Counselling* on college campuses
+2️⃣ Publish complete *college-wise & category-wise vacancy matrices* beforehand
+3️⃣ Stop online seat-blocking & fill vacant seats through transparent merit spot admission
 
-👉 *Send Your 1-Click Official Representation in 10 Seconds:*
+🎯 *HOW TO PARTICIPATE IN 10 SECONDS:*
+1️⃣ Save the official campaign poster from the portal
+2️⃣ 1-Click copy your pre-drafted grievance message
+3️⃣ ⚠️ *On Twitter/X:* Scroll past any pinned tweets to their *LATEST post*, tap *Reply (💬)*, and post with the campaign poster attached!
+4️⃣ 1-Click email all higher education authorities
+
+👉 *Join the Live Student Campaign Now:*
 ${portalUrl}
 
-Please forward this to all WBJEE 2026 aspirants, batch groups & parents!
+📢 *Please forward this to all WBJEE 2026 coaching batches, batchmates & parents! Every voice counts!* ✊
 
-#WBJEEOfflineDC #DemandOfflineDC #ConductOfflineDC #StopSeatBlocking #WBJEE2026 #SaveAcademicYear`;
+#JusticeForWBJEE #WBJEEOfflineDC #DemandOfflineDC #ConductOfflineDC #WBJEE2026`;
 
   const handleWhatsAppShare = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
