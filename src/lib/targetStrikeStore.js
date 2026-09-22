@@ -1,7 +1,6 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 
-const LOCAL_STORAGE_KEY = 'wbjee_target_real_strike_counts_v4';
-const GLOBAL_TWEETS_KEY = 'wbjee_global_tweets_count_live';
+const LOCAL_STORAGE_KEY = 'wbjee_target_real_strike_counts_v5';
 
 // Get local cache
 export function getLocalStrikeCounts() {
@@ -38,28 +37,11 @@ export async function fetchTargetStrikeCounts() {
         .eq('student_name', 'DISPATCH_STRIKE');
 
       if (strikeRows && !strikeError) {
-        const dbCounts = {};
+        const dbCounts = { _totalStrikes: strikeRows.length };
         strikeRows.forEach(row => {
           if (row.roll_number) {
             const clean = row.roll_number.replace('@', '').trim().toLowerCase();
             dbCounts[clean] = (dbCounts[clean] || 0) + 1;
-          }
-        });
-        saveLocalStrikeCounts(dbCounts);
-        return dbCounts;
-      }
-
-      // 2. Also check if target_strikes table is created
-      const { data: targetData, error: targetError } = await supabase
-        .from('target_strikes')
-        .select('target_handle, strike_count');
-
-      if (targetData && !targetError && targetData.length > 0) {
-        const dbCounts = {};
-        targetData.forEach(row => {
-          if (row.target_handle) {
-            const clean = row.target_handle.replace('@', '').trim().toLowerCase();
-            dbCounts[clean] = Number(row.strike_count || 0);
           }
         });
         saveLocalStrikeCounts(dbCounts);
@@ -76,16 +58,21 @@ export async function fetchTargetStrikeCounts() {
 // Increment strike for a specific target handle in real-time
 export async function incrementTargetStrike(handle) {
   if (!handle) return;
-  const cleanHandle = handle.replace('@', '').trim();
-  const lowerHandle = cleanHandle.toLowerCase();
+  const cleanHandle = handle.replace('@', '').trim().toLowerCase();
 
   // 1. Optimistic local update
   const current = getLocalStrikeCounts();
-  const newCount = (current[lowerHandle] || current[cleanHandle] || 0) + 1;
+  const currentTargetCount = Number(current[cleanHandle] || 0);
+  const newTargetCount = currentTargetCount + 1;
+  const currentTotal = current._totalStrikes !== undefined 
+    ? Number(current._totalStrikes) 
+    : Object.entries(current).filter(([k]) => !k.startsWith('_')).reduce((a, [, v]) => a + Number(v || 0), 0);
+  const newTotal = currentTotal + 1;
+
   const updated = { 
     ...current, 
-    [lowerHandle]: newCount,
-    [cleanHandle]: newCount 
+    [cleanHandle]: newTargetCount,
+    _totalStrikes: newTotal
   };
   saveLocalStrikeCounts(updated);
 
@@ -98,24 +85,13 @@ export async function incrementTargetStrike(handle) {
         .insert([
           {
             student_name: 'DISPATCH_STRIKE',
-            roll_number: lowerHandle,
+            roll_number: cleanHandle,
             rank_gmr: '1',
             current_institute: 'x_strike_dispatch',
             contact_info: 'strike_event',
             submitted_at: new Date().toISOString()
           }
         ]);
-
-      // Also attempt target_strikes upsert if available
-      try {
-        await supabase
-          .from('target_strikes')
-          .upsert({
-            target_handle: cleanHandle,
-            strike_count: newCount,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'target_handle' });
-      } catch {}
     } catch (err) {
       console.warn('Supabase individual strike sync failed:', err);
     }
@@ -129,7 +105,7 @@ export function subscribeToTargetStrikes(onUpdate) {
   if (!isSupabaseConfigured || !supabase) return () => {};
 
   try {
-    // 1. Channel for grievance_submissions strike inserts
+    // Channel for grievance_submissions strike inserts
     const grievanceChannel = supabase
       .channel('strike_events_realtime')
       .on(
@@ -139,8 +115,15 @@ export function subscribeToTargetStrikes(onUpdate) {
           if (payload.new && payload.new.student_name === 'DISPATCH_STRIKE' && payload.new.roll_number) {
             const handle = payload.new.roll_number.replace('@', '').trim().toLowerCase();
             const current = getLocalStrikeCounts();
-            const count = (current[handle] || 0) + 1;
-            const updated = { ...current, [handle]: count };
+            const currentTargetCount = Number(current[handle] || 0);
+            const currentTotal = current._totalStrikes !== undefined 
+              ? Number(current._totalStrikes) 
+              : Object.entries(current).filter(([k]) => !k.startsWith('_')).reduce((a, [, v]) => a + Number(v || 0), 0);
+            const updated = { 
+              ...current, 
+              [handle]: currentTargetCount + 1,
+              _totalStrikes: currentTotal + 1
+            };
             saveLocalStrikeCounts(updated);
             if (onUpdate) onUpdate(updated);
           }
@@ -148,33 +131,11 @@ export function subscribeToTargetStrikes(onUpdate) {
       )
       .subscribe();
 
-    // 2. Channel for campaign_stats table (global tweets)
-    const statsChannel = supabase
-      .channel('strike_campaign_stats_realtime')
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'campaign_stats', filter: 'id=eq.global' },
-        (payload) => {
-          if (payload.new) {
-            const tweets = Number(payload.new.tweets || 0);
-            try {
-              localStorage.setItem(GLOBAL_TWEETS_KEY, tweets.toString());
-            } catch {}
-            if (onUpdate) {
-              const current = getLocalStrikeCounts();
-              onUpdate({ ...current, _globalTweets: tweets });
-            }
-          }
-        }
-      )
-      .subscribe();
-
     return () => {
       supabase.removeChannel(grievanceChannel);
-      supabase.removeChannel(statsChannel);
     };
   } catch (e) {
-    console.warn('Could not subscribe to realtime strike channels:', e);
+    console.warn('Could not subscribe to realtime strike channel:', e);
     return () => {};
   }
 }

@@ -280,24 +280,19 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
   const struckCount = struckIds.length;
   const isCurrentStruck = struckIds.includes(currentTarget.id);
 
-  // Filter out any internal meta keys for sum
+  // Sum of individual target strikes
   const targetStrikesSum = Object.entries(strikeCounts)
     .filter(([key]) => !key.startsWith('_'))
     .reduce((a, [, val]) => a + Number(val || 0), 0);
 
-  // Total global strikes across all targets (real-time from Supabase campaign_stats.tweets & target_strikes)
-  const totalGlobalStrikes = Math.max(
-    Number(globalStats?.tweets || 0),
-    Number(strikeCounts._globalTweets || 0),
-    targetStrikesSum
-  );
+  // Total global strikes across all targets (strictly verified count from Supabase)
+  const totalGlobalStrikes = strikeCounts._totalStrikes !== undefined 
+    ? Number(strikeCounts._totalStrikes)
+    : targetStrikesSum;
 
-  // Current target's real strikes (strictly individual count)
+  // Current target's real strikes (strictly individual count for this specific handle)
   const currentTargetStrikes = Number(
-    strikeCounts[currentHandleClean.toLowerCase()] || 
-    strikeCounts[currentHandleClean] || 
-    strikeCounts[currentTarget.handle] || 
-    0
+    strikeCounts[currentHandleClean.toLowerCase()] || 0
   );
 
   // WhatsApp & Social Mobilization Forwarding
