@@ -1,12 +1,12 @@
-// Target Handles Database for WBJEE 2026 Decentralized Counselling Strike Hub
-// 41 High-Profile Targets across Journalists, Legal/Education Advocates, Student Leaders, and Key Politicians
+// Target Handles Database for WBJEE 2026 Strike Hub
+// High-Profile Targets across Journalists, Legal/Education Advocates, Youth Leaders, and Politicians
 
 export const TARGET_CATEGORIES = [
-  { id: 'all', label: 'All Targets', icon: '⚡', count: 41 },
-  { id: 'journalist', label: 'Journalists & Media', icon: '📰', count: 14 },
-  { id: 'advocate', label: 'Advocates & RTI Activists', icon: '⚖️', count: 4 },
-  { id: 'student', label: 'Student & Youth Leaders', icon: '✊', count: 8 },
-  { id: 'politician', label: 'Politicians & Decision Makers', icon: '🏛️', count: 15 },
+  { id: 'all', label: 'All Targets', icon: '⚡' },
+  { id: 'journalist', label: 'Journalists & Media', icon: '📰' },
+  { id: 'advocate', label: 'Advocates & RTI Activists', icon: '⚖️' },
+  { id: 'student', label: 'Student & Youth Leaders', icon: '✊' },
+  { id: 'politician', label: 'Politicians & Leaders', icon: '🏛️' },
 ];
 
 export const TARGET_HANDLES = [
@@ -197,6 +197,26 @@ export const TARGET_HANDLES = [
   // 3. Student & Youth Leaders
   {
     id: 'target-19',
+    name: 'Abhijeet Dipke',
+    handle: 'abhijeet_dipke',
+    category: 'student',
+    role: 'Youth Activist & Founder, CJP',
+    priority: 'critical',
+    bio: 'Founder of Cockroach Janta Party (CJP); leading viral youth digital protests and student rights campaigns.',
+    tags: ['Youth', 'DigitalActivist', 'CJP', 'Viral']
+  },
+  {
+    id: 'target-20',
+    name: 'Cockroach Janta Party (CJP)',
+    handle: 'CJP_2029',
+    category: 'student',
+    role: 'Viral Youth Digital Movement',
+    priority: 'critical',
+    bio: 'Viral Gen-Z youth movement advocating for student welfare, fair exams, and institutional accountability.',
+    tags: ['Youth', 'Movement', 'CJP', 'Students']
+  },
+  {
+    id: 'target-21',
     name: 'Aishe Ghosh',
     handle: 'aishe_ghosh',
     category: 'student',
@@ -206,7 +226,7 @@ export const TARGET_HANDLES = [
     tags: ['StudentLeader', 'Youth']
   },
   {
-    id: 'target-20',
+    id: 'target-22',
     name: 'Mayukh Biswas',
     handle: 'MayukhSFI',
     category: 'student',
@@ -216,7 +236,7 @@ export const TARGET_HANDLES = [
     tags: ['StudentLeader', 'National']
   },
   {
-    id: 'target-21',
+    id: 'target-23',
     name: 'Minakshi Mukherjee',
     handle: 'MinakshiMukher4',
     category: 'student',
@@ -226,7 +246,7 @@ export const TARGET_HANDLES = [
     tags: ['StudentLeader', 'Youth', 'Grassroots']
   },
   {
-    id: 'target-22',
+    id: 'target-24',
     name: 'Srijan Bhattacharyya',
     handle: 'SrijanCPIM',
     category: 'student',
@@ -236,7 +256,7 @@ export const TARGET_HANDLES = [
     tags: ['StudentLeader', 'Youth']
   },
   {
-    id: 'target-23',
+    id: 'target-25',
     name: 'Dipsita Dhar',
     handle: 'DipsitaDhar',
     category: 'student',
@@ -246,7 +266,7 @@ export const TARGET_HANDLES = [
     tags: ['StudentLeader', 'Research']
   },
   {
-    id: 'target-24',
+    id: 'target-26',
     name: 'Shatarup Ghosh',
     handle: 'ShatarupGhosh',
     category: 'student',
@@ -255,60 +275,20 @@ export const TARGET_HANDLES = [
     bio: 'Viral political communicator with extensive reach among college graduates and youth.',
     tags: ['Commentator', 'Youth']
   },
-  {
-    id: 'target-25',
-    name: 'Pratikur Rahaman',
-    handle: 'Pratikur_SFI',
-    category: 'student',
-    role: 'Student Leader',
-    priority: 'high',
-    bio: 'Ground student organizer advocating for state university decentralized rounds.',
-    tags: ['StudentLeader']
-  },
-  {
-    id: 'target-26',
-    name: 'Trinankur Bhattacharjee',
-    handle: 'Trinankur_AITC',
-    category: 'student',
-    role: 'TMCP State President',
-    priority: 'critical',
-    bio: 'Ruling state student organization president; direct line of influence to Higher Education Dept.',
-    tags: ['StudentLeader', 'TMCP', 'StatePresident']
-  },
 
   // 4. Politicians & Decision Makers
   {
     id: 'target-27',
-    name: 'Bratya Basu',
-    handle: 'basu_bratya',
-    category: 'politician',
-    role: 'Minister for Higher Education, WB',
-    priority: 'critical',
-    bio: 'Minister in charge of WB Higher Education Dept & overseeing WBJEE Board policies.',
-    tags: ['Authority', 'EducationMinister', 'WBGov']
-  },
-  {
-    id: 'target-28',
     name: 'Suvendu Adhikari',
     handle: 'SuvenduWB',
     category: 'politician',
-    role: 'Leader of Opposition, WB Assembly',
+    role: 'Senior Leader & MLA, WB',
     priority: 'critical',
     bio: 'Massive digital reach; frequently amplifies West Bengal governance and student grievances.',
-    tags: ['Politician', 'LeaderOfOpposition']
+    tags: ['Politician', 'MLA', 'WB']
   },
   {
-    id: 'target-29',
-    name: 'Abhishek Banerjee',
-    handle: 'abhishekaitc',
-    category: 'politician',
-    role: 'Member of Parliament & General Secretary',
-    priority: 'critical',
-    bio: 'Highest leadership tier; critical for urgent state policy interventions.',
-    tags: ['Politician', 'MP', 'Leadership']
-  },
-  {
-    id: 'target-30',
+    id: 'target-28',
     name: 'Kunal Ghosh',
     handle: 'KunalGhoshAgain',
     category: 'politician',
@@ -318,37 +298,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'Spokesperson', 'Active']
   },
   {
-    id: 'target-31',
-    name: 'Debangshu Bhattacharya',
-    handle: 'ItsYourDev',
-    category: 'politician',
-    role: 'State Youth Leader & Spokesperson',
-    priority: 'high',
-    bio: 'Youth face of ruling party with strong daily engagement on student discourse.',
-    tags: ['Politician', 'Youth']
-  },
-  {
-    id: 'target-32',
-    name: 'Saayoni Ghosh',
-    handle: 'sayani06',
-    category: 'politician',
-    role: 'Member of Parliament & Youth President',
-    priority: 'high',
-    bio: 'MP & State Youth wing president vocal on candidate welfare.',
-    tags: ['Politician', 'MP', 'Youth']
-  },
-  {
-    id: 'target-33',
-    name: 'Sudip Raha',
-    handle: 'SudipRaha_',
-    category: 'politician',
-    role: 'State Youth General Secretary',
-    priority: 'high',
-    bio: 'Youth spokesperson actively tracking education updates in Kolkata.',
-    tags: ['Politician', 'Youth']
-  },
-  {
-    id: 'target-34',
+    id: 'target-29',
     name: 'Saket Gokhale',
     handle: 'SaketGokhale',
     category: 'politician',
@@ -358,7 +308,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MP', 'RajyaSabha']
   },
   {
-    id: 'target-35',
+    id: 'target-30',
     name: 'Derek O\'Brien',
     handle: 'derekobrienmp',
     category: 'politician',
@@ -368,17 +318,17 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MP']
   },
   {
-    id: 'target-36',
+    id: 'target-31',
     name: 'Mohammed Salim',
-    handle: 'MdSalimKolkata',
+    handle: 'salimdotcomrade',
     category: 'politician',
     role: 'State Secretary & Former MP',
     priority: 'high',
-    bio: 'Senior opposition leader consistently raising institutional recruitment & entrance anomalies.',
-    tags: ['Politician', 'Opposition']
+    bio: 'Senior leader consistently raising institutional recruitment & entrance anomalies.',
+    tags: ['Politician', 'Leadership']
   },
   {
-    id: 'target-37',
+    id: 'target-32',
     name: 'Dr. Sukanta Majumdar',
     handle: 'DrSukantaBJP',
     category: 'politician',
@@ -388,7 +338,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'UnionMinister', 'MP']
   },
   {
-    id: 'target-38',
+    id: 'target-33',
     name: 'Agnimitra Paul',
     handle: 'paulagnimitra1',
     category: 'politician',
@@ -398,7 +348,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MLA']
   },
   {
-    id: 'target-39',
+    id: 'target-34',
     name: 'Amit Malviya',
     handle: 'amitmalviya',
     category: 'politician',
@@ -408,7 +358,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'National']
   },
   {
-    id: 'target-40',
+    id: 'target-35',
     name: 'Dharmendra Pradhan',
     handle: 'dpradhanbjp',
     category: 'politician',
@@ -416,16 +366,6 @@ export const TARGET_HANDLES = [
     priority: 'high',
     bio: 'Union Minister overseeing higher education standards across states.',
     tags: ['Politician', 'UnionMinister', 'Cabinet']
-  },
-  {
-    id: 'target-41',
-    name: 'Pralhad Joshi',
-    handle: 'JoshiPralhad',
-    category: 'politician',
-    role: 'Union Cabinet Minister',
-    priority: 'medium',
-    bio: 'Union Cabinet Minister for Consumer Affairs and Public Affairs.',
-    tags: ['Politician', 'UnionMinister']
   }
 ];
 
