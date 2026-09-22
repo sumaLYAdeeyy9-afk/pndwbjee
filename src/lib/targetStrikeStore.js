@@ -1,8 +1,9 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 
 const LOCAL_STORAGE_KEY = 'wbjee_target_real_strike_counts_v2';
+const GLOBAL_TWEETS_KEY = 'wbjee_global_tweets_count_live';
 
-// 100% Real Initial State (Starts from 0, no dummy data)
+// Get local cache
 export function getLocalStrikeCounts() {
   try {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -24,19 +25,20 @@ export function saveLocalStrikeCounts(counts) {
   }
 }
 
-// Fetch 100% real strike counts from Supabase
+// Fetch real strike counts from Supabase (checking both target_strikes and campaign_stats)
 export async function fetchTargetStrikeCounts() {
   const local = getLocalStrikeCounts();
   
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase
+      // 1. Fetch from target_strikes table if present
+      const { data: targetData, error: targetError } = await supabase
         .from('target_strikes')
         .select('target_handle, strike_count');
 
-      if (data && !error) {
+      if (targetData && !targetError && targetData.length > 0) {
         const dbCounts = {};
-        data.forEach(row => {
+        targetData.forEach(row => {
           if (row.target_handle) {
             dbCounts[row.target_handle] = Number(row.strike_count || 0);
           }
@@ -44,8 +46,22 @@ export async function fetchTargetStrikeCounts() {
         saveLocalStrikeCounts(dbCounts);
         return dbCounts;
       }
+
+      // 2. Fallback / Sync with campaign_stats table (global tweets)
+      const { data: statsData, error: statsError } = await supabase
+        .from('campaign_stats')
+        .select('tweets')
+        .eq('id', 'global')
+        .single();
+
+      if (statsData && !statsError) {
+        const totalTweets = Number(statsData.tweets || 0);
+        try {
+          localStorage.setItem(GLOBAL_TWEETS_KEY, totalTweets.toString());
+        } catch {}
+      }
     } catch (err) {
-      console.warn('Could not fetch from Supabase target_strikes:', err);
+      console.warn('Supabase fetch failed (using local cache):', err);
     }
   }
 
@@ -63,40 +79,51 @@ export async function incrementTargetStrike(handle) {
   const updated = { ...current, [cleanHandle]: newCount };
   saveLocalStrikeCounts(updated);
 
-  // 2. Sync to Supabase via RPC or direct Upsert
+  // 2. Sync to Supabase
   if (isSupabaseConfigured && supabase) {
     try {
-      // First try RPC atomic increment
-      const { data: rpcData, error: rpcError } = await supabase
-        .rpc('increment_target_strike', { handle: cleanHandle });
+      // Always increment campaign_stats.tweets (the verified global counter)
+      const { data: currentStats } = await supabase
+        .from('campaign_stats')
+        .select('tweets')
+        .eq('id', 'global')
+        .single();
 
-      if (rpcError) {
-        // Fallback: Direct table upsert
-        await supabase
-          .from('target_strikes')
-          .upsert({
-            target_handle: cleanHandle,
-            strike_count: newCount,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'target_handle' });
-      } else if (rpcData !== null && rpcData !== undefined) {
-        updated[cleanHandle] = rpcData;
-        saveLocalStrikeCounts(updated);
+      const nextGlobalTweets = (Number(currentStats?.tweets || 0)) + 1;
+
+      await supabase
+        .from('campaign_stats')
+        .update({ tweets: nextGlobalTweets, updated_at: new Date().toISOString() })
+        .eq('id', 'global');
+
+      // Attempt to increment target_strikes table if created
+      const { error: upsertErr } = await supabase
+        .from('target_strikes')
+        .upsert({
+          target_handle: cleanHandle,
+          strike_count: newCount,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'target_handle' });
+
+      if (upsertErr) {
+        // Table might not be created yet in SQL editor, which is handled gracefully
+        console.info('Note: target_strikes table not yet created in Supabase SQL editor. Synced to campaign_stats.');
       }
     } catch (err) {
-      console.warn('Supabase target_strikes update failed (falling back to local):', err);
+      console.warn('Supabase sync failed (offline fallback):', err);
     }
   }
 
   return updated;
 }
 
-// Subscribe to real-time changes across all users
+// Subscribe to real-time changes across all devices (mobile, desktop, etc.)
 export function subscribeToTargetStrikes(onUpdate) {
   if (!isSupabaseConfigured || !supabase) return () => {};
 
   try {
-    const channel = supabase
+    // 1. Channel for target_strikes table
+    const targetChannel = supabase
       .channel('target_strikes_realtime')
       .on(
         'postgres_changes',
@@ -114,11 +141,33 @@ export function subscribeToTargetStrikes(onUpdate) {
       )
       .subscribe();
 
+    // 2. Channel for campaign_stats table (global tweets)
+    const statsChannel = supabase
+      .channel('strike_campaign_stats_realtime')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'campaign_stats', filter: 'id=eq.global' },
+        (payload) => {
+          if (payload.new) {
+            const tweets = Number(payload.new.tweets || 0);
+            try {
+              localStorage.setItem(GLOBAL_TWEETS_KEY, tweets.toString());
+            } catch {}
+            if (onUpdate) {
+              const current = getLocalStrikeCounts();
+              onUpdate({ ...current, _globalTweets: tweets });
+            }
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(targetChannel);
+      supabase.removeChannel(statsChannel);
     };
   } catch (e) {
-    console.warn('Could not subscribe to realtime target_strikes channel:', e);
+    console.warn('Could not subscribe to realtime strike channels:', e);
     return () => {};
   }
 }

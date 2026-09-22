@@ -231,6 +231,7 @@ export default function App() {
           onBackToMain={navigateToMain}
           onNavigateToEmail={navigateToEmail}
           onActionCompleted={handleActionCompleted}
+          globalStats={stats}
         />
       ) : (
         <main className="flex-1">

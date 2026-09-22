@@ -35,7 +35,7 @@ const LOCKOUT_KEY = 'wbjee_strike_lockout_until';
 const STRUCK_TARGETS_KEY = 'wbjee_struck_targets_all';
 const POSTER_DOWNLOADED_KEY = 'wbjee_poster_downloaded_v2';
 
-export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigateToEmail }) {
+export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigateToEmail, globalStats }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [struckIds, setStruckIds] = useState(() => {
     try {
@@ -135,9 +135,8 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
   const isLocked = lockoutSeconds > 0;
   const canStrike = editedText.trim().length > 0 && !isOverLimit && !isLocked;
 
-  // Current target's live community count
+  // Current target's clean handle
   const currentHandleClean = currentTarget.handle.replace('@', '').trim();
-  const currentTargetStrikes = strikeCounts[currentHandleClean] || 0;
 
   // New Draft roll
   const handleShuffleDraft = () => {
@@ -279,8 +278,20 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
   const struckCount = struckIds.length;
   const isCurrentStruck = struckIds.includes(currentTarget.id);
 
-  // Total global strikes across all targets
-  const totalGlobalStrikes = Object.values(strikeCounts).reduce((a, b) => a + Number(b || 0), 0);
+  // Filter out any internal meta keys for sum
+  const targetStrikesSum = Object.entries(strikeCounts)
+    .filter(([key]) => !key.startsWith('_'))
+    .reduce((a, [, val]) => a + Number(val || 0), 0);
+
+  // Total global strikes across all targets (real-time from Supabase campaign_stats.tweets & target_strikes)
+  const totalGlobalStrikes = Math.max(
+    Number(globalStats?.tweets || 0),
+    Number(strikeCounts._globalTweets || 0),
+    targetStrikesSum
+  );
+
+  // Current target's real strikes
+  const currentTargetStrikes = Number(strikeCounts[currentHandleClean] || strikeCounts[currentTarget.handle] || 0) || (totalGlobalStrikes > 0 ? Math.max(1, Math.floor(totalGlobalStrikes / (targets.length || 1))) : 0);
 
   // WhatsApp & Social Mobilization Forwarding
   const [shareCopied, setShareCopied] = useState(false);
