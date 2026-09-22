@@ -129,8 +129,8 @@ export const TARGET_HANDLES = [
   },
   {
     id: 'target-18',
-    name: 'Adv. Alok Srivastava',
-    handle: 'AlokSrivastava',
+    name: 'Adv. Alakh Alok Srivastava',
+    handle: 'advocate_alakh',
     category: 'advocate',
     role: 'Advocate on Record, Supreme Court',
     priority: 'high',
