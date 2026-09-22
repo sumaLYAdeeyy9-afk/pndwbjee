@@ -82,21 +82,7 @@ export async function incrementTargetStrike(handle) {
   // 2. Sync to Supabase
   if (isSupabaseConfigured && supabase) {
     try {
-      // Always increment campaign_stats.tweets (the verified global counter)
-      const { data: currentStats } = await supabase
-        .from('campaign_stats')
-        .select('tweets')
-        .eq('id', 'global')
-        .single();
-
-      const nextGlobalTweets = (Number(currentStats?.tweets || 0)) + 1;
-
-      await supabase
-        .from('campaign_stats')
-        .update({ tweets: nextGlobalTweets, updated_at: new Date().toISOString() })
-        .eq('id', 'global');
-
-      // Attempt to increment target_strikes table if created
+      // Attempt to increment target_strikes table if created in SQL editor
       const { error: upsertErr } = await supabase
         .from('target_strikes')
         .upsert({
@@ -106,11 +92,11 @@ export async function incrementTargetStrike(handle) {
         }, { onConflict: 'target_handle' });
 
       if (upsertErr) {
-        // Table might not be created yet in SQL editor, which is handled gracefully
-        console.info('Note: target_strikes table not yet created in Supabase SQL editor. Synced to campaign_stats.');
+        // Table not yet created in Supabase SQL editor; gracefully handled
+        console.info('target_strikes table not yet created in Supabase; local strike count used.');
       }
     } catch (err) {
-      console.warn('Supabase sync failed (offline fallback):', err);
+      console.warn('Supabase target_strikes sync failed (offline fallback):', err);
     }
   }
 
