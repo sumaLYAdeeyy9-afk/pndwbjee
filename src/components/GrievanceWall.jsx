@@ -86,14 +86,18 @@ export default function GrievanceWall({ onStorySubmitted }) {
     };
   }, []);
 
-  // Save stories to localStorage as fallback
+  // Save stories to localStorage as fallback safely
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stories_v2', JSON.stringify(stories));
+    try {
+      localStorage.setItem('pnd_wbjee_stories_v2', JSON.stringify(stories));
+    } catch {}
   }, [stories]);
 
-  // Save upvoted ids to localStorage
+  // Save upvoted ids to localStorage safely
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_upvoted', JSON.stringify(upvotedIds));
+    try {
+      localStorage.setItem('pnd_wbjee_upvoted', JSON.stringify(upvotedIds));
+    } catch {}
   }, [upvotedIds]);
 
   // Handle Upvote

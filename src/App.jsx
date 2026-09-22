@@ -130,9 +130,11 @@ export default function App() {
     };
   }, []);
 
-  // Save to local storage as fallback
+  // Save to local storage as fallback safely
   useEffect(() => {
-    localStorage.setItem('pnd_wbjee_stats_v10_live', JSON.stringify(stats));
+    try {
+      localStorage.setItem('pnd_wbjee_stats_v10_live', JSON.stringify(stats));
+    } catch {}
   }, [stats]);
 
   // Increment action handler with optimistic local update and Supabase sync

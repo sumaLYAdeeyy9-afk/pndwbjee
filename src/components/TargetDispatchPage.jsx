@@ -300,7 +300,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
     ? `${window.location.origin}/strike`
     : 'https://wbjee.playnodice.com/strike';
 
-  const strikeShareText = `🔥 *WBJEE 2026 DIGITAL STRIKE HUB IS LIVE!* ⚡
+  const strikeShareText = `🔥 *WBJEE 2026 STUDENT ADVOCACY & TWITTER CAMPAIGN IS LIVE!* ⚡
 
 Deserving students are stranded while vacant engineering seats in JU, CU & Government colleges are blocked by the flawed online portal!
 
@@ -310,7 +310,7 @@ Deserving students are stranded while vacant engineering seats in JU, CU & Gover
 ✅ Official campaign poster attachment
 ✅ Anti-spam automated queue protection
 
-👉 *Join the Strike & Tweet Your Demands in 10 Seconds:*
+👉 *Join the Campaign & Tweet Your Demands in 10 Seconds:*
 ${strikePortalUrl}
 
 Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants right now! Every single reply counts! ✊
@@ -458,7 +458,7 @@ Forward this to all WBJEE 2026 batches, coaching groups & engineering aspirants 
               className="w-full min-h-[48px] py-3 rounded-2xl bg-[#25D366] hover:bg-[#20ba59] text-black font-black text-xs transition-all flex items-center justify-center space-x-2 shadow-lg shadow-emerald-950/60 cursor-pointer active:scale-[0.99]"
             >
               <MessageCircle className="w-4 h-4 text-black fill-black" />
-              <span>Forward Strike Hub to WhatsApp Groups</span>
+              <span>Forward Campaign to WhatsApp Groups</span>
             </button>
 
             <button
