@@ -356,16 +356,6 @@ export const TARGET_HANDLES = [
     priority: 'high',
     bio: 'National amplification of West Bengal governance and student policy issues.',
     tags: ['Politician', 'National']
-  },
-  {
-    id: 'target-35',
-    name: 'Dharmendra Pradhan',
-    handle: 'dpradhanbjp',
-    category: 'politician',
-    role: 'Cabinet Minister for Education, Govt of India',
-    priority: 'high',
-    bio: 'Union Minister overseeing higher education standards across states.',
-    tags: ['Politician', 'UnionMinister', 'Cabinet']
   }
 ];
 
