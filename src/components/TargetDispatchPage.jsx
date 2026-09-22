@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   ArrowLeft, 
@@ -8,13 +8,11 @@ import {
   RefreshCw, 
   ChevronRight, 
   ChevronLeft, 
-  ArrowRight,
-  Download,
-  Image as ImageIcon,
-  CheckCircle2
+  ArrowRight, 
+  Download 
 } from 'lucide-react';
 import { TARGET_HANDLES } from '../data/targetHandles';
-import { generateUniqueReply, checkTextCustomized } from '../data/dynamicReplyGenerator';
+import { generateUniqueReply } from '../data/dynamicReplyGenerator';
 
 export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -27,7 +25,6 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
     }
   });
 
-  const [originalDraft, setOriginalDraft] = useState('');
   const [editedText, setEditedText] = useState('');
   const [copied, setCopied] = useState(false);
   const [posterDownloaded, setPosterDownloaded] = useState(false);
@@ -42,23 +39,18 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
   useEffect(() => {
     if (currentTarget) {
       const generated = generateUniqueReply();
-      setOriginalDraft(generated.text);
       setEditedText(generated.text);
       setCopied(false);
     }
   }, [currentTarget?.id]);
 
-  const customizationStatus = useMemo(() => {
-    return checkTextCustomized(originalDraft, editedText);
-  }, [originalDraft, editedText]);
-
   const charCount = editedText.length;
   const isOverLimit = charCount > 280;
+  const canStrike = editedText.trim().length > 0 && !isOverLimit;
 
   // New Draft roll
   const handleShuffleDraft = () => {
     const generated = generateUniqueReply();
-    setOriginalDraft(generated.text);
     setEditedText(generated.text);
     setCopied(false);
   };
@@ -76,7 +68,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
   // Primary Strike Action: Copy & Open X Profile
   const handleCopyAndStrike = () => {
-    if (!currentTarget || !customizationStatus.isValid) return;
+    if (!currentTarget || !canStrike) return;
 
     // 1. Copy text to clipboard
     navigator.clipboard.writeText(editedText).catch(() => {});
@@ -91,7 +83,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
       colors: ['#ffffff', '#a3a3a3', '#38bdf8', '#f43f5e']
     });
 
-    // Mark as struck for user reference (without vanishing the card)
+    // Mark as struck for user reference
     const newStruck = [...new Set([...struckIds, currentTarget.id])];
     setStruckIds(newStruck);
     try {
@@ -245,11 +237,11 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             </div>
           </div>
 
-          {/* ENLARGED HUMANIZED COMPOSER BOX */}
+          {/* ENLARGED COMPOSER BOX */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center space-x-1.5">
-                <span>Personalized Grievance Message</span>
+              <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
+                Grievance Message
               </label>
               <button
                 onClick={handleShuffleDraft}
@@ -260,25 +252,23 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
               </button>
             </div>
 
-            {/* Large Textarea */}
+            {/* Large Textarea (Editable, but edit is not mandatory) */}
             <textarea
               value={editedText}
               onChange={(e) => setEditedText(e.target.value)}
               rows={6}
               maxLength={280}
               className={`w-full p-4 sm:p-5 rounded-2xl bg-black border text-xs sm:text-sm leading-relaxed focus:outline-none transition-all resize-none font-sans ${
-                !customizationStatus.isValid
-                  ? 'border-neutral-800 text-neutral-300 focus:border-neutral-600'
-                  : isOverLimit
-                    ? 'border-red-500 text-white'
-                    : 'border-neutral-700 text-white focus:border-white'
+                isOverLimit
+                  ? 'border-red-500 text-white'
+                  : 'border-neutral-700 text-white focus:border-white'
               }`}
-              placeholder="Type or customize your humanized appeal here..."
+              placeholder="Your grievance message..."
             />
 
             <div className="flex items-center justify-between text-xs px-1">
-              <span className={customizationStatus.isValid ? 'text-neutral-400' : 'text-neutral-500'}>
-                {customizationStatus.reason}
+              <span className="text-neutral-500 text-[11px]">
+                You can copy immediately or edit the text if you wish
               </span>
               <span className={`font-mono font-bold ${isOverLimit ? 'text-red-400' : 'text-neutral-400'}`}>
                 {charCount} / 280
@@ -290,9 +280,9 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
           <div className="space-y-3 pt-2">
             <button
               onClick={handleCopyAndStrike}
-              disabled={!customizationStatus.isValid || isOverLimit}
+              disabled={!canStrike}
               className={`w-full py-4 px-6 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-2xl ${
-                customizationStatus.isValid && !isOverLimit
+                canStrike
                   ? 'bg-white text-black hover:bg-neutral-200 active:scale-[0.99]'
                   : 'bg-neutral-900 text-neutral-600 border border-neutral-800/80 cursor-not-allowed'
               }`}
@@ -312,7 +302,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             </button>
 
             <div className="bg-neutral-950 p-3.5 rounded-xl border border-neutral-900 text-[11px] text-neutral-400 text-center leading-relaxed">
-              💡 <strong>Action Flow:</strong> Tweak words above → Click button → Paste (Ctrl+V) in @{currentTarget.handle}'s latest post reply → <strong>Attach the poster</strong>!
+              💡 <strong>Action Flow:</strong> Click button → Paste (Ctrl+V) in @{currentTarget.handle}'s latest post reply → <strong>Attach the downloaded poster</strong>!
             </div>
           </div>
 
