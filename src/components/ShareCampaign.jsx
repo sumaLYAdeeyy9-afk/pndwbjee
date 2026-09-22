@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import confetti from 'canvas-confetti';
+import { fireConfetti } from '../lib/confettiHelper';
 import { Share2, MessageCircle, Send, Copy, Check, Users } from 'lucide-react';
 
 export default function ShareCampaign() {
@@ -55,7 +55,7 @@ ${portalUrl}
   };
 
   const triggerConfetti = () => {
-    confetti({
+    fireConfetti({
       particleCount: 50,
       spread: 60,
       origin: { y: 0.7 },

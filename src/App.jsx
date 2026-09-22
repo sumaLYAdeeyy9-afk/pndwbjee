@@ -1,14 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import LiveCounter from './components/LiveCounter';
 import EmailTool from './components/EmailTool';
 import ShareCampaign from './components/ShareCampaign';
-import Directory from './components/Directory';
 import Footer from './components/Footer';
-import AdminSubmissionsModal from './components/AdminSubmissionsModal';
-import TargetDispatchPage from './components/TargetDispatchPage';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
+
+// Lazy-loaded routes & heavy components for instant initial page loading & zero clutter
+const TargetDispatchPage = lazy(() => import('./components/TargetDispatchPage'));
+const AdminSubmissionsModal = lazy(() => import('./components/AdminSubmissionsModal'));
+const Directory = lazy(() => import('./components/Directory'));
+
+function SectionLoader() {
+  return (
+    <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3 p-8 text-center">
+      <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin" />
+      <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-widest">
+        Loading...
+      </span>
+    </div>
+  );
+}
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('email-tool');
@@ -229,12 +242,14 @@ export default function App() {
       />
 
       {currentPage === 'strike' ? (
-        <TargetDispatchPage 
-          onBackToMain={navigateToMain}
-          onNavigateToEmail={navigateToEmail}
-          onActionCompleted={handleActionCompleted}
-          globalStats={stats}
-        />
+        <Suspense fallback={<SectionLoader />}>
+          <TargetDispatchPage 
+            onBackToMain={navigateToMain}
+            onNavigateToEmail={navigateToEmail}
+            onActionCompleted={handleActionCompleted}
+            globalStats={stats}
+          />
+        </Suspense>
       ) : (
         <main className="flex-1">
           <EmailTool 
@@ -251,17 +266,23 @@ export default function App() {
 
           <ShareCampaign />
 
-          <Directory />
+          <Suspense fallback={<SectionLoader />}>
+            <Directory />
+          </Suspense>
         </main>
       )}
 
       <Footer />
 
       {/* Password-Protected Admin Submissions Log & CSV Exporter Modal */}
-      <AdminSubmissionsModal
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-      />
+      {isAdminOpen && (
+        <Suspense fallback={null}>
+          <AdminSubmissionsModal
+            isOpen={isAdminOpen}
+            onClose={() => setIsAdminOpen(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

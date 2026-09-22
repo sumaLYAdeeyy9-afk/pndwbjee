@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
+import { fireConfetti } from '../lib/confettiHelper';
 import { 
   ArrowLeft, 
   Copy, 
@@ -244,7 +244,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted, onNavigate
       setLockoutSeconds(600);
 
       // Trigger Confetti
-      confetti({
+      fireConfetti({
         particleCount: 75,
         spread: 80,
         origin: { y: 0.6 },
@@ -330,7 +330,7 @@ ${strikePortalUrl}
   const handleWhatsAppForward = () => {
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(strikeShareText)}`;
     window.open(url, '_blank');
-    confetti({
+    fireConfetti({
       particleCount: 45,
       spread: 60,
       origin: { y: 0.8 },
@@ -342,7 +342,7 @@ ${strikePortalUrl}
     navigator.clipboard.writeText(strikeShareText).then(() => {
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2500);
-      confetti({
+      fireConfetti({
         particleCount: 35,
         spread: 50,
         origin: { y: 0.8 },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
+import { fireConfetti } from '../lib/confettiHelper';
 import { 
   Mail, Send, Copy, Check, ExternalLink, ShieldCheck, 
   User, Hash, School, Phone, CheckCircle2, Globe,
@@ -314,13 +314,11 @@ export default function EmailTool({ onActionCompleted }) {
       isAnonymous: false
     });
 
-    try {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    } catch {}
+    fireConfetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
 
     if (typeof onActionCompleted === 'function') {
       onActionCompleted('emails');
