@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
-import { Mail, Share2, PhoneCall, Menu, X, Flame } from 'lucide-react';
+import { Mail, Share2, PhoneCall, Menu, X, Flame, Target, Zap } from 'lucide-react';
 
-export default function Navbar({ activeSection, scrollToSection }) {
+export default function Navbar({ activeSection, scrollToSection, onNavigateToStrike, currentPage }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
+    { id: 'strike-hub', label: '⚡ Strike Hub (41 Targets)', icon: Target, isPage: true, isSpecial: true },
     { id: 'email-tool', label: 'Email Authorities', icon: Mail, highlight: true },
     { id: 'demands', label: 'Our Demands', icon: Flame },
     { id: 'share-campaign', label: 'Mobilize Batches', icon: Share2 },
     { id: 'directory', label: 'Contacts & FAQ', icon: PhoneCall },
   ];
 
-  const handleNavClick = (id) => {
-    scrollToSection(id);
+  const handleNavClick = (item) => {
+    if (item.isPage) {
+      if (onNavigateToStrike) onNavigateToStrike();
+    } else {
+      scrollToSection(item.id);
+    }
     setMobileMenuOpen(false);
   };
 
@@ -39,17 +44,21 @@ export default function Navbar({ activeSection, scrollToSection }) {
             <nav className="flex items-center space-x-1 lg:space-x-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = activeSection === item.id;
+                const isCurrent = item.isPage ? currentPage === 'strike' : activeSection === item.id;
                 return (
                   <button
                     key={item.id}
-                    onClick={() => handleNavClick(item.id)}
-                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                      item.highlight 
-                        ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-900/40' 
-                        : isActive 
-                          ? 'bg-slate-800 text-rose-400 border border-rose-500/30' 
-                          : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    onClick={() => handleNavClick(item)}
+                    className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      item.isSpecial
+                        ? isCurrent
+                          ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white shadow-lg shadow-rose-950 ring-2 ring-rose-400'
+                          : 'bg-gradient-to-r from-rose-600/90 to-amber-600/90 hover:from-rose-500 hover:to-amber-500 text-white shadow-md shadow-rose-950/40 animate-pulse'
+                        : item.highlight 
+                          ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-900/40' 
+                          : isCurrent 
+                            ? 'bg-slate-800 text-rose-400 border border-rose-500/30' 
+                            : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                     }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -77,14 +86,19 @@ export default function Navbar({ activeSection, scrollToSection }) {
         <div className="md:hidden bg-slate-950 border-b border-slate-800 px-4 pt-2 pb-4 space-y-2 animate-in fade-in slide-in-from-top duration-200">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isCurrent = item.isPage ? currentPage === 'strike' : activeSection === item.id;
             return (
               <button
                 key={item.id}
-                onClick={() => handleNavClick(item.id)}
+                onClick={() => handleNavClick(item)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-semibold text-left transition-all ${
-                  item.highlight 
-                    ? 'bg-rose-600 text-white font-bold' 
-                    : 'bg-slate-900 text-slate-200 hover:bg-slate-800'
+                  item.isSpecial
+                    ? 'bg-gradient-to-r from-rose-600 to-amber-600 text-white font-extrabold shadow-lg shadow-rose-950'
+                    : item.highlight 
+                      ? 'bg-rose-600 text-white font-bold' 
+                      : isCurrent
+                        ? 'bg-slate-800 text-rose-400 border border-rose-500/30'
+                        : 'bg-slate-900 text-slate-200 hover:bg-slate-800'
                 }`}
               >
                 <Icon className="w-4 h-4" />

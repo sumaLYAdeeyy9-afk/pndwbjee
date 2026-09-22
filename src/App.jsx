@@ -7,10 +7,21 @@ import ShareCampaign from './components/ShareCampaign';
 import Directory from './components/Directory';
 import Footer from './components/Footer';
 import AdminSubmissionsModal from './components/AdminSubmissionsModal';
+import TargetDispatchPage from './components/TargetDispatchPage';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('email-tool');
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const isStrikeQuery = params.get('page') === 'strike' || params.get('page') === 'dispatch';
+      const isStrikeHash = window.location.hash.toLowerCase().includes('strike') || window.location.hash.toLowerCase().includes('dispatch');
+      const isStrikePath = window.location.pathname.toLowerCase().includes('/strike') || window.location.pathname.toLowerCase().includes('/dispatch');
+      if (isStrikeQuery || isStrikeHash || isStrikePath) return 'strike';
+    }
+    return 'main';
+  });
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Real Community Stats initialized starting strictly from 0
@@ -20,14 +31,15 @@ export default function App() {
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
-      emails: 0
+      emails: 0,
+      tweets: 0
     };
   });
 
-  // Check URL routes (?admin=true, #admin, /admin) or key combination Ctrl+Shift+A
+  // Check URL routes (?page=strike, /strike, #strike, ?admin=true, #admin, /admin)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const checkAdminTriggers = () => {
+      const checkRoutes = () => {
         const params = new URLSearchParams(window.location.search);
         const hasAdminParam = params.has('admin');
         const hasAdminHash = window.location.hash.toLowerCase().includes('admin');
@@ -36,11 +48,24 @@ export default function App() {
         if (hasAdminParam || hasAdminHash || hasAdminPath) {
           setIsAdminOpen(true);
         }
+
+        const isStrikeQuery = params.get('page') === 'strike' || params.get('page') === 'dispatch';
+        const isStrikeHash = window.location.hash.toLowerCase().includes('strike') || window.location.hash.toLowerCase().includes('dispatch');
+        const isStrikePath = window.location.pathname.toLowerCase().includes('/strike') || window.location.pathname.toLowerCase().includes('/dispatch');
+
+        if (isStrikeQuery || isStrikeHash || isStrikePath) {
+          setCurrentPage('strike');
+        } else if (!hasAdminParam && !hasAdminHash) {
+          // If explicitly navigating home
+          if (window.location.hash === '' || window.location.hash === '#top') {
+            setCurrentPage('main');
+          }
+        }
       };
 
-      checkAdminTriggers();
-      window.addEventListener('popstate', checkAdminTriggers);
-      window.addEventListener('hashchange', checkAdminTriggers);
+      checkRoutes();
+      window.addEventListener('popstate', checkRoutes);
+      window.addEventListener('hashchange', checkRoutes);
 
       const handleKeyDown = (e) => {
         if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
@@ -51,8 +76,8 @@ export default function App() {
 
       window.addEventListener('keydown', handleKeyDown);
       return () => {
-        window.removeEventListener('popstate', checkAdminTriggers);
-        window.removeEventListener('hashchange', checkAdminTriggers);
+        window.removeEventListener('popstate', checkRoutes);
+        window.removeEventListener('hashchange', checkRoutes);
         window.removeEventListener('keydown', handleKeyDown);
       };
     }
@@ -72,7 +97,8 @@ export default function App() {
 
         if (data && !error) {
           setStats({
-            emails: data.emails || 0
+            emails: data.emails || 0,
+            tweets: data.tweets || 0
           });
         }
       } catch (err) {
@@ -91,7 +117,8 @@ export default function App() {
         (payload) => {
           if (payload.new) {
             setStats({
-              emails: payload.new.emails || 0
+              emails: payload.new.emails || 0,
+              tweets: payload.new.tweets || 0
             });
           }
         }
@@ -110,31 +137,30 @@ export default function App() {
 
   // Increment action handler with optimistic local update and Supabase sync
   const handleActionCompleted = async (type = 'emails') => {
-    const statKey = (type === 'email' || type === 'emails') ? 'emails' : type;
+    const statKey = (type === 'email' || type === 'emails') ? 'emails' : 'tweets';
 
     // 1. Optimistic local increment
     setStats(prev => {
-      const currentVal = Number(prev[statKey] || prev.emails || 0);
+      const currentVal = Number(prev[statKey] || 0);
       const updated = {
         ...prev,
-        [statKey]: currentVal + 1,
-        emails: currentVal + 1
+        [statKey]: currentVal + 1
       };
 
       // 2. Sync to Supabase
       if (isSupabaseConfigured && supabase) {
-        supabase.rpc('increment_campaign_stat', { stat_column: 'emails' }).then(({ error }) => {
+        supabase.rpc('increment_campaign_stat', { stat_column: statKey }).then(({ error }) => {
           if (error) {
             supabase
               .from('campaign_stats')
-              .update({ emails: updated.emails, updated_at: new Date().toISOString() })
+              .update({ [statKey]: updated[statKey], updated_at: new Date().toISOString() })
               .eq('id', 'global')
               .catch(console.error);
           }
         }).catch(() => {
           supabase
             .from('campaign_stats')
-            .update({ emails: updated.emails, updated_at: new Date().toISOString() })
+            .update({ [statKey]: updated[statKey], updated_at: new Date().toISOString() })
             .eq('id', 'global')
             .catch(console.error);
         });
@@ -144,11 +170,37 @@ export default function App() {
     });
   };
 
+  const navigateToStrike = () => {
+    setCurrentPage('strike');
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', '?page=strike');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const navigateToMain = () => {
+    setCurrentPage('main');
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', window.location.pathname);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const scrollToSection = (id) => {
-    setActiveSection(id);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (currentPage !== 'main') {
+      navigateToMain();
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      setActiveSection(id);
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 
@@ -157,25 +209,34 @@ export default function App() {
       <Navbar 
         activeSection={activeSection} 
         scrollToSection={scrollToSection} 
+        onNavigateToStrike={navigateToStrike}
+        currentPage={currentPage}
       />
 
-      <main className="flex-1">
-        <EmailTool 
-          onActionCompleted={handleActionCompleted} 
+      {currentPage === 'strike' ? (
+        <TargetDispatchPage 
+          onBackToMain={navigateToMain}
+          onActionCompleted={handleActionCompleted}
         />
+      ) : (
+        <main className="flex-1">
+          <EmailTool 
+            onActionCompleted={handleActionCompleted} 
+          />
 
-        <Hero 
-          scrollToSection={scrollToSection} 
-        />
+          <Hero 
+            scrollToSection={scrollToSection} 
+          />
 
-        <LiveCounter 
-          stats={stats} 
-        />
+          <LiveCounter 
+            stats={stats} 
+          />
 
-        <ShareCampaign />
+          <ShareCampaign />
 
-        <Directory />
-      </main>
+          <Directory />
+        </main>
+      )}
 
       <Footer />
 
