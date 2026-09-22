@@ -11,7 +11,8 @@ import {
   Download,
   Clock,
   ShieldCheck,
-  AlertCircle
+  Lock,
+  Sparkles
 } from 'lucide-react';
 import { TARGET_HANDLES } from '../data/targetHandles';
 import { generateUniqueReply } from '../data/dynamicReplyGenerator';
@@ -127,7 +128,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
     }, 2000);
   };
 
-  // 2. User confirms they have posted their reply -> Trigger 10-Minute Lockout
+  // 2. User confirms they have posted their reply -> Trigger Full-Page 10-Minute Lockout
   const handleConfirmPosted = (posted) => {
     if (posted && pendingConfirmTarget) {
       // Mark as struck
@@ -150,9 +151,9 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
       // Trigger Confetti
       confetti({
-        particleCount: 60,
-        spread: 70,
-        origin: { y: 0.7 },
+        particleCount: 70,
+        spread: 80,
+        origin: { y: 0.6 },
         colors: ['#ffffff', '#38bdf8', '#34d399', '#f59e0b']
       });
 
@@ -160,7 +161,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
         onActionCompleted('tweets');
       }
 
-      // Advance to next target
+      // Advance to next target for when timer expires
       setCurrentIndex(prev => (prev < targets.length - 1 ? prev + 1 : 0));
     }
 
@@ -179,6 +180,110 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
   const struckCount = struckIds.length;
   const isCurrentStruck = struckIds.includes(currentTarget.id);
 
+  // --------------------------------------------------------------------------
+  // FULL PAGE LOCKOUT VIEW (NO OPTIONS LEFT WHILE TIMER RUNS)
+  // --------------------------------------------------------------------------
+  if (isLocked) {
+    const progressPercent = Math.max(0, Math.min(100, ((600 - lockoutSeconds) / 600) * 100));
+
+    return (
+      <div className="min-h-screen bg-black text-neutral-100 flex flex-col font-sans selection:bg-neutral-800 selection:text-white">
+        
+        {/* Minimal Header */}
+        <header className="border-b border-neutral-900 bg-black/95 backdrop-blur-md sticky top-0 z-30">
+          <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+            <button
+              onClick={onBackToMain}
+              className="flex items-center space-x-1.5 text-xs text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Main Portal</span>
+            </button>
+
+            <div className="text-xs font-bold tracking-widest text-amber-400 uppercase flex items-center space-x-2">
+              <Lock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span>ANTI-SPAM SAFETY LOCKOUT</span>
+            </div>
+
+            <div className="text-xs font-mono text-neutral-400">
+              <span className="text-white font-bold">{struckCount}</span> / {totalAll} struck
+            </div>
+          </div>
+        </header>
+
+        {/* FULL PAGE LOCKOUT CENTER CONTAINER */}
+        <main className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 max-w-xl mx-auto w-full text-center space-y-8 animate-fade-in">
+          
+          {/* Big Glowing Lock Badge */}
+          <div className="relative">
+            <div className="w-24 h-24 rounded-3xl bg-neutral-950 border-2 border-amber-500/40 text-amber-400 flex items-center justify-center shadow-2xl shadow-amber-500/10 mx-auto animate-pulse">
+              <Lock className="w-10 h-10" />
+            </div>
+            <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shadow-lg">
+              ⏳
+            </div>
+          </div>
+
+          {/* Huge Digital Countdown Timer */}
+          <div className="space-y-2">
+            <div className="text-5xl sm:text-7xl font-black font-mono tracking-tight text-white select-none">
+              {formatTime(lockoutSeconds)}
+            </div>
+            <p className="text-xs font-bold uppercase tracking-widest text-amber-400">
+              Lockout Active • Cooldown in Progress
+            </p>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-neutral-900 h-2 rounded-full overflow-hidden border border-neutral-800">
+            <div 
+              className="bg-gradient-to-r from-amber-500 to-emerald-400 h-full transition-all duration-1000 ease-linear rounded-full"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          {/* Detailed Anti-Spam Explanation Card */}
+          <div className="bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-5 text-left space-y-3 w-full shadow-xl">
+            <div className="flex items-center space-x-2 text-white font-bold text-xs">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>Why is this page locked?</span>
+            </div>
+            <p className="text-xs text-neutral-400 leading-relaxed">
+              To safeguard candidate accounts against Twitter/X automated spam detection, shadowbans, and rate limits, a mandatory <strong>10-minute cooldown</strong> is enforced after each reply.
+            </p>
+            <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px] text-neutral-500 font-mono">
+              <span>Next target: <strong>@{currentTarget.handle}</strong></span>
+              <span>Unlocks automatically at 00:00</span>
+            </div>
+          </div>
+
+          {/* Helpful actions while waiting */}
+          <div className="w-full space-y-3 pt-2">
+            <button
+              onClick={handleDownloadPoster}
+              className="w-full py-3.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 font-bold text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer"
+            >
+              <Download className="w-4 h-4 text-neutral-400" />
+              <span>Download Campaign Poster ({posterDownloaded ? 'Downloaded ✓' : 'Keep Ready'})</span>
+            </button>
+
+            <button
+              onClick={onBackToMain}
+              className="w-full py-3.5 rounded-2xl bg-neutral-950 hover:bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-900 font-semibold text-xs transition-all cursor-pointer"
+            >
+              View Main Petition & Analytics Dashboard →
+            </button>
+          </div>
+
+        </main>
+
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // NORMAL ACTIVE DISPATCH HUB VIEW (WHEN NOT LOCKED)
+  // --------------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-black text-neutral-100 flex flex-col font-sans selection:bg-neutral-800 selection:text-white">
       
@@ -193,14 +298,8 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             <span>Main Portal</span>
           </button>
 
-          <div className="text-xs font-bold tracking-widest text-neutral-300 uppercase flex items-center space-x-2">
-            <span>TARGET STRIKE HUB</span>
-            {isLocked && (
-              <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono flex items-center space-x-1">
-                <Clock className="w-3 h-3 animate-spin" />
-                <span>{formatTime(lockoutSeconds)}</span>
-              </span>
-            )}
+          <div className="text-xs font-bold tracking-widest text-neutral-300 uppercase">
+            TARGET STRIKE HUB
           </div>
 
           <div className="text-xs font-mono text-neutral-400">
@@ -211,28 +310,6 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
       {/* Main Spacious Container */}
       <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 py-8 w-full flex flex-col justify-center space-y-6">
-
-        {/* 10-Minute Lockout Active Alert Banner */}
-        {isLocked && (
-          <div className="bg-gradient-to-r from-amber-950/40 via-black to-neutral-950 border border-amber-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl flex items-start space-x-4 animate-fade-in">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0 mt-0.5">
-              <Clock className="w-5 h-5 animate-pulse" />
-            </div>
-            <div className="space-y-1 flex-1">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-1.5">
-                  <span>10-Minute Anti-Spam Safety Lockout</span>
-                </h4>
-                <span className="text-xs font-mono font-black text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-lg border border-amber-500/30">
-                  ⏳ {formatTime(lockoutSeconds)}
-                </span>
-              </div>
-              <p className="text-xs text-neutral-300 leading-relaxed">
-                To prevent accounts from being flagged or shadowbanned by X's spam detection algorithm, there is a mandatory <strong>10-minute cooldown</strong> between strikes. You can review and prepare your next message below!
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Poster Download & Attachment Directive Banner */}
         <div className="bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
@@ -375,25 +452,18 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             </div>
           </div>
 
-          {/* ACTION BUTTON WITH 10-MIN LOCKOUT LOGIC */}
+          {/* ACTION BUTTON */}
           <div className="space-y-3 pt-2">
             <button
               onClick={handleCopyAndStrike}
               disabled={!canStrike}
               className={`w-full py-4 px-6 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-2xl ${
-                isLocked
-                  ? 'bg-neutral-900 text-amber-400 border border-amber-500/30 cursor-not-allowed'
-                  : canStrike
-                    ? 'bg-white text-black hover:bg-neutral-200 active:scale-[0.99]'
-                    : 'bg-neutral-900 text-neutral-600 border border-neutral-800/80 cursor-not-allowed'
+                canStrike
+                  ? 'bg-white text-black hover:bg-neutral-200 active:scale-[0.99]'
+                  : 'bg-neutral-900 text-neutral-600 border border-neutral-800/80 cursor-not-allowed'
               }`}
             >
-              {isLocked ? (
-                <>
-                  <Clock className="w-4 h-4 animate-spin text-amber-400" />
-                  <span>Locked: Next Strike in {formatTime(lockoutSeconds)}</span>
-                </>
-              ) : copied ? (
+              {copied ? (
                 <>
                   <Check className="w-4 h-4 text-black" />
                   <span>Copied! Opening @{currentTarget.handle} on X...</span>
@@ -439,7 +509,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
                 <span>Anti-Spam 10-Minute Lockout</span>
               </div>
               <p className="text-[11px] text-neutral-400">
-                Clicking <strong>"Yes, I Posted"</strong> will lock the next strike for <strong>10 minutes</strong> to safeguard your account against X rate limits.
+                Clicking <strong>"Yes, I Posted"</strong> will lock the entire strike hub for <strong>10 minutes</strong> to safeguard your account against X rate limits.
               </p>
             </div>
 
