@@ -12,16 +12,27 @@ import {
   Clock,
   ShieldCheck,
   Lock,
-  Sparkles
+  Flame,
+  Users
 } from 'lucide-react';
 import { TARGET_HANDLES } from '../data/targetHandles';
 import { generateUniqueReply } from '../data/dynamicReplyGenerator';
+import { 
+  fetchTargetStrikeCounts, 
+  incrementTargetStrike, 
+  subscribeToTargetStrikes, 
+  getLocalStrikeCounts 
+} from '../lib/targetStrikeStore';
+
+const PENDING_TOKEN_KEY = 'wbjee_pending_strike_token';
+const LOCKOUT_KEY = 'wbjee_strike_lockout_until';
+const STRUCK_TARGETS_KEY = 'wbjee_struck_targets_all';
 
 export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [struckIds, setStruckIds] = useState(() => {
     try {
-      const saved = localStorage.getItem('wbjee_struck_targets_all');
+      const saved = localStorage.getItem(STRUCK_TARGETS_KEY);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -32,13 +43,23 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
   const [copied, setCopied] = useState(false);
   const [posterDownloaded, setPosterDownloaded] = useState(false);
   
-  // Pending verification popup state
-  const [pendingConfirmTarget, setPendingConfirmTarget] = useState(null);
+  // Real-time Global Strike Counts Store
+  const [strikeCounts, setStrikeCounts] = useState(() => getLocalStrikeCounts());
+
+  // Persistent Pending Strike Token (Survives Reloads)
+  const [pendingToken, setPendingToken] = useState(() => {
+    try {
+      const saved = localStorage.getItem(PENDING_TOKEN_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
 
   // 10-Minute Lockout Cooldown State
   const [lockoutSeconds, setLockoutSeconds] = useState(() => {
     try {
-      const storedUntil = localStorage.getItem('wbjee_strike_lockout_until');
+      const storedUntil = localStorage.getItem(LOCKOUT_KEY);
       if (storedUntil) {
         const remaining = Math.max(0, Math.ceil((parseInt(storedUntil, 10) - Date.now()) / 1000));
         return remaining;
@@ -48,6 +69,13 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
       return 0;
     }
   });
+
+  // Fetch initial global counts & subscribe to real-time updates
+  useEffect(() => {
+    fetchTargetStrikeCounts().then(setStrikeCounts);
+    const unsubscribe = subscribeToTargetStrikes(setStrikeCounts);
+    return () => unsubscribe();
+  }, []);
 
   // All targets in specified order (with Suvendu Adhikari at the end)
   const targets = TARGET_HANDLES;
@@ -59,12 +87,12 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
     const timer = setInterval(() => {
       try {
-        const storedUntil = localStorage.getItem('wbjee_strike_lockout_until');
+        const storedUntil = localStorage.getItem(LOCKOUT_KEY);
         if (storedUntil) {
           const remaining = Math.max(0, Math.ceil((parseInt(storedUntil, 10) - Date.now()) / 1000));
           setLockoutSeconds(remaining);
           if (remaining <= 0) {
-            localStorage.removeItem('wbjee_strike_lockout_until');
+            localStorage.removeItem(LOCKOUT_KEY);
           }
         } else {
           setLockoutSeconds(0);
@@ -91,6 +119,10 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
   const isLocked = lockoutSeconds > 0;
   const canStrike = editedText.trim().length > 0 && !isOverLimit && !isLocked;
 
+  // Current target's live community count
+  const currentHandleClean = currentTarget.handle.replace('@', '').trim();
+  const currentTargetStrikes = strikeCounts[currentHandleClean] || 0;
+
   // New Draft roll
   const handleShuffleDraft = () => {
     const generated = generateUniqueReply();
@@ -109,7 +141,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
     setPosterDownloaded(true);
   };
 
-  // 1. User clicks Copy & Open X Profile
+  // 1. User clicks Copy & Open X Profile -> Register Persistent Token in localStorage
   const handleCopyAndStrike = () => {
     if (!currentTarget || !canStrike) return;
 
@@ -117,8 +149,20 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
     navigator.clipboard.writeText(editedText).catch(() => {});
     setCopied(true);
     
-    // Set pending target for confirmation pop-up
-    setPendingConfirmTarget(currentTarget);
+    // Register persistent strike token in localStorage (persists across page reloads)
+    const token = {
+      tokenId: `strike_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      targetId: currentTarget.id,
+      handle: currentTarget.handle,
+      name: currentTarget.name,
+      timestamp: Date.now()
+    };
+    try {
+      localStorage.setItem(PENDING_TOKEN_KEY, JSON.stringify(token));
+    } catch (e) {
+      console.error(e);
+    }
+    setPendingToken(token);
 
     // Open target profile in a new tab
     window.open(`https://x.com/${currentTarget.handle}`, '_blank', 'noopener,noreferrer');
@@ -128,22 +172,30 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
     }, 2000);
   };
 
-  // 2. User confirms they have posted their reply -> Trigger Full-Page 10-Minute Lockout
-  const handleConfirmPosted = (posted) => {
-    if (posted && pendingConfirmTarget) {
-      // Mark as struck
-      const newStruck = [...new Set([...struckIds, pendingConfirmTarget.id])];
+  // 2. User confirms they have posted their reply -> Increment Global Counter & Trigger Full-Page 10-Minute Lockout
+  const handleConfirmPosted = async (posted) => {
+    if (posted && pendingToken) {
+      const activeHandle = pendingToken.handle;
+
+      // Increment global counter live for this X profile across all users
+      const updatedCounts = await incrementTargetStrike(activeHandle);
+      if (updatedCounts) {
+        setStrikeCounts(updatedCounts);
+      }
+
+      // Mark as struck in user's personal history
+      const newStruck = [...new Set([...struckIds, pendingToken.targetId])];
       setStruckIds(newStruck);
       try {
-        localStorage.setItem('wbjee_struck_targets_all', JSON.stringify(newStruck));
+        localStorage.setItem(STRUCK_TARGETS_KEY, JSON.stringify(newStruck));
       } catch (e) {
         console.error(e);
       }
 
-      // Start 10-minute lockout (10 * 60 = 600 seconds)
+      // Start 10-minute lockout (600 seconds)
       const lockoutEnd = Date.now() + 10 * 60 * 1000;
       try {
-        localStorage.setItem('wbjee_strike_lockout_until', lockoutEnd.toString());
+        localStorage.setItem(LOCKOUT_KEY, lockoutEnd.toString());
       } catch (e) {
         console.error(e);
       }
@@ -151,7 +203,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
       // Trigger Confetti
       confetti({
-        particleCount: 70,
+        particleCount: 75,
         spread: 80,
         origin: { y: 0.6 },
         colors: ['#ffffff', '#38bdf8', '#34d399', '#f59e0b']
@@ -161,12 +213,17 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
         onActionCompleted('tweets');
       }
 
-      // Advance to next target for when timer expires
+      // Advance to next target
       setCurrentIndex(prev => (prev < targets.length - 1 ? prev + 1 : 0));
     }
 
-    // Close confirmation pop-up
-    setPendingConfirmTarget(null);
+    // Always clear the token once responded to (Yes or Not Yet)
+    try {
+      localStorage.removeItem(PENDING_TOKEN_KEY);
+    } catch (e) {
+      console.error(e);
+    }
+    setPendingToken(null);
   };
 
   // Format seconds to MM:SS
@@ -179,6 +236,9 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
   const totalAll = targets.length;
   const struckCount = struckIds.length;
   const isCurrentStruck = struckIds.includes(currentTarget.id);
+
+  // Total global strikes across all targets
+  const totalGlobalStrikes = Object.values(strikeCounts).reduce((a, b) => a + Number(b || 0), 0);
 
   // --------------------------------------------------------------------------
   // FULL PAGE LOCKOUT VIEW (NO OPTIONS LEFT WHILE TIMER RUNS)
@@ -253,7 +313,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             </p>
             <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px] text-neutral-500 font-mono">
               <span>Next target: <strong>@{currentTarget.handle}</strong></span>
-              <span>Unlocks automatically at 00:00</span>
+              <span className="text-amber-400 font-bold">⚡ {totalGlobalStrikes.toLocaleString()} Total Strikes</span>
             </div>
           </div>
 
@@ -298,8 +358,12 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             <span>Main Portal</span>
           </button>
 
-          <div className="text-xs font-bold tracking-widest text-neutral-300 uppercase">
-            TARGET STRIKE HUB
+          <div className="text-xs font-bold tracking-widest text-neutral-300 uppercase flex items-center space-x-2">
+            <span>TARGET STRIKE HUB</span>
+            <span className="text-[10px] bg-neutral-900 border border-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full font-mono flex items-center space-x-1">
+              <Flame className="w-3 h-3 text-amber-400" />
+              <span>{totalGlobalStrikes.toLocaleString()} Total</span>
+            </span>
           </div>
 
           <div className="text-xs font-mono text-neutral-400">
@@ -357,23 +421,31 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
         {/* ENLARGED ACTIVE TARGET FLASHCARD */}
         <div className="bg-[#0a0a0a] border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
           
-          {/* Target Account Header & Card Navigation */}
-          <div className="flex items-start justify-between border-b border-neutral-900 pb-5">
+          {/* Target Account Header, Live Community Counter, & Card Navigation */}
+          <div className="flex items-start justify-between border-b border-neutral-900 pb-5 gap-4">
             <div className="flex items-center space-x-4">
               <div className="w-14 h-14 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-center font-black text-xl text-white shrink-0 shadow-inner">
                 {currentTarget.name.charAt(0)}
               </div>
               <div>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-extrabold text-lg sm:text-xl text-white">
                     {currentTarget.name}
                   </h2>
+                  
+                  {/* Live Community Strikes Counter for this Target */}
+                  <div className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-[11px] font-bold shadow-sm">
+                    <Flame className="w-3 h-3 text-amber-400" />
+                    <span>{currentTargetStrikes.toLocaleString()} Replies</span>
+                  </div>
+
                   {isCurrentStruck && (
                     <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                      ✓ Struck
+                      ✓ Struck by You
                     </span>
                   )}
                 </div>
+
                 <div className="flex items-center space-x-2 mt-0.5">
                   <a
                     href={`https://x.com/${currentTarget.handle}`}
@@ -477,7 +549,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             </button>
 
             <div className="bg-neutral-950 p-3.5 rounded-xl border border-neutral-900 text-[11px] text-neutral-400 text-center leading-relaxed">
-              💡 <strong>Action Flow:</strong> Click button → Paste (Ctrl+V) in @{currentTarget.handle}'s latest post reply → <strong>Attach poster</strong> → Confirm in popup to start 10m timer!
+              💡 <strong>Action Flow:</strong> Click button → Paste (Ctrl+V) in @{currentTarget.handle}'s latest post reply → <strong>Attach poster</strong> → Confirm popup (persists on reload) to start 10m timer!
             </div>
           </div>
 
@@ -485,8 +557,8 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
       </main>
 
-      {/* POPUP CONFIRMATION MODAL ("Have you posted your message?") */}
-      {pendingConfirmTarget && (
+      {/* PERSISTENT CONFIRMATION POPUP MODAL (SURVIVES RELOADS) */}
+      {pendingToken && !isLocked && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#0d0d0d] border border-neutral-800 rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-6 shadow-2xl animate-scale-in text-center">
             
@@ -499,7 +571,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
                 Have you posted your message?
               </h3>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Did you reply to <strong className="text-white">@{pendingConfirmTarget.handle}</strong>'s latest post on X and attach the campaign poster?
+                Did you reply to <strong className="text-white">@{pendingToken.handle}</strong>'s latest post on X and attach the campaign poster?
               </p>
             </div>
 
@@ -509,7 +581,7 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
                 <span>Anti-Spam 10-Minute Lockout</span>
               </div>
               <p className="text-[11px] text-neutral-400">
-                Clicking <strong>"Yes, I Posted"</strong> will lock the entire strike hub for <strong>10 minutes</strong> to safeguard your account against X rate limits.
+                Clicking <strong>"Yes, I Posted"</strong> records your strike (+1 Live Community Counter) and locks the strike hub for <strong>10 minutes</strong>.
               </p>
             </div>
 
