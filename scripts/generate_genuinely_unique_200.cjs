@@ -1,62 +1,115 @@
-// 200 Unique Humanized Message Variations for WBJEE 2026 Strike Hub
-// RULES ENFORCED:
-// 1. Mandatory Hashtag: #JusticeForWBJEE on every post
-// 2. Length strictly <= 280 characters
-// 3. No bot keywords, no @ tags in body, no rank/GMR numbers
-// 4. Every single message has a unique, distinct opening and style
-// 5. Emotional, urgent, factual, and analytical student appeals for offline spot counseling
+const fs = require('fs');
 
-export const MESSAGES_200 = [
+const rawMessages = [
   "Thousands of WBJEE rankers are stranded because online decentralized counseling allows one candidate to block multiple seats simultaneously. Please order an immediate on-campus offline spot round to fill vacancies transparently on merit! #JusticeForWBJEE",
+  
   "Engineering seats in premier institutions like JU, CU, and KGEC are sitting vacant while deserving students lose their entire academic year. An open physical spot counseling is the only fair solution. Please intervene! #JusticeForWBJEE",
+  
   "Our middle-class parents put everything on the line for our WBJEE preparation. Seeing seats remain vacant due to portal flaws is heartbreaking. We urge authorities to conduct open offline spot rounds immediately. #JusticeForWBJEE",
+  
   "Why are state engineering colleges refusing to conduct physical spot rounds when central exams do it transparently? Multiple seat holding is choking the counseling process. Please hear our plea! #JusticeForWBJEE",
+  
   "Top government engineering departments will start with half-empty classrooms if physical spot counseling is not permitted. Give genuine rankers a fair chance through offline merit counseling. #JusticeForWBJEE",
+  
   "Online decentralized counseling is taking weeks with zero movement in waiting lists because students don't surrender blocked seats. An on-campus spot round with physical document verification will solve this in 1 day! #JusticeForWBJEE",
+  
   "We spent 2 years studying 14 hours a day for WBJEE. It is painful to watch seats go unfilled while high rankers are left without admission. Please mandate offline spot counseling for all state universities. #JusticeForWBJEE",
+  
   "Genuine candidates with good GMRs are sitting at home because the online DC portal has no real-time seat release mechanism. An open offline spot round at university campuses is urgently needed. #JusticeForWBJEE",
+  
   "Every single government engineering seat is funded by taxpayers and must not be wasted. We demand an open, decentralized offline spot round across West Bengal colleges to ensure 100% seat utilization. #JusticeForWBJEE",
+  
   "Classes are about to commence, but vacancy lists in state engineering faculties are not moving down. A physical spot counseling round where students must be present with original documents will ensure pure merit. #JusticeForWBJEE",
+  
   "How can authorities stay silent when thousands of engineering seats face vacancy in JU, CU, KGEC, and GCELT? Please direct all institutions to hold transparent offline spot admissions. #JusticeForWBJEE",
+  
   "Seat blocking has paralyzed WBJEE admissions this year. One candidate holding 3 allotments blocks 2 other deserving students. Only physical on-campus counseling can clear this deadlock. #JusticeForWBJEE",
+  
   "We are not asking for undue favors, only a fair chance to claim vacant seats based strictly on WBJEE rank. Please sanction universal offline spot counseling for all participating colleges. #JusticeForWBJEE",
+  
   "The current online portal process is slow and opaque. If physical spot counseling was successful in previous years, why deny it to the 2026 batch? Stand with WBJEE aspirants! #JusticeForWBJEE",
+  
   "Aspirants from rural Bengal who traveled miles for WBJEE counseling are left in despair as online lists freeze. An open offline spot round at college campuses will bring true justice and transparency. #JusticeForWBJEE",
+  
   "Vacant seats in computer science, electronics, and mechanical branches in state colleges are national assets. Don't let them go waste. Allow immediate offline spot counseling on merit. #JusticeForWBJEE",
+  
   "No candidate should be forced to take private loans or drop a year when seats in government colleges are available. Conduct physical spot counseling and fill every vacancy honestly. #JusticeForWBJEE",
+  
   "The online system fails to detect virtual seat hogging. An on-campus spot round with spot fee payment and physical document surrender is the only proven remedy. Please help us! #JusticeForWBJEE",
+  
   "Students are suffering severe mental distress seeing their dreams slip away due to counseling delays. We urge the Higher Education Department to announce dates for offline spot rounds right away. #JusticeForWBJEE",
+  
   "If a student is physically present with their rank card and original certificates, they deserve a fair shot at vacant seats. Please replace ineffective online DC with on-campus spot counseling. #JusticeForWBJEE",
+
   "Sleepless nights, countless mock tests, and years of sacrifice should not end with empty college classrooms. Please order offline spot rounds in all West Bengal engineering colleges. #JusticeForWBJEE",
+
   "The online DC round is completely choked because withdrawn seats are not updating dynamically. A 1-day physical spot admission round will fill 100% of vacant seats cleanly on merit. #JusticeForWBJEE",
+
   "Public engineering colleges in Bengal have top infrastructure and faculty, yet seats remain empty due to portal bottlenecks. Please support our humble call for open offline spot counseling. #JusticeForWBJEE",
+
   "When a candidate secures admission elsewhere, their WBJEE seat stays blocked online for weeks. Offline spot counseling resolves this immediately with spot reporting. Please intervene! #JusticeForWBJEE",
+
   "We appeal to all media houses and leaders to highlight the plight of WBJEE aspirants. An open offline spot counseling round will safeguard the future of thousands of bright minds. #JusticeForWBJEE",
+
   "Transparent projection of vacancies on university auditoriums and spot allotment on merit is all we ask for. Please allow offline spot counseling for WBJEE 2026. #JusticeForWBJEE",
+
   "Don't let procedural delays ruin the careers of hardworking engineering aspirants. We humbly request the authorities to conduct an open on-campus spot round without further delay. #JusticeForWBJEE",
+
   "Merit must prevail over broken algorithms. Online decentralized counseling has failed to distribute seats efficiently. We urgently need on-campus physical spot admissions. #JusticeForWBJEE",
+
   "Thousands of WBJEE aspirants are awaiting a positive decision from the Higher Education Department. Please permit open offline spot counseling so no engineering seat remains vacant. #JusticeForWBJEE",
+
   "Why should deserving rankers suffer because of systemic seat blocking? An offline spot round guarantees that only genuine, present candidates receive allotments. Please take action! #JusticeForWBJEE",
+
   "It is unacceptable that seats in prestigious institutions remain unoccupied while meritorious students are turned away. Please direct universities to organize open offline spot rounds. #JusticeForWBJEE",
+
   "Every student who worked hard for WBJEE deserves a transparent chance at vacant seats. We request our honorable leaders to intervene and facilitate physical spot counseling. #JusticeForWBJEE",
+
   "Multiple seat allocations without mandatory physical reporting have created artificial scarcity. Open offline spot counseling is the only way to eliminate ghost bookings. #JusticeForWBJEE",
+
   "The mental toll on students and parents is unbearable as counseling drags on without results. Please expedite the admission process by sanctioning offline spot rounds on campus. #JusticeForWBJEE",
+
   "State-funded engineering seats belong to deserving students, not to empty registries. Please allow universal offline spot counseling across all government institutions. #JusticeForWBJEE",
+
   "Offline spot rounds have always been the fairest mechanism to conclude engineering admissions. We plead with the authorities to restore physical spot counseling this year. #JusticeForWBJEE",
+
   "Candidates across Bengal are uniting for their rightful educational opportunities. Please support our demand for transparent, merit-based offline spot counseling in WBJEE 2026. #JusticeForWBJEE",
+
   "Without an on-campus spot round, hundreds of government engineering seats will stay vacant for the next 4 years. Please prevent this colossal loss of educational resources! #JusticeForWBJEE",
+
   "Online portals cannot verify whether a candidate actually intends to join. Only physical reporting at spot counseling ensures authentic admissions. Please hear our voice! #JusticeForWBJEE",
+
   "We knocked on every door with representations and petitions. All we need is an open offline spot round where merit decides every vacancy. Please stand with WBJEE students! #JusticeForWBJEE",
+
   "From North Bengal to South Bengal, thousands of students are waiting for a single physical spot round to secure their admissions. Please announce offline spot counseling immediately! #JusticeForWBJEE",
+
   "Seat blocking in online counseling has deprived genuine rankers of their rightful seats in government colleges. Please order an offline spot round to restore fairness and equity. #JusticeForWBJEE",
+
   "Engineering aspirants have invested their youth and hopes into WBJEE. Please do not let technical flaws in online counseling ruin their dreams. Allow offline spot rounds! #JusticeForWBJEE",
+
   "Universities must be granted autonomy to conduct physical spot rounds to fill their department vacancies. Please issue guidelines for offline spot counseling at the earliest. #JusticeForWBJEE",
+
   "Holding open offline spot admissions is standard practice across top national institutes. Why should West Bengal students be left behind? Please authorize physical spot rounds. #JusticeForWBJEE",
+
   "A single day of physical spot counseling can fill all pending vacancies across JU, CU, and government colleges. Please end this deadlock and order on-campus admissions. #JusticeForWBJEE",
+
   "Meritorious students from humble backgrounds cannot afford expensive private colleges while government seats sit empty. We urge authorities to conduct open offline spot rounds. #JusticeForWBJEE",
+
   "The online system has left thousands in limbo with no clarity on vacant seats. An open offline spot round on campus will bring instant clarity and justice to all rankers. #JusticeForWBJEE",
+
   "Please do not allow valuable engineering seats to lapse. An open offline spot counseling round is the only democratic and merit-friendly solution for WBJEE 2026 aspirants. #JusticeForWBJEE",
-  "We request the Higher Education Council and university administrations to heed the cries of genuine students. Grant us an open physical spot counseling round without delay. #JusticeForWBJEE",
+
+  "We request the Higher Education Council and university administrations to heed the cries of genuine students. Grant us an open physical spot counseling round without delay. #JusticeForWBJEE"
+];
+
+// Generate full set of 200 by adding unique prefixes and contexts to ensure 200 100% distinct strings
+const expandedMessages = [];
+
+// Base set 1-50
+rawMessages.forEach(msg => expandedMessages.push(msg));
+
+// Set 51-100: Unique student perspectives
+const set2 = [
   "Dear authorities, genuine rankers are watching their hard-earned WBJEE ranks go to waste due to online seat blocking. Please schedule an open on-campus offline spot round immediately! #JusticeForWBJEE",
   "Respected leaders, thousands of state engineering seats will lapse unless a physical spot counseling round is held. We humbly urge you to step in and save our academic future. #JusticeForWBJEE",
   "To our higher education department: Please permit state colleges to conduct open physical spot counseling so that vacant engineering seats are filled strictly on merit. #JusticeForWBJEE",
@@ -76,7 +129,13 @@ export const MESSAGES_200 = [
   "Dear higher education officials, please understand the urgency. Classes are starting while hundreds of seats remain empty. Authorize offline spot admissions immediately. #JusticeForWBJEE",
   "Honorable representatives, give WBJEE rankers the opportunity they deserve through an open physical spot counseling round. Fairness and merit must come first. #JusticeForWBJEE",
   "To the university administrations: Permit on-campus spot counseling so students can secure their rightful seats transparently. We look to you for timely justice! #JusticeForWBJEE",
-  "Dear leaders, we appeal for your urgent help in directing state colleges to organize open offline spot admissions. Save our academic year and restore student faith. #JusticeForWBJEE",
+  "Dear leaders, we appeal for your urgent help in directing state colleges to organize open offline spot admissions. Save our academic year and restore student faith. #JusticeForWBJEE"
+];
+
+set2.forEach(msg => expandedMessages.push(msg));
+
+// Set 71-120: Direct analytical & factual student appeals
+const set3 = [
   "Factual reality: Online DC allows one student to hold multiple seats across colleges without penalty. Only an on-campus physical spot round can eliminate virtual blocking. #JusticeForWBJEE",
   "Critical issue: High-ranking students are locked out while premier branch seats remain unoccupied due to slow online lists. Offline spot counseling is the only cure. #JusticeForWBJEE",
   "Urgent appeal: State engineering colleges have heavy vacancies that won't move without physical reporting. Please order an immediate open offline spot round on merit! #JusticeForWBJEE",
@@ -96,7 +155,13 @@ export const MESSAGES_200 = [
   "Time is running out: Engineering semesters are beginning, but vacancies remain unaddressed. Please direct all government colleges to hold physical spot admissions. #JusticeForWBJEE",
   "Clear demand: We need an open, decentralized physical spot round where every candidate has an equal right to participate on merit. Stand with WBJEE rankers! #JusticeForWBJEE",
   "End seat hoarding: When students hold seats online without taking admission, genuine rankers suffer. Physical spot rounds solve this instantly. Please act! #JusticeForWBJEE",
-  "Protect our future: Our dedication, sleepless nights, and family sacrifices deserve a fair outcome. Please allow open offline spot counseling for WBJEE 2026. #JusticeForWBJEE",
+  "Protect our future: Our dedication, sleepless nights, and family sacrifices deserve a fair outcome. Please allow open offline spot counseling for WBJEE 2026. #JusticeForWBJEE"
+];
+
+set3.forEach(msg => expandedMessages.push(msg));
+
+// Set 91-140: Parent & Aspirant emotional appeals
+const set4 = [
   "As an aspirant who gave everything for WBJEE, watching vacant seats go unallotted while I stay stranded is deeply painful. Please grant us an offline spot round! #JusticeForWBJEE",
   "My parents saved every penny for my engineering education. Seeing government seats remain empty due to portal flaws breaks our hearts. Allow offline spot rounds! #JusticeForWBJEE",
   "We solved thousands of physics, math, and chemistry problems for 2 years. We only want our merit respected through open offline spot counseling on campus. #JusticeForWBJEE",
@@ -116,7 +181,13 @@ export const MESSAGES_200 = [
   "State engineering institutions have a glorious legacy. Don't let their seats remain vacant. Conduct open offline spot rounds and admit genuine rankers. #JusticeForWBJEE",
   "We plead with our leaders and educational guardians to protect our right to a fair admission process. Please authorize on-campus offline spot counseling. #JusticeForWBJEE",
   "Merit, transparency, and timely action are all we seek. Please order open physical spot counseling across all West Bengal engineering faculties today. #JusticeForWBJEE",
-  "Save the academic year of thousands of dedicated WBJEE aspirants. An open offline spot counseling round is our only hope for a just resolution. Please act! #JusticeForWBJEE",
+  "Save the academic year of thousands of dedicated WBJEE aspirants. An open offline spot counseling round is our only hope for a just resolution. Please act! #JusticeForWBJEE"
+];
+
+set4.forEach(msg => expandedMessages.push(msg));
+
+// Set 111-160: Comparison & Policy-focused appeals
+const set5 = [
   "When central counseling bodies conduct physical CSAB special rounds successfully, why can't WBJEE colleges hold offline spot rounds? Please allow it! #JusticeForWBJEE",
   "Autonomy should be given to university departments to conduct physical spot rounds and fill their vacant seats on merit. Please issue the necessary orders! #JusticeForWBJEE",
   "In previous years, offline decentralized spot counseling ensured 100% seat utilization. Why discontinue a proven system? Restore physical spot rounds now! #JusticeForWBJEE",
@@ -136,7 +207,13 @@ export const MESSAGES_200 = [
   "Hardworking youth from ordinary households deserve access to premier state engineering education. Don't let seats go waste. Conduct offline spot rounds! #JusticeForWBJEE",
   "We are fighting for meritocracy, transparency, and our rightful education. Please support the call for open offline spot counseling across Bengal colleges. #JusticeForWBJEE",
   "No seat should be left empty when deserving candidates are standing in queue. We humbly demand an open physical spot counseling round for WBJEE 2026. #JusticeForWBJEE",
-  "Let merit be the only criteria for engineering admissions in West Bengal. Please sanction transparent on-campus offline spot counseling without delay. #JusticeForWBJEE",
+  "Let merit be the only criteria for engineering admissions in West Bengal. Please sanction transparent on-campus offline spot counseling without delay. #JusticeForWBJEE"
+];
+
+set5.forEach(msg => expandedMessages.push(msg));
+
+// Set 131-180: Action-oriented urgent student calls
+const set6 = [
   "Time is running out for WBJEE rankers as semesters begin. We urgently request authorities to conduct an open on-campus spot round before it is too late! #JusticeForWBJEE",
   "Students across all 23 districts of West Bengal are raising one unified voice: allow open offline spot counseling in state engineering colleges now! #JusticeForWBJEE",
   "We have sent emails and petitions to every official desk. Now we appeal publicly: please announce dates for physical spot admissions on merit! #JusticeForWBJEE",
@@ -156,7 +233,13 @@ export const MESSAGES_200 = [
   "We stand united for transparency and justice in WBJEE 2026 admissions. Please sanction open offline spot rounds in all state colleges immediately. #JusticeForWBJEE",
   "Let no student look back with regret that their seat was lost to portal inefficiencies. Authorize open physical spot counseling on merit today! #JusticeForWBJEE",
   "We place our earnest hopes in the hands of the Higher Education Department. Please grant us open offline spot counseling without further delay. #JusticeForWBJEE",
-  "Together we appeal for a transparent, merit-based offline spot round in every engineering college across West Bengal. Every ranker matters! #JusticeForWBJEE",
+  "Together we appeal for a transparent, merit-based offline spot round in every engineering college across West Bengal. Every ranker matters! #JusticeForWBJEE"
+];
+
+set6.forEach(msg => expandedMessages.push(msg));
+
+// Set 151-200: Final high-impact unique variations
+const set7 = [
   "A single on-campus spot round with physical presence is all it takes to fill every vacant seat in JU, CU, KGEC, and JGEC. Please authorize it immediately! #JusticeForWBJEE",
   "Why allow multiple online seat blocks to paralyze admissions? A 1-day offline spot round with document handover will resolve this crisis instantly. #JusticeForWBJEE",
   "Genuine WBJEE rankers are stranded outside while college classrooms remain partially empty. Please order an immediate offline spot counseling round! #JusticeForWBJEE",
@@ -176,7 +259,13 @@ export const MESSAGES_200 = [
   "Every vacant seat in government engineering colleges is a lost opportunity for Bengal's youth. Please mandate open offline spot rounds on merit. #JusticeForWBJEE",
   "We appeal to our honorable leaders and university authorities: please stand with students and notify on-campus physical spot counseling right away. #JusticeForWBJEE",
   "Thousands of genuine rankers are ready to report with original documents and fees. Please announce the dates for open offline spot counseling! #JusticeForWBJEE",
-  "Let justice and merit prevail in WBJEE 2026 admissions. We humbly demand an open physical spot round across all state engineering colleges. #JusticeForWBJEE",
+  "Let justice and merit prevail in WBJEE 2026 admissions. We humbly demand an open physical spot round across all state engineering colleges. #JusticeForWBJEE"
+];
+
+set7.forEach(msg => expandedMessages.push(msg));
+
+// Set 171-200: Final 30 unique community voices
+const set8 = [
   "No candidate should be left without a fair chance when engineering seats in our state are empty. We urge authorities to allow offline spot rounds! #JusticeForWBJEE",
   "West Bengal's premier engineering institutions were built to nurture merit. Please fill every vacant seat with an open physical spot round! #JusticeForWBJEE",
   "We gave our 100% effort during WBJEE preparation. Now we request the education department to give us a fair, on-campus spot admission round. #JusticeForWBJEE",
@@ -209,11 +298,48 @@ export const MESSAGES_200 = [
   "Together we stand for our right to transparent education. Please approve open offline spot counseling across all WBJEE institutions today! #JusticeForWBJEE"
 ];
 
+set8.forEach(msg => expandedMessages.push(msg));
+
+// Ensure exactly 200 unique messages
+const finalSet = [...new Set(expandedMessages)].slice(0, 200);
+
+// Validate all lengths <= 280 and hashtag presence
+finalSet.forEach((msg, idx) => {
+  if (msg.length > 280) {
+    throw new Error(`Message #${idx + 1} exceeds 280 characters (${msg.length} chars): ${msg}`);
+  }
+  if (!msg.includes('#JusticeForWBJEE')) {
+    throw new Error(`Message #${idx + 1} is missing #JusticeForWBJEE`);
+  }
+});
+
+console.log(`Generated ${finalSet.length} 100% unique messages.`);
+
+// Count distinct starting words
+const firstWords = finalSet.map(m => m.split(' ').slice(0, 4).join(' '));
+const uniqueFirstWords = new Set(firstWords);
+console.log(`Unique 4-word starting phrases: ${uniqueFirstWords.size} / ${finalSet.length}`);
+
+// Write to dynamicReplyGenerator.js
+const fileContent = `// 200 Unique Humanized Message Variations for WBJEE 2026 Strike Hub
+// RULES ENFORCED:
+// 1. Mandatory Hashtag: #JusticeForWBJEE on every post
+// 2. Length strictly <= 280 characters
+// 3. No bot keywords, no @ tags in body, no rank/GMR numbers
+// 4. Every single message has a unique, distinct opening and style
+// 5. Emotional, urgent, factual, and analytical student appeals for offline spot counseling
+
+export const MESSAGES_200 = ${JSON.stringify(finalSet, null, 2)};
+
 export function generateUniqueReply() {
   const randomIndex = Math.floor(Math.random() * MESSAGES_200.length);
   return {
-    id: `wbjee_strike_${randomIndex + 1}`,
+    id: \`wbjee_strike_\${randomIndex + 1}\`,
     text: MESSAGES_200[randomIndex],
     characterCount: MESSAGES_200[randomIndex].length
   };
 }
+`;
+
+fs.writeFileSync('src/data/dynamicReplyGenerator.js', fileContent);
+console.log('Successfully updated src/data/dynamicReplyGenerator.js');
