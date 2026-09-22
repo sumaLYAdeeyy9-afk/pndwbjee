@@ -94,16 +94,7 @@ export const TARGET_HANDLES = [
     tags: ['Media', 'Digital']
   },
 
-  {
-    id: 'target-14',
-    name: 'Anupam Mishra',
-    handle: 'anupammishra_tv',
-    category: 'journalist',
-    role: 'Senior TV Journalist',
-    priority: 'medium',
-    bio: 'Broadcaster highlighting student concerns and administrative updates.',
-    tags: ['Media', 'Broadcast']
-  },
+
 
   // 2. Education Advocates & RTI Activists
   {
