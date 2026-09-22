@@ -1,199 +1,145 @@
-// Dynamic Anti-Spam Reply Generator for WBJEE 2026 Strike Hub
-// Strictly grounded in the Official Student Petition:
-// 1. Multiple Allocation Bottleneck (Unordered simultaneous allotments causing ghost seat blocking)
-// 2. Absence of Real-Time Sliding (Discrete batch reallocations keep seats locked for days)
-// 3. Merit Violation via Phase 3 Lockout of Phase 1 Admitted Candidates
-// 4. Stagnation: Negligible vacancy decrease after Phase 1 / Phase 2 Round 1
-// 5. Actionable Prayer: Terminate Online DCAP after Phase 2 & Conduct Universal OFFLINE Spot Counselling with Real-Time Sliding
-// 6. Alternative Proposal: Strict descending preference single allocation CAP
-// RULE: NO @ tags in generated text to bypass X spam/bot filters.
+// Dynamic Humanized Post Generator for WBJEE 2026 Strike Deck
+// RULES:
+// 1. NO HASHTAGS (#)
+// 2. NO GMR, RANK NUMBERS, OR BRANCHES
+// 3. NO @ TAGS (to bypass anti-spam filters)
+// 4. Pure human, emotional, student-written language appealing for offline spot counselling.
 
-export const GRIEVANCE_ANGLES = [
+export const HUMANIZED_TEMPLATES = [
   {
-    id: 'angle-1',
-    name: '1. Multiple Allocation Bottleneck',
-    summary: 'Unordered simultaneous allotments causing ghost seat blocking.',
-    hooks: [
-      'Flaw in WBJEE 2026 Online DCAP:',
-      'Urgent WBJEE 2026 admission crisis:',
-      'Multiple allocation flaw in WBJEE:'
-    ],
-    bodies: [
-      'Unordered choices give top ranks multiple simultaneous seats with zero intent to admit, blocking thousands of seats.',
-      'Without descending priority order, top rankers hold multiple seats at once, freezing genuine admissions.',
-      'Ghost seat blocking from unordered multiple allocations has paralyzed state engineering admissions.'
-    ],
-    demands: [
-      'Scrap Online DC after Phase 2 & conduct Universal OFFLINE Spot Counselling.',
-      'We demand immediate Offline Spot Round with real-time sliding at college campuses.'
-    ],
-    hashtags: '#WBJEEOfflineDC #WBJEE2026'
+    id: 'human-1',
+    theme: 'Future & Years of Hard Work',
+    opener: 'Thousands of us worked hard for years, but the online counselling system has completely frozen seat allotments.',
+    body: 'Government colleges are sitting with empty seats while deserving students are left in despair.',
+    plea: 'We humbly urge you to raise our voice for an open offline spot counselling round after Phase 2.'
   },
   {
-    id: 'angle-2',
-    name: '2. Absence of Real-Time Sliding',
-    summary: 'Discrete batch reallocations keep seats locked for days.',
-    hooks: [
-      'Technical flaw in WBJEE 2026 DCAP:',
-      'Why WBJEE Online DC is failing:',
-      'Stagnant WBJEE 2026 counselling:'
-    ],
-    bodies: [
-      'Discrete online batches lock forfeited seats for days with zero instantaneous dynamic sliding for next-in-line rankers.',
-      'Unlike offline rounds where forfeited seats cascade instantly, online batch rounds keep seats locked for weeks.'
-    ],
-    demands: [
-      'Shift to Universal OFFLINE Spot Rounds with continuous real-time sliding.',
-      'Conduct on-campus physical spot admissions at JU & state colleges now.'
-    ],
-    hashtags: '#WBJEEOfflineDC #StopSeatBlocking'
+    id: 'human-2',
+    theme: 'Multiple Seat Blocking Issue',
+    opener: 'Because the current online portal offers multiple seats to single candidates simultaneously, genuine admissions are completely blocked.',
+    body: 'Seats that could change students lives are lying vacant across state universities.',
+    plea: 'Please support our appeal to conduct physical on-campus spot rounds so every seat is filled fairly.'
   },
   {
-    id: 'angle-3',
-    name: '3. Phase 3 Lockout & Merit Violation',
-    summary: 'Phase 1 admitted students barred from Phase 3.',
-    hooks: [
-      'Merit violation in WBJEE 2026 DCAP:',
-      'Arbitrary exclusion in WBJEE 2026:',
-      'Unfair Phase 3 lockout of rankers:'
-    ],
-    bodies: [
-      'Phase 1 admitted students are barred from Phase 3. Prime seats freed up later will go to lower ranks, violating merit.',
-      'Locking Phase 1 admitted students out of Phase 3 unfairly gives top branches to lower-ranked applicants.'
-    ],
-    demands: [
-      'Allow Universal OFFLINE Spot Counselling open to ALL rank holders equally.',
-      'Stop Phase 3 lockout and restore open physical spot merit rounds.'
-    ],
-    hashtags: '#WBJEEOfflineDC #MeritViolation'
+    id: 'human-3',
+    theme: 'Merit & Fairness',
+    opener: 'Meritorious students across Bengal are suffering sleepless nights due to technical stagnation in online decentralized counselling.',
+    body: 'The batch process takes weeks and fails to move vacancies down to deserving candidates.',
+    plea: 'An on-campus offline spot admission is the only transparent solution left for us.'
   },
   {
-    id: 'angle-4',
-    name: '4. Negligible Vacancy Decrease',
-    summary: 'Vacancies reduced by only a tiny margin.',
-    hooks: [
-      'Severe stagnation in WBJEE admissions:',
-      'Ground reality of WBJEE 2026 vacancies:',
-      'Engineering seats stranded in Bengal:'
-    ],
-    bodies: [
-      'Post Phase 1 & 2 Round 1, seat vacancy reduced by a negligible margin. Core branches across state colleges remain empty.',
-      'Online DCAP is crawling at a dead pace with thousands of government engineering seats still unoccupied.'
-    ],
-    demands: [
-      'End online DC after Phase 2 and conduct physical offline spot admissions immediately.',
-      'We urge authorities & media to highlight this crisis and mandate offline spot rounds.'
-    ],
-    hashtags: '#WBJEEOfflineDC #ScrapOnlineDC'
+    id: 'human-4',
+    theme: 'Phase 3 Exclusion Crisis',
+    opener: 'Students who took admission early in Phase 1 are being unfairly locked out from upgrading in later rounds.',
+    body: 'This directly hurts merit while core engineering seats remain unoccupied.',
+    plea: 'Please help us request the authorities to permit universal offline spot counselling for all.'
   },
   {
-    id: 'angle-5',
-    name: '5. Actionable Prayer (Offline Spot)',
-    summary: 'Terminate Online DC after Phase 2 & conduct Universal Offline Spot Round.',
-    hooks: [
-      'Our united prayer for WBJEE 2026:',
-      'How to resolve the WBJEE DCAP mess:',
-      'Urgent appeal to Higher Education Dept:'
-    ],
-    bodies: [
-      '1. Terminate Online DCAP after Phase 2.\n2. Conduct Universal OFFLINE SPOT COUNSELLING with real-time sliding for all valid rankers at JU/CU/state colleges.',
-      'Physical offline spot rounds eliminate multiple seat blocking and fill vacancies in hours instead of weeks.'
-    ],
-    demands: [
-      'Please support our petition to restore offline spot admissions immediately.',
-      'Approve Universal Offline Spot Round to protect the academic year of engineering aspirants.'
-    ],
-    hashtags: '#WBJEEOfflineDC #WBJEE2026'
+    id: 'human-5',
+    theme: 'Urgent Administrative Intervention',
+    opener: 'Please look into the engineering admission crisis in West Bengal.',
+    body: 'Even after Phase 1 and Phase 2, vacancies have barely reduced. A broken online algorithm cannot replace real-time physical counselling.',
+    plea: 'We desperately need an offline spot round to save our academic year.'
   },
   {
-    id: 'angle-6',
-    name: '6. Alternative Single-Seat CAP Rule',
-    summary: 'Enforce locked descending preference with single allocation.',
-    hooks: [
-      'Constructive reform for WBJEE Board:',
-      'If online rounds continue in WBJEE:',
-      'Technical fix for WBJEE 2026 portal:'
-    ],
-    bodies: [
-      'If online DC continues, enforce locked descending preferences with SINGLE allocation and immediate debarment for unresponsiveness.',
-      'Reverting to traditional CAP locked single allocation will instantly end ghost seat blocking.'
-    ],
-    demands: [
-      'Enforce single-seat allocation CAP or conduct open Offline Spot rounds.',
-      'Eliminate multiple-offer chaos to protect middle-rank merit.'
-    ],
-    hashtags: '#WBJEEOfflineDC #FixWBJEEPortal'
+    id: 'human-6',
+    theme: 'College Vacancies & Wasted Potential',
+    opener: 'Prestigious government engineering seats in our state are at risk of going completely empty this year.',
+    body: 'Online DCAP has proven to be ineffective, leaving hundreds of hardworking students helpless.',
+    plea: 'Holding an open offline spot admission at college campuses will fill all seats in a single day.'
+  },
+  {
+    id: 'human-7',
+    theme: 'Student Mental Health & Anxiety',
+    opener: 'The ongoing counselling delay and flawed seat distribution are taking a heavy mental toll on thousands of young aspirants.',
+    body: 'We only ask for a fair and transparent chance to study in our state colleges.',
+    plea: 'Kindly amplify our petition for immediate offline spot admissions.'
+  },
+  {
+    id: 'human-8',
+    theme: 'Direct Appeal to Leadership',
+    opener: 'Respected authorities and leaders, our future is hanging by a thread.',
+    body: 'The online seat matrix is completely stalled while genuine candidates wait helplessly.',
+    plea: 'Please intervene and direct colleges to conduct universal offline spot rounds immediately.'
   }
 ];
 
+export const HUMANIZED_OPENERS = [
+  'Respected sir, please hear the plea of thousands of engineering aspirants in Bengal.',
+  'Thousands of students worked tirelessly for years, but the current online counselling is failing us.',
+  'Please look into the serious counselling deadlock affecting thousands of students across West Bengal.',
+  'Deserving students are losing their academic year because of flaws in the online seat allocation.',
+  'We humbly appeal for your support regarding the ongoing admission crisis in state colleges.'
+];
+
+export const HUMANIZED_BODIES = [
+  'Government engineering seats are sitting empty while candidates are blocked by duplicate online allocations.',
+  'The online process takes weeks without moving vacancies, freezing seats that should go to genuine students.',
+  'Meritorious candidates are stranded while vacant seats in top state colleges remain unfilled.',
+  'The current system allows seats to be blocked without real-time sliding for students waiting in line.'
+];
+
+export const HUMANIZED_PLEAS = [
+  'We desperately need authorities to conduct open offline spot counselling after Phase 2.',
+  'Please help us urge the Higher Education Department to permit physical on-campus spot admissions.',
+  'An offline spot round is the only fair and transparent way to fill every vacant seat immediately.',
+  'Kindly amplify our appeal so no student is deprived of their rightful education.'
+];
+
 /**
- * Generates a concise, high-impact draft under 220 characters
- * Guaranteed NO @ mentions
+ * Generates a purely humanized draft under 250 characters
+ * ZERO hashtags, ZERO GMR, ZERO rank placeholders, ZERO @ mentions
  */
-export function generateUniqueReply(angleId = null) {
-  const angle = angleId 
-    ? GRIEVANCE_ANGLES.find(a => a.id === angleId) || GRIEVANCE_ANGLES[0]
-    : GRIEVANCE_ANGLES[Math.floor(Math.random() * GRIEVANCE_ANGLES.length)];
+export function generateUniqueReply() {
+  const template = HUMANIZED_TEMPLATES[Math.floor(Math.random() * HUMANIZED_TEMPLATES.length)];
+  
+  // Combine either full curated template or randomized natural variation
+  const useCurated = Math.random() > 0.4;
+  
+  let fullText = '';
+  if (useCurated) {
+    fullText = `${template.opener} ${template.body} ${template.plea}`;
+  } else {
+    const op = HUMANIZED_OPENERS[Math.floor(Math.random() * HUMANIZED_OPENERS.length)];
+    const bd = HUMANIZED_BODIES[Math.floor(Math.random() * HUMANIZED_BODIES.length)];
+    const pl = HUMANIZED_PLEAS[Math.floor(Math.random() * HUMANIZED_PLEAS.length)];
+    fullText = `${op} ${bd} ${pl}`;
+  }
 
-  const hook = angle.hooks[Math.floor(Math.random() * angle.hooks.length)];
-  const body = angle.bodies[Math.floor(Math.random() * angle.bodies.length)];
-  const demand = angle.demands[Math.floor(Math.random() * angle.demands.length)];
-
-  const personalPointers = [
-    '[GMR rank / branch]',
-    '[my dream college]',
-    '[Phase 1 experience]'
-  ];
-  const pointer = personalPointers[Math.floor(Math.random() * personalPointers.length)];
-
-  const fullText = `${hook} ${body} (Context: ${pointer}) ${demand} ${angle.hashtags}`;
+  // Ensure it's comfortably under 275 chars
+  if (fullText.length > 275) {
+    fullText = `${template.opener} ${template.plea}`;
+  }
 
   return {
-    angleId: angle.id,
-    angleTitle: angle.name,
-    angleSummary: angle.summary,
-    text: fullText,
-    charCount: fullText.length
+    templateId: template.id,
+    theme: template.theme,
+    text: fullText.trim(),
+    charCount: fullText.trim().length
   };
 }
 
 /**
- * Checks if the user has modified/personalized the template text
- * Enforces anti-bot mandatory editing rule
+ * Validates that the user has slightly customized the text in their own voice
  */
 export function checkTextCustomized(originalText, currentText) {
-  if (!currentText || currentText.trim().length < 30) {
+  if (!currentText || currentText.trim().length < 25) {
     return {
       isValid: false,
-      reason: 'Draft is too short. Please write your genuine concern.'
+      reason: 'Please write a few words about your situation.'
     };
   }
 
-  // Check if user still has the placeholder in brackets
-  const hasUneditedPlaceholder = currentText.includes('[GMR rank / branch]') ||
-                                currentText.includes('[my dream college]') ||
-                                currentText.includes('[Phase 1 experience]') ||
-                                currentText.includes('[Add your custom') ||
-                                currentText.includes('(Context: [');
-
-  if (hasUneditedPlaceholder) {
-    return {
-      isValid: false,
-      reason: 'Please replace the [bracketed placeholder] with your own rank, college, or words to unlock reply!'
-    };
-  }
-
-  // Calculate simple edit difference
   const isIdentical = originalText.trim() === currentText.trim();
   if (isIdentical) {
     return {
       isValid: false,
-      reason: 'Mandatory Customization: Please tweak a few words in your own voice to prevent X from flagging your account.'
+      reason: 'Please rephrase or edit a few words in the box to personalize your message.'
     };
   }
 
   return {
     isValid: true,
-    reason: 'Personalization Active! Ready to dispatch reply.'
+    reason: 'Message personalized! Ready to post on X.'
   };
 }
