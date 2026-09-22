@@ -41,9 +41,8 @@ export const TARGET_HANDLES = [
     bio: 'High youth and student viewership across West Bengal media networks.',
     tags: ['Media', 'PrimeTime', 'Youth']
   },
-
   {
-    id: 'target-5',
+    id: 'target-4',
     name: 'Kamalika Sengupta',
     handle: 'KamalikaSengupt',
     category: 'journalist',
@@ -52,9 +51,8 @@ export const TARGET_HANDLES = [
     bio: 'National and regional bureau coverage on Bengal governance and student issues.',
     tags: ['Media', 'National', 'Bureau']
   },
-
   {
-    id: 'target-7',
+    id: 'target-5',
     name: 'Pooja Mehta',
     handle: 'pooja_news',
     category: 'journalist',
@@ -64,7 +62,7 @@ export const TARGET_HANDLES = [
     tags: ['Media', 'Broadcast']
   },
   {
-    id: 'target-8',
+    id: 'target-6',
     name: 'Indrajit Kundu',
     handle: 'iindrojit',
     category: 'journalist',
@@ -74,7 +72,7 @@ export const TARGET_HANDLES = [
     tags: ['Media', 'Editor']
   },
   {
-    id: 'target-9',
+    id: 'target-7',
     name: 'Manogya Loiwal',
     handle: 'manogyaloiwal',
     category: 'journalist',
@@ -84,7 +82,7 @@ export const TARGET_HANDLES = [
     tags: ['Media', 'Editor', 'National']
   },
   {
-    id: 'target-10',
+    id: 'target-8',
     name: 'Ritayan Basu',
     handle: 'ritayanbasu',
     category: 'journalist',
@@ -94,11 +92,9 @@ export const TARGET_HANDLES = [
     tags: ['Media', 'Digital']
   },
 
-
-
   // 2. Education Advocates & RTI Activists
   {
-    id: 'target-15',
+    id: 'target-9',
     name: 'Saurav Das',
     handle: 'SauravDassss',
     category: 'advocate',
@@ -108,7 +104,7 @@ export const TARGET_HANDLES = [
     tags: ['Advocate', 'RTI', 'Transparency']
   },
   {
-    id: 'target-16',
+    id: 'target-10',
     name: 'Adv. Anubha Shrivastava Sahai',
     handle: 'anubha1812',
     category: 'advocate',
@@ -118,7 +114,7 @@ export const TARGET_HANDLES = [
     tags: ['Advocate', 'Legal', 'SupremeCourt']
   },
   {
-    id: 'target-17',
+    id: 'target-11',
     name: 'Dr. Vivek Pandey',
     handle: 'Vivekpandey21',
     category: 'advocate',
@@ -128,7 +124,7 @@ export const TARGET_HANDLES = [
     tags: ['Advocate', 'RTI', 'StudentRights']
   },
   {
-    id: 'target-18',
+    id: 'target-12',
     name: 'Adv. Alakh Alok Srivastava',
     handle: 'advocate_alakh',
     category: 'advocate',
@@ -140,7 +136,7 @@ export const TARGET_HANDLES = [
 
   // 3. Student & Youth Leaders
   {
-    id: 'target-19',
+    id: 'target-13',
     name: 'Abhijeet Dipke',
     handle: 'abhijeet_dipke',
     category: 'student',
@@ -150,7 +146,7 @@ export const TARGET_HANDLES = [
     tags: ['Youth', 'DigitalActivist', 'CJP', 'Viral']
   },
   {
-    id: 'target-20',
+    id: 'target-14',
     name: 'Cockroach Janta Party (CJP)',
     handle: 'CJP_2029',
     category: 'student',
@@ -160,79 +156,19 @@ export const TARGET_HANDLES = [
     tags: ['Youth', 'Movement', 'CJP', 'Students']
   },
   {
-    id: 'target-21',
-    name: 'Aishe Ghosh',
-    handle: 'aishe_ghosh',
-    category: 'student',
-    role: 'Student & Youth Activist',
-    priority: 'high',
-    bio: 'Former JNUSU President & youth activist championing democratic education policies.',
-    tags: ['StudentLeader', 'Youth']
-  },
-  {
-    id: 'target-22',
-    name: 'Mayukh Biswas',
-    handle: 'MayukhSFI',
-    category: 'student',
-    role: 'Student & Youth Leader',
-    priority: 'high',
-    bio: 'National leadership in student rights movement, higher education accessibility.',
-    tags: ['StudentLeader', 'National']
-  },
-  {
-    id: 'target-23',
+    id: 'target-15',
     name: 'Minakshi Mukherjee',
-    handle: 'MinakshiMukher4',
+    handle: 'MinakshiMukher8',
     category: 'student',
     role: 'Youth & Mass Movement Leader',
     priority: 'critical',
     bio: 'Leading massive grassroots youth mobilizations across West Bengal.',
     tags: ['StudentLeader', 'Youth', 'Grassroots']
   },
-  {
-    id: 'target-24',
-    name: 'Srijan Bhattacharyya',
-    handle: 'SrijanCPIM',
-    category: 'student',
-    role: 'Youth Leader & Public Speaker',
-    priority: 'high',
-    bio: 'Articulate spokesperson on West Bengal youth unemployment and engineering education crisis.',
-    tags: ['StudentLeader', 'Youth']
-  },
-  {
-    id: 'target-25',
-    name: 'Dipsita Dhar',
-    handle: 'DipsitaDhar',
-    category: 'student',
-    role: 'Student & Youth Leader',
-    priority: 'high',
-    bio: 'PhD scholar and prominent student activist fighting for transparent entrance exams.',
-    tags: ['StudentLeader', 'Research']
-  },
-  {
-    id: 'target-26',
-    name: 'Shatarup Ghosh',
-    handle: 'ShatarupGhosh',
-    category: 'student',
-    role: 'Political Commentator & Youth Voice',
-    priority: 'high',
-    bio: 'Viral political communicator with extensive reach among college graduates and youth.',
-    tags: ['Commentator', 'Youth']
-  },
 
-  // 4. Politicians & Decision Makers
+  // 4. Politicians & Leaders
   {
-    id: 'target-27',
-    name: 'Suvendu Adhikari',
-    handle: 'SuvenduWB',
-    category: 'politician',
-    role: 'Senior Leader & MLA, WB',
-    priority: 'critical',
-    bio: 'Massive digital reach; frequently amplifies West Bengal governance and student grievances.',
-    tags: ['Politician', 'MLA', 'WB']
-  },
-  {
-    id: 'target-28',
+    id: 'target-16',
     name: 'Kunal Ghosh',
     handle: 'KunalGhoshAgain',
     category: 'politician',
@@ -242,7 +178,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'Spokesperson', 'Active']
   },
   {
-    id: 'target-29',
+    id: 'target-17',
     name: 'Saket Gokhale',
     handle: 'SaketGokhale',
     category: 'politician',
@@ -252,7 +188,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MP', 'RajyaSabha']
   },
   {
-    id: 'target-30',
+    id: 'target-18',
     name: 'Derek O\'Brien',
     handle: 'derekobrienmp',
     category: 'politician',
@@ -262,7 +198,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MP']
   },
   {
-    id: 'target-31',
+    id: 'target-19',
     name: 'Mohammed Salim',
     handle: 'salimdotcomrade',
     category: 'politician',
@@ -272,7 +208,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'Leadership']
   },
   {
-    id: 'target-32',
+    id: 'target-20',
     name: 'Dr. Sukanta Majumdar',
     handle: 'DrSukantaBJP',
     category: 'politician',
@@ -282,7 +218,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'UnionMinister', 'MP']
   },
   {
-    id: 'target-33',
+    id: 'target-21',
     name: 'Agnimitra Paul',
     handle: 'paulagnimitra1',
     category: 'politician',
@@ -292,7 +228,7 @@ export const TARGET_HANDLES = [
     tags: ['Politician', 'MLA']
   },
   {
-    id: 'target-34',
+    id: 'target-22',
     name: 'Amit Malviya',
     handle: 'amitmalviya',
     category: 'politician',
@@ -300,6 +236,16 @@ export const TARGET_HANDLES = [
     priority: 'high',
     bio: 'National amplification of West Bengal governance and student policy issues.',
     tags: ['Politician', 'National']
+  },
+  {
+    id: 'target-23',
+    name: 'Suvendu Adhikari',
+    handle: 'SuvenduWB',
+    category: 'politician',
+    role: 'Senior Leader & MLA, WB',
+    priority: 'critical',
+    bio: 'Massive digital reach; frequently amplifies West Bengal governance and student grievances.',
+    tags: ['Politician', 'MLA', 'WB']
   }
 ];
 

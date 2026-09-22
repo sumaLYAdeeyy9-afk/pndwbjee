@@ -8,8 +8,10 @@ import {
   RefreshCw, 
   ChevronRight, 
   ChevronLeft, 
-  ArrowRight, 
-  Download 
+  Download,
+  Clock,
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 import { TARGET_HANDLES } from '../data/targetHandles';
 import { generateUniqueReply } from '../data/dynamicReplyGenerator';
@@ -28,12 +30,51 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
   const [editedText, setEditedText] = useState('');
   const [copied, setCopied] = useState(false);
   const [posterDownloaded, setPosterDownloaded] = useState(false);
-  const [showStepModal, setShowStepModal] = useState(false);
-  const [lastStruckTarget, setLastStruckTarget] = useState(null);
+  
+  // Pending verification popup state
+  const [pendingConfirmTarget, setPendingConfirmTarget] = useState(null);
 
-  // All 41 targets remain visible and accessible in order (NO vanishing)
+  // 10-Minute Lockout Cooldown State
+  const [lockoutSeconds, setLockoutSeconds] = useState(() => {
+    try {
+      const storedUntil = localStorage.getItem('wbjee_strike_lockout_until');
+      if (storedUntil) {
+        const remaining = Math.max(0, Math.ceil((parseInt(storedUntil, 10) - Date.now()) / 1000));
+        return remaining;
+      }
+      return 0;
+    } catch {
+      return 0;
+    }
+  });
+
+  // All targets in specified order (with Suvendu Adhikari at the end)
   const targets = TARGET_HANDLES;
   const currentTarget = targets[currentIndex] || targets[0];
+
+  // Timer interval for 10-minute lockout
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      try {
+        const storedUntil = localStorage.getItem('wbjee_strike_lockout_until');
+        if (storedUntil) {
+          const remaining = Math.max(0, Math.ceil((parseInt(storedUntil, 10) - Date.now()) / 1000));
+          setLockoutSeconds(remaining);
+          if (remaining <= 0) {
+            localStorage.removeItem('wbjee_strike_lockout_until');
+          }
+        } else {
+          setLockoutSeconds(0);
+        }
+      } catch {
+        setLockoutSeconds(prev => Math.max(0, prev - 1));
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
 
   // Generate initial draft when target changes
   useEffect(() => {
@@ -46,7 +87,8 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
   const charCount = editedText.length;
   const isOverLimit = charCount > 280;
-  const canStrike = editedText.trim().length > 0 && !isOverLimit;
+  const isLocked = lockoutSeconds > 0;
+  const canStrike = editedText.trim().length > 0 && !isOverLimit && !isLocked;
 
   // New Draft roll
   const handleShuffleDraft = () => {
@@ -66,42 +108,71 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
     setPosterDownloaded(true);
   };
 
-  // Primary Strike Action: Copy & Open X Profile
+  // 1. User clicks Copy & Open X Profile
   const handleCopyAndStrike = () => {
     if (!currentTarget || !canStrike) return;
 
-    // 1. Copy text to clipboard
+    // Copy text to clipboard
     navigator.clipboard.writeText(editedText).catch(() => {});
     setCopied(true);
-    setLastStruckTarget(currentTarget);
-    setShowStepModal(true);
+    
+    // Set pending target for confirmation pop-up
+    setPendingConfirmTarget(currentTarget);
 
-    confetti({
-      particleCount: 50,
-      spread: 60,
-      origin: { y: 0.8 },
-      colors: ['#ffffff', '#a3a3a3', '#38bdf8', '#f43f5e']
-    });
-
-    // Mark as struck for user reference
-    const newStruck = [...new Set([...struckIds, currentTarget.id])];
-    setStruckIds(newStruck);
-    try {
-      localStorage.setItem('wbjee_struck_targets_all', JSON.stringify(newStruck));
-    } catch (e) {
-      console.error(e);
-    }
-
-    if (onActionCompleted) {
-      onActionCompleted('tweets');
-    }
-
-    // 2. Open target profile in a new tab
+    // Open target profile in a new tab
     window.open(`https://x.com/${currentTarget.handle}`, '_blank', 'noopener,noreferrer');
 
     setTimeout(() => {
       setCopied(false);
-    }, 2500);
+    }, 2000);
+  };
+
+  // 2. User confirms they have posted their reply -> Trigger 10-Minute Lockout
+  const handleConfirmPosted = (posted) => {
+    if (posted && pendingConfirmTarget) {
+      // Mark as struck
+      const newStruck = [...new Set([...struckIds, pendingConfirmTarget.id])];
+      setStruckIds(newStruck);
+      try {
+        localStorage.setItem('wbjee_struck_targets_all', JSON.stringify(newStruck));
+      } catch (e) {
+        console.error(e);
+      }
+
+      // Start 10-minute lockout (10 * 60 = 600 seconds)
+      const lockoutEnd = Date.now() + 10 * 60 * 1000;
+      try {
+        localStorage.setItem('wbjee_strike_lockout_until', lockoutEnd.toString());
+      } catch (e) {
+        console.error(e);
+      }
+      setLockoutSeconds(600);
+
+      // Trigger Confetti
+      confetti({
+        particleCount: 60,
+        spread: 70,
+        origin: { y: 0.7 },
+        colors: ['#ffffff', '#38bdf8', '#34d399', '#f59e0b']
+      });
+
+      if (onActionCompleted) {
+        onActionCompleted('tweets');
+      }
+
+      // Advance to next target
+      setCurrentIndex(prev => (prev < targets.length - 1 ? prev + 1 : 0));
+    }
+
+    // Close confirmation pop-up
+    setPendingConfirmTarget(null);
+  };
+
+  // Format seconds to MM:SS
+  const formatTime = (totalSeconds) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const totalAll = targets.length;
@@ -122,8 +193,14 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             <span>Main Portal</span>
           </button>
 
-          <div className="text-xs font-bold tracking-widest text-neutral-300 uppercase">
-            TARGET STRIKE HUB
+          <div className="text-xs font-bold tracking-widest text-neutral-300 uppercase flex items-center space-x-2">
+            <span>TARGET STRIKE HUB</span>
+            {isLocked && (
+              <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono flex items-center space-x-1">
+                <Clock className="w-3 h-3 animate-spin" />
+                <span>{formatTime(lockoutSeconds)}</span>
+              </span>
+            )}
           </div>
 
           <div className="text-xs font-mono text-neutral-400">
@@ -134,6 +211,28 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
       {/* Main Spacious Container */}
       <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 py-8 w-full flex flex-col justify-center space-y-6">
+
+        {/* 10-Minute Lockout Active Alert Banner */}
+        {isLocked && (
+          <div className="bg-gradient-to-r from-amber-950/40 via-black to-neutral-950 border border-amber-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl flex items-start space-x-4 animate-fade-in">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0 mt-0.5">
+              <Clock className="w-5 h-5 animate-pulse" />
+            </div>
+            <div className="space-y-1 flex-1">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center space-x-1.5">
+                  <span>10-Minute Anti-Spam Safety Lockout</span>
+                </h4>
+                <span className="text-xs font-mono font-black text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-lg border border-amber-500/30">
+                  ⏳ {formatTime(lockoutSeconds)}
+                </span>
+              </div>
+              <p className="text-xs text-neutral-300 leading-relaxed">
+                To prevent accounts from being flagged or shadowbanned by X's spam detection algorithm, there is a mandatory <strong>10-minute cooldown</strong> between strikes. You can review and prepare your next message below!
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Poster Download & Attachment Directive Banner */}
         <div className="bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
@@ -276,18 +375,25 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
             </div>
           </div>
 
-          {/* SINGLE PROMINENT ACTION BUTTON */}
+          {/* ACTION BUTTON WITH 10-MIN LOCKOUT LOGIC */}
           <div className="space-y-3 pt-2">
             <button
               onClick={handleCopyAndStrike}
               disabled={!canStrike}
               className={`w-full py-4 px-6 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-2xl ${
-                canStrike
-                  ? 'bg-white text-black hover:bg-neutral-200 active:scale-[0.99]'
-                  : 'bg-neutral-900 text-neutral-600 border border-neutral-800/80 cursor-not-allowed'
+                isLocked
+                  ? 'bg-neutral-900 text-amber-400 border border-amber-500/30 cursor-not-allowed'
+                  : canStrike
+                    ? 'bg-white text-black hover:bg-neutral-200 active:scale-[0.99]'
+                    : 'bg-neutral-900 text-neutral-600 border border-neutral-800/80 cursor-not-allowed'
               }`}
             >
-              {copied ? (
+              {isLocked ? (
+                <>
+                  <Clock className="w-4 h-4 animate-spin text-amber-400" />
+                  <span>Locked: Next Strike in {formatTime(lockoutSeconds)}</span>
+                </>
+              ) : copied ? (
                 <>
                   <Check className="w-4 h-4 text-black" />
                   <span>Copied! Opening @{currentTarget.handle} on X...</span>
@@ -296,13 +402,12 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
                 <>
                   <Copy className="w-4 h-4" />
                   <span>Copy Message & Open @{currentTarget.handle} on X</span>
-                  <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
 
             <div className="bg-neutral-950 p-3.5 rounded-xl border border-neutral-900 text-[11px] text-neutral-400 text-center leading-relaxed">
-              💡 <strong>Action Flow:</strong> Click button → Paste (Ctrl+V) in @{currentTarget.handle}'s latest post reply → <strong>Attach the downloaded poster</strong>!
+              💡 <strong>Action Flow:</strong> Click button → Paste (Ctrl+V) in @{currentTarget.handle}'s latest post reply → <strong>Attach poster</strong> → Confirm in popup to start 10m timer!
             </div>
           </div>
 
@@ -310,57 +415,50 @@ export function TargetDispatchPage({ onBackToMain, onActionCompleted }) {
 
       </main>
 
-      {/* 2-Step Strike Instructions Modal */}
-      {showStepModal && lastStruckTarget && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-3xl p-6 sm:p-7 max-w-md w-full space-y-5 shadow-2xl animate-scale-in">
-            <div className="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center mx-auto font-black text-xl shadow-lg">
-              ✓
+      {/* POPUP CONFIRMATION MODAL ("Have you posted your message?") */}
+      {pendingConfirmTarget && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0d0d0d] border border-neutral-800 rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-6 shadow-2xl animate-scale-in text-center">
+            
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto text-2xl shadow-inner">
+              💬
             </div>
 
-            <div className="text-center space-y-1">
-              <h3 className="text-base font-bold text-white">
-                Message Copied!
+            <div className="space-y-2">
+              <h3 className="text-lg font-black text-white">
+                Have you posted your message?
               </h3>
-              <p className="text-xs text-neutral-400">
-                Opened @{lastStruckTarget.handle} on X in a new tab.
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Did you reply to <strong className="text-white">@{pendingConfirmTarget.handle}</strong>'s latest post on X and attach the campaign poster?
               </p>
             </div>
 
-            <div className="bg-black p-4 rounded-2xl border border-neutral-900 space-y-3 text-xs text-neutral-300">
-              <div className="flex items-start space-x-3">
-                <span className="w-5 h-5 rounded-full bg-white text-black font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">
-                  1
-                </span>
-                <span>Look at <strong className="text-white">@{lastStruckTarget.handle}</strong>'s latest post.</span>
+            <div className="bg-neutral-950 p-4 rounded-2xl border border-neutral-900 text-left space-y-2 text-xs text-neutral-300">
+              <div className="flex items-center space-x-2 text-amber-400 font-semibold text-[11px]">
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                <span>Anti-Spam 10-Minute Lockout</span>
               </div>
-              <div className="flex items-start space-x-3">
-                <span className="w-5 h-5 rounded-full bg-white text-black font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">
-                  2
-                </span>
-                <span>Click <strong className="text-white">Reply 💬</strong>, press <strong className="text-white font-mono">Ctrl + V</strong> to paste, and <strong>attach the poster</strong>!</span>
-              </div>
+              <p className="text-[11px] text-neutral-400">
+                Clicking <strong>"Yes, I Posted"</strong> will lock the next strike for <strong>10 minutes</strong> to safeguard your account against X rate limits.
+              </p>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
               <button
-                onClick={handleDownloadPoster}
-                className="flex-1 py-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 font-bold text-xs transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+                onClick={() => handleConfirmPosted(false)}
+                className="w-full sm:w-1/2 py-3.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 font-bold text-xs transition-all cursor-pointer"
               >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download Poster</span>
+                Not Yet / Retry
               </button>
 
               <button
-                onClick={() => {
-                  setShowStepModal(false);
-                  setCurrentIndex(prev => (prev < targets.length - 1 ? prev + 1 : 0));
-                }}
-                className="flex-1 py-3 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-xs transition-all cursor-pointer shadow-lg"
+                onClick={() => handleConfirmPosted(true)}
+                className="w-full sm:w-1/2 py-3.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-extrabold text-xs transition-all cursor-pointer shadow-lg active:scale-[0.98]"
               >
-                Next Target →
+                Yes, I Posted! 🚀
               </button>
             </div>
+
           </div>
         </div>
       )}
