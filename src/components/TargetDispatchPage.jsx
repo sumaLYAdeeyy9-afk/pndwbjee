@@ -741,60 +741,89 @@ export default function TargetDispatchPage({ onBackToMain, onActionCompleted }) 
                 </p>
               )}
 
-              {/* Strike Action Buttons (Active only when customized) */}
+              {/* Unified Strike Action System */}
               <div className="space-y-2.5 pt-1">
                 
-                {/* 1. Primary Copy & Open Target Tweet */}
+                {/* 1. The Single Unified Reply Launcher */}
                 <button
-                  onClick={handleCopyAndStrike}
+                  onClick={() => {
+                    if (!customizationStatus.isValid) return;
+
+                    // Copy to clipboard as reliable backup
+                    navigator.clipboard.writeText(editedText).catch(() => {});
+                    setCopied(true);
+                    triggerCelebration();
+                    setShowSuccessToast(true);
+                    setTimeout(() => setCopied(false), 3000);
+                    setTimeout(() => setShowSuccessToast(false), 6000);
+
+                    if (customTweetId) {
+                      // Directly opens X reply modal attached to this tweet with text pre-filled
+                      const replyUrl = `https://x.com/intent/tweet?in_reply_to=${customTweetId}&text=${encodeURIComponent(editedText)}`;
+                      window.open(replyUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                      // Opens profile feed where user can hit reply and paste
+                      const targetUrl = `https://x.com/${selectedTarget.handle}`;
+                      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                    }
+                  }}
                   disabled={!customizationStatus.isValid}
-                  className={`w-full py-3.5 px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-xl transition-all ${
+                  className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-xl transition-all cursor-pointer ${
                     customizationStatus.isValid
-                      ? 'bg-gradient-to-r from-rose-500 via-red-600 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white cursor-pointer shadow-rose-950'
+                      ? 'bg-gradient-to-r from-rose-500 via-red-600 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white shadow-rose-950 scale-[1.02] active:scale-[0.98]'
                       : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                  }`}
+                >
+                  <Send className="w-4 h-4" />
+                  <span>
+                    {customTweetId 
+                      ? '🚀 Open Reply Box on X (Prefilled)'
+                      : `⚡ Open @${selectedTarget.handle}'s Latest Post & Reply`}
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Direct copy helper */}
+                <button
+                  onClick={() => {
+                    if (!customizationStatus.isValid) return;
+                    navigator.clipboard.writeText(editedText);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 3000);
+                  }}
+                  disabled={!customizationStatus.isValid}
+                  className={`w-full py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 border transition-all ${
+                    customizationStatus.isValid
+                      ? 'bg-slate-950 hover:bg-slate-900 text-slate-300 border-slate-800 cursor-pointer'
+                      : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
                   }`}
                 >
                   {copied ? (
                     <>
-                      <Check className="w-4 h-4 text-white" />
-                      <span>Copied & Opening Target Post!</span>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-emerald-300">Message Copied to Clipboard!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4" />
-                      <span>Copy Edited Reply & Open Target Post</span>
+                      <Copy className="w-3.5 h-3.5 text-slate-400" />
+                      <span>Copy Text to Clipboard Only</span>
                     </>
                   )}
                 </button>
 
-                {/* 2. Web Intent Direct Reply */}
-                <button
-                  onClick={handleWebReply}
-                  disabled={!customizationStatus.isValid}
-                  className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 border transition-all ${
-                    customizationStatus.isValid
-                      ? 'bg-slate-800 hover:bg-slate-700 text-sky-400 border-slate-700 cursor-pointer'
-                      : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed'
-                  }`}
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>Reply via Web X.com Intent</span>
-                  <ExternalLink className="w-3 h-3 opacity-60" />
-                </button>
-
-                {/* 3. Native Mobile App Dispatch */}
-                <a
-                  href={customizationStatus.isValid ? appReplyUrl : '#'}
-                  onClick={handleAppDispatch}
-                  className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 border transition-all text-center ${
-                    customizationStatus.isValid
-                      ? 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500 shadow-md shadow-sky-950 cursor-pointer'
-                      : 'bg-slate-900 text-slate-600 border-slate-800 cursor-not-allowed pointer-events-none'
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5" />
-                  <span>Reply in Native X App (Mobile)</span>
-                </a>
+                {/* Target Status Indicator */}
+                <div className="pt-1 text-center">
+                  {customTweetId ? (
+                    <span className="text-[10px] text-emerald-400 font-mono bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full inline-flex items-center space-x-1">
+                      <span>✓</span>
+                      <span>Target Post Linked: status/{customTweetId}</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-500 font-sans block">
+                      💡 <em>Paste a specific tweet URL in the middle box to trigger direct 1-click reply popup</em>
+                    </span>
+                  )}
+                </div>
 
               </div>
 
