@@ -93,36 +93,7 @@ export const TARGET_HANDLES = [
     bio: 'Digital news editor covering Bengal public interest issues.',
     tags: ['Media', 'Digital']
   },
-  {
-    id: 'target-11',
-    name: 'Anindya Sengupta',
-    handle: 'anindya_sengupta',
-    category: 'journalist',
-    role: 'Senior Journalist',
-    priority: 'medium',
-    bio: 'Education and civic governance news contributor.',
-    tags: ['Media']
-  },
-  {
-    id: 'target-12',
-    name: 'Prakash Sinha',
-    handle: 'PrakashSinhaNews',
-    category: 'journalist',
-    role: 'Special Crime & Policy Reporter',
-    priority: 'medium',
-    bio: 'Investigative reporter tracking administrative irregularities.',
-    tags: ['Media', 'Investigative']
-  },
-  {
-    id: 'target-13',
-    name: 'Kamalesh Bhattacharya',
-    handle: 'kamalesh_bhatt',
-    category: 'journalist',
-    role: 'Senior Education Correspondent',
-    priority: 'medium',
-    bio: 'Specialist in West Bengal secondary and higher education counselling policies.',
-    tags: ['Media', 'Education']
-  },
+
   {
     id: 'target-14',
     name: 'Anupam Mishra',
